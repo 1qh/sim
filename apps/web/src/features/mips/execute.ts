@@ -123,7 +123,7 @@ const executeI = (
       return { branchTaken: false, nextState: writeRegister(state, ins.rt, readMemory(state, addr)) }
     }
     case 'ori':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(rs | ins.imm)) }
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(rs || ins.imm)) }
     case 'sw': {
       const addr = addU32(rs, Math.trunc(immSE))
       return { branchTaken: false, nextState: writeMemory(state, addr, rt) }
