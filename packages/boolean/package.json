@@ -15,10 +15,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "bun test"
   },
   "dependencies": {
+    "chevrotain": "latest",
     "espresso-iisojs": "latest",
     "zod": "latest"
+  },
+  "devDependencies": {
+    "fast-check": "latest"
   }
 }
