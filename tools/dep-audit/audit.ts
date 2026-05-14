@@ -1,9 +1,9 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/style/noProcessEnv: bun CLI script reads $HOME env */
-/** biome-ignore-all lint/suspicious/noExplicitAny: npm registry json is dynamic */
-/** biome-ignore-all lint/nursery/noContinue: filter loop guard */
+/** biome-ignore-all lint/style/noProcessEnv: bun CLI script */
+/** biome-ignore-all lint/suspicious/noExplicitAny: npm registry json shape varies */
+/** biome-ignore-all lint/nursery/noContinue: loop guard for metadata keys */
 /* eslint-disable no-console, no-continue */
-import { argv, env, file } from 'bun'
+import { argv, file } from 'bun'
 import process from 'node:process'
 const NOW = Date.now()
 const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000
@@ -32,7 +32,8 @@ const args = argv.slice(2)
 const namesArgIdx = args.indexOf('--names')
 const names = new Set<string>()
 if (namesArgIdx === -1) {
-  const depsPath = args[0] ?? `${env.HOME}/simdocs/deps.json`
+  const defaultPath = new URL('../../../simdocs/deps.json', import.meta.url).pathname
+  const depsPath = args[0] ?? defaultPath
   const deps = (await file(depsPath).json()) as Record<string, string[]>
   for (const cat of REAL_NPM_CATS) for (const n of deps[cat] ?? []) names.add(REMAP[n] ?? n)
 } else
@@ -100,7 +101,7 @@ if (stale.length === 0 && notFound.length === 0) {
 console.log(`${greenR.length}/${total} green, ${stale.length} stale, ${notFound.length} missing`)
 if (stale.length > 0) {
   stale.sort((a, b) => a.pubMs - b.pubMs)
-  console.log('\nSTALE (>6mo since most-recent publish of any version):')
+  console.log('\nSTALE:')
   for (const r of stale) console.log(`  ${fmt(r)}`)
 }
 if (notFound.length > 0) {
