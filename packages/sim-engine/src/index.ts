@@ -1,2 +1,6 @@
-export const placeholder =
-  'sim-engine substrate package — implementation lands per simdocs/adr/foundation-bootstrap-order.md'
+export { applyDiff, decode, diff, encode, hashBytes, hashValue, toCanonicalBytes } from './codec'
+export type { Patch, Snapshot } from './codec'
+export { replay, run, scrub, snapshotTrace, verifyTrace } from './machine'
+export type { MachineConfig, Trace } from './machine'
+export { clone, fromSeed, next, nextFloat, nextInt } from './rng'
+export type { RngState } from './rng'
