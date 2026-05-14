@@ -1,0 +1,16 @@
+{
+  "name": "backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo 'backend codegen runs at Phase 6 + 17 when CONVEX_DEPLOYMENT is set' && exit 0",
+    "dev": "bunx convex dev"
+  },
+  "dependencies": {
+    "@auth/core": "latest",
+    "@convex-dev/auth": "latest",
+    "convex": "latest",
+    "zod": "latest"
+  }
+}
