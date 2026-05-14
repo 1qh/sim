@@ -370,3 +370,104 @@ describe('control signals', () => {
     expect(ctl.ALUOp).toBe(1)
   })
 })
+describe('golden: andi', () => {
+  test('andi $2, $1, 0x0f', () => {
+    const state = writeRegister(createInitialState(), 1, 0xff)
+    const ins: Instruction = {
+      imm: 0x0f,
+      name: 'andi',
+      opcode: 0x0c,
+      rs: 1 as RegisterNumber,
+      rt: 2 as RegisterNumber,
+      type: 'I'
+    }
+    const out = step(state, ins)
+    expect(readRegister(out.nextState, 2)).toBe(0x0f)
+  })
+})
+describe('golden: j', () => {
+  test('j 0x100 jumps absolute', () => {
+    const state: MachineState = { ...createInitialState(), pc: 0x10 }
+    const ins: Instruction = { name: 'j', opcode: 0x02, target: 0x1_00, type: 'J' }
+    const out = step(state, ins)
+    expect(out.nextPc).toBe(0x4_00)
+  })
+})
+describe('golden: lui', () => {
+  test('lui $1, 0xabcd shifts left 16', () => {
+    const state = createInitialState()
+    const ins: Instruction = {
+      imm: 0xab_cd,
+      name: 'lui',
+      opcode: 0x0f,
+      rs: 0 as RegisterNumber,
+      rt: 1 as RegisterNumber,
+      type: 'I'
+    }
+    const out = step(state, ins)
+    expect(Math.trunc(readRegister(out.nextState, 1))).toBe(0xab_cd_00_00)
+  })
+})
+describe('golden: nor', () => {
+  test('nor $3, $1, $2', () => {
+    const state = writeRegister(writeRegister(createInitialState(), 1, 0), 2, 0)
+    const ins = buildR({
+      funct: 0x27,
+      name: 'nor',
+      rd: 3 as RegisterNumber,
+      rs: 1 as RegisterNumber,
+      rt: 2 as RegisterNumber,
+      shamt: 0,
+      type: 'R'
+    })
+    const out = step(state, ins)
+    expect(Math.trunc(readRegister(out.nextState, 3))).toBe(0xff_ff_ff_ff)
+  })
+})
+describe('golden: ori', () => {
+  test('ori $2, $1, 0x00f0', () => {
+    const state = writeRegister(createInitialState(), 1, 0x0f_00)
+    const ins: Instruction = {
+      imm: 0x00_f0,
+      name: 'ori',
+      opcode: 0x0d,
+      rs: 1 as RegisterNumber,
+      rt: 2 as RegisterNumber,
+      type: 'I'
+    }
+    const out = step(state, ins)
+    expect(readRegister(out.nextState, 2)).toBe(0x0f_f0)
+  })
+})
+describe('golden: sll', () => {
+  test('sll $3, $1, 4', () => {
+    const state = writeRegister(createInitialState(), 1, 0xff)
+    const ins = buildR({
+      funct: 0x00,
+      name: 'sll',
+      rd: 3 as RegisterNumber,
+      rs: 0 as RegisterNumber,
+      rt: 1 as RegisterNumber,
+      shamt: 4,
+      type: 'R'
+    })
+    const out = step(state, ins)
+    expect(readRegister(out.nextState, 3)).toBe(0xf_f0)
+  })
+})
+describe('golden: srl', () => {
+  test('srl $3, $1, 4', () => {
+    const state = writeRegister(createInitialState(), 1, 0xff_00)
+    const ins = buildR({
+      funct: 0x02,
+      name: 'srl',
+      rd: 3 as RegisterNumber,
+      rs: 0 as RegisterNumber,
+      rt: 1 as RegisterNumber,
+      shamt: 4,
+      type: 'R'
+    })
+    const out = step(state, ins)
+    expect(readRegister(out.nextState, 3)).toBe(0x0f_f0)
+  })
+})
