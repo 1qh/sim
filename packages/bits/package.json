@@ -15,6 +15,10 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "fast-check": "latest"
   }
 }
