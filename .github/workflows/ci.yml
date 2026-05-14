@@ -1,10 +1,8 @@
 name: ' '
 on:
-  workflow_dispatch:
-# Velocity-mode active per simdocs/adr/early-velocity-mode.md.
-# Push + schedule triggers disabled; manual-only via workflow_dispatch.
-# Trigger to re-enable: phase 18 / first external contributor / first public
-# traffic / operator declares velocity-mode off / repeated lint regression.
+  push:
+  schedule:
+    - cron: '0 0 * * 1'
 jobs:
   ci:
     runs-on: ubuntu-latest
