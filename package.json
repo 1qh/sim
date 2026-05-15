@@ -44,6 +44,9 @@
     "unlighthouse": "latest",
     "unrun": "latest"
   },
+  "overrides": {
+    "@auth/core": "0.41.x"
+  },
   "packageManager": "bun@1.3.13",
   "trustedDependencies": [
     "esbuild",
