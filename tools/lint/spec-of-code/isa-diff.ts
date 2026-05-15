@@ -1,8 +1,8 @@
 #!/usr/bin/env bun
 /* eslint-disable no-console */
 import { $, file } from 'bun'
-import { FUNCT, OPCODE } from '../../../apps/web/src/features/mips/encode'
 import process from 'node:process'
+import { FUNCT, OPCODE } from '../../../apps/web/src/features/mips/encode'
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const isaText = await file(`${repoRoot}/../simdocs/MIPS-ISA.md`).text()
 const docOpcodes = new Map<string, number>()
