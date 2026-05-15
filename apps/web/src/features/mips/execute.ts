@@ -1,6 +1,15 @@
+/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
+/** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/* eslint-disable no-bitwise, no-useless-assignment */
-/* oxlint-disable no-bitwise, unicorn/prefer-math-trunc */
+/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
+/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
+/** biome-ignore-all lint/nursery/noContinue: noise */
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/** biome-ignore-all lint/performance/noNamespaceImport: noise */
+/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise, no-namespace */
 import { addU32, signExtend, subU32 } from '@sim/bits'
 import type { ControlSignals, ExecutionStep, Instruction, MachineState, RegisterNumber } from './types'
 const ZERO_CONTROL: ControlSignals = {
