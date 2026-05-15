@@ -52,11 +52,9 @@ const buildStructural = (instruction: Instruction): PathEdge[] => {
     edges.push({ delayPs: DELAYS_PS.SignExtend, from: 'SignExtend', reason: 'sign-extend immediate', to: 'MuxALUSrc' })
     edges.push({ delayPs: DELAYS_PS.MuxALUSrc, from: 'MuxALUSrc', reason: 'ALU operand select', to: 'ALU' })
   } else edges.push({ delayPs: DELAYS_PS.SignExtend, from: 'SignExtend', reason: 'pass-through', to: 'ALU' })
-
   edges.push({ delayPs: DELAYS_PS.ALU, from: 'ALU', reason: 'ALU compute', to: 'MemAccess' })
   if (ctl.MemRead === 1 || ctl.MemWrite === 1)
     edges.push({ delayPs: DELAYS_PS.MemAccess, from: 'MemAccess', reason: 'data memory access', to: 'MuxMemToReg' })
-
   if (ctl.RegWrite === 1) {
     edges.push({
       delayPs: DELAYS_PS.MuxMemToReg,
