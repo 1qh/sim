@@ -2,6 +2,10 @@
 /* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
+interface ManifestPackage {
+  dependencies?: Record<string, string>
+  devDependencies?: Record<string, string>
+}
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const stackPath = `${repoRoot}/../simdocs/STACK.md`
 const stackText = await file(stackPath)
@@ -22,33 +26,35 @@ for (const m of codeBlocks) {
   if (!/[a-z]/u.test(pick)) continue
   candidatePicks.add(pick)
 }
+const readManifest = async (p: string): Promise<ManifestPackage> => {
+  const raw = (await file(p)
+    .json()
+    .catch(() => ({}))) as ManifestPackage
+  return raw
+}
 const manifestPaths = [
   `${repoRoot}/package.json`,
   `${repoRoot}/apps/web/package.json`,
   `${repoRoot}/apps/backend/package.json`
 ]
 const allDeps = new Set<string>()
-for (const p of manifestPaths) {
-  const j = await file(p)
-    .json()
-    .catch(() => ({}))
+const manifests = await Promise.all(manifestPaths.map(async p => readManifest(p)))
+for (const j of manifests) {
   for (const k of Object.keys(j.dependencies ?? {})) allDeps.add(k)
   for (const k of Object.keys(j.devDependencies ?? {})) allDeps.add(k)
 }
-for (const dir of [
-  'packages/bits',
-  'packages/boolean',
-  'packages/design-tokens',
-  'packages/sim-engine',
-  'packages/three-kit',
-  'packages/hud',
-  'packages/editor'
-]) {
-  const j = await file(`${repoRoot}/${dir}/package.json`)
-    .json()
-    .catch(() => ({}))
-  for (const k of Object.keys(j.dependencies ?? {})) allDeps.add(k)
-}
+const pkgManifests = await Promise.all(
+  [
+    'packages/bits',
+    'packages/boolean',
+    'packages/design-tokens',
+    'packages/sim-engine',
+    'packages/three-kit',
+    'packages/hud',
+    'packages/editor'
+  ].map(async dir => readManifest(`${repoRoot}/${dir}/package.json`))
+)
+for (const j of pkgManifests) for (const k of Object.keys(j.dependencies ?? {})) allDeps.add(k)
 const missingPicks: string[] = []
 for (const pick of candidatePicks) {
   if (allDeps.has(pick)) continue
