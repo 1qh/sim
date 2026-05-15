@@ -45,7 +45,6 @@ const diffSteps = (left: ExecutionStep, right: ExecutionStep): StepDiff => {
   for (const key of Object.keys(left.control) as (keyof typeof left.control)[])
     if (left.control[key] !== right.control[key])
       controlDifferences.push(`${key}: ${left.control[key]} → ${right.control[key]}`)
-
   return {
     controlDifferences,
     hashAfterLeft: hashValue(left.nextState),
