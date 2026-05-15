@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker-js/master/packages/api/schema/stryker-core.json",
+  "packageManager": "npm",
+  "reporters": ["clear-text"],
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "bun test src/index.test.ts"
+  },
+  "mutate": ["src/index.ts", "src/ast.ts", "src/qm.ts"],
+  "thresholds": { "high": 90, "low": 70, "break": 70 },
+  "checkers": [],
+  "coverageAnalysis": "off",
+  "tempDirName": ".stryker-tmp",
+  "concurrency": 4,
+  "timeoutMS": 60000
+}

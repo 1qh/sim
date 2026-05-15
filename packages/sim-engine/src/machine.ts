@@ -16,7 +16,7 @@ const run = <S, E>(config: MachineConfig<S, E>, events: E[]): Trace<S, E> => {
   const patches: Patch[] = []
   const hashes: string[] = [hashValue(config.initial)]
   for (const event of events) {
-    const previous = states[states.length - 1] as S
+    const previous = states.at(-1) as S
     const nextState = config.reducer(previous, event)
     patches.push(diff(previous, nextState))
     states.push(nextState)
@@ -33,7 +33,7 @@ const scrub = <S, E>(trace: Trace<S, E>, step: number): S => {
 const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
   for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i] as S) !== trace.hashes[i]) return false
   for (let i = 0; i < trace.patches.length; i += 1) {
-    const rebuilt = applyDiff(trace.states[i] as S, trace.patches[i] as Patch)
+    const rebuilt = applyDiff(trace.states[i] as S, trace.patches[i]!)
     if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false
   }
   return true
