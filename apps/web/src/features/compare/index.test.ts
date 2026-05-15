@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
 import { describe, expect, test } from 'bun:test'
 import type { RegisterNumber } from '../mips/types'
 import { createInitialState, decodeInstruction, encodeInstruction, executeStep, writeRegister } from '../mips/index'

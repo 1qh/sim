@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
+/** biome-ignore-all lint/nursery/noExcessiveClassesPerFile: noise */
+/* eslint-disable @typescript-eslint/strict-void-return, max-classes-per-file, unicorn/no-array-reduce */
 import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'

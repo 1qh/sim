@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
-/* eslint-disable no-console */
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/* eslint-disable no-await-in-loop, no-console, no-promise-executor-return */
 import { $, file, spawn } from 'bun'
 import process from 'node:process'
 const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/learn/foundation', '/s/abc123']

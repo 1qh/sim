@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, MachineState, RegisterNumber } from './types'
 import {

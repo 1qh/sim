@@ -10,7 +10,7 @@ type Tier = 'convex' | 'fragment'
 const URL_FRAGMENT_LIMIT_BYTES = 1024
 const base64UrlEncode = (bytes: Uint8Array): string => {
   let bin = ''
-  for (let i = 0; i < bytes.length; i += 1) bin += String.fromCodePoint(bytes[i]!)
+  for (const b of bytes) bin += String.fromCodePoint(b)
   const b64 = btoa(bin)
   return b64.replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
 }

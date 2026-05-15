@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/* eslint-disable no-bitwise */
 import { insertField } from '@sim/bits'
 import type { Instruction, RegisterNumber } from './types'
 const OPCODE = {

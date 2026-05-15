@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 import type { Expr } from './ast'
 import type { Implicant } from './qm'
 import { evalExpr, maxterms, minterms, sortedVars, truthTable } from './ast'

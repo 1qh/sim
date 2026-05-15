@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/* eslint-disable no-bitwise */
 import type { Implicant, SolveResult } from '@sim/boolean'
 import { solve } from '@sim/boolean'
 type Geometry = '2d' | '3d-toroidal'

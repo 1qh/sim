@@ -1,4 +1,5 @@
-/** biome-ignore-all lint/style/noProcessEnv: live local Convex env */
+/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
+/** biome-ignore-all lint/style/noProcessEnv: noise */
 import { describe, expect, test } from 'bun:test'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from './_generated/api'

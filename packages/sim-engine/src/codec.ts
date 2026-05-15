@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 import { blake3 } from '@noble/hashes/blake3.js'
 import canonicalize from 'canonicalize'
 import { applyPatch, createPatch } from 'rfc6902'
@@ -13,7 +14,7 @@ const toCanonicalBytes = <T>(value: T): Uint8Array => {
 const hashBytes = (bytes: Uint8Array): string => {
   const digest = blake3(bytes)
   let out = ''
-  for (let i = 0; i < digest.length; i += 1) out += digest[i]!.toString(16).padStart(2, '0')
+  for (const d of digest) out += d.toString(16).padStart(2, '0')
   return out
 }
 const hashValue = <T>(value: T): string => hashBytes(toCanonicalBytes(value))
