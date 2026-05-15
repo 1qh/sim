@@ -46,7 +46,7 @@ describe('pipeline WAW hazard', () => {
     const program = [r(3, 1, 2), r(3, 4, 5)]
     const hazards = detectWaw(program)
     expect(hazards.length).toBe(1)
-    expect(hazards[0].register).toBe(3 as RegisterNumber)
+    expect((hazards[0] as any).register).toBe(3 as RegisterNumber)
   })
 })
 describe('pipeline WAR hazard', () => {
@@ -77,7 +77,7 @@ describe('pipeline stall accounting', () => {
   test('cycleCount = startOfLast + 5', () => {
     const program = [r(3, 1, 2), r(5, 3, 4), r(7, 5, 6)]
     const report = analyzePipeline(program)
-    expect(report.cycleCount).toBe(report.rows.at(-1)!.startCycle + 5)
+    expect(report.cycleCount).toBe((report.rows.at(-1) as any).startCycle + 5)
   })
   test('CPI ≥ 1 always', () => {
     const program = [r(3, 1, 2), r(5, 3, 4), r(7, 5, 6)]

@@ -26,9 +26,9 @@ describe('diffRegisters', () => {
     const b = writeRegister(a, 5, 42)
     const d = diffRegisters(a, b)
     expect(d).toHaveLength(1)
-    expect(d[0].index).toBe(5 as RegisterNumber)
-    expect(d[0].before).toBe(0)
-    expect(d[0].after).toBe(42)
+    expect((d[0] as any).index).toBe(5 as RegisterNumber)
+    expect((d[0] as any).before).toBe(0)
+    expect((d[0] as any).after).toBe(42)
   })
 })
 describe('diffMemory', () => {
@@ -37,7 +37,7 @@ describe('diffMemory', () => {
     const b = { ...a, dataMemory: { ...a.dataMemory, 256: 0xde_ad } }
     const d = diffMemory(a, b)
     expect(d).toHaveLength(1)
-    expect(d[0].address).toBe(0x1_00)
+    expect((d[0] as any).address).toBe(0x1_00)
   })
 })
 describe('diffSteps', () => {
@@ -47,8 +47,8 @@ describe('diffSteps', () => {
     const right = stepWith(seed, makeR(3, 1, 2, 'sub', 0x22))
     const d = diffSteps(left, right)
     expect(d.registerDiffs.length).toBe(1)
-    expect(d.registerDiffs[0].before).toBe(13)
-    expect(d.registerDiffs[0].after).toBe(7)
+    expect((d.registerDiffs[0] as any).before).toBe(13)
+    expect((d.registerDiffs[0] as any).after).toBe(7)
     expect(d.hashAfterLeft).not.toBe(d.hashAfterRight)
   })
   test('identical instructions produce empty diff', () => {

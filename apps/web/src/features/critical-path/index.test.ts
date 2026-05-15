@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
 import { criticalPath, DELAYS_PS, longestProgramPath, sumDelay } from './index'
-const r = (rd: number, rs: number, rt: number, name = 'add'): Instruction => ({
+const r = (rd: number, rs: number, rt: number, name = 'add' as const): Instruction => ({
   funct: 0x20,
   name,
   rd: rd as RegisterNumber,
