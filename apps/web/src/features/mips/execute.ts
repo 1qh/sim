@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: ALU semantics */
+/* oxlint-disable no-bitwise, unicorn/prefer-math-trunc */
+/* eslint-disable no-bitwise */
 import { addU32, signExtend, subU32 } from '@sim/bits'
 import type { ControlSignals, ExecutionStep, Instruction, MachineState, RegisterNumber } from './types'
 const ZERO_CONTROL: ControlSignals = {
@@ -12,6 +15,7 @@ const ZERO_CONTROL: ControlSignals = {
   RegWrite: 0
 }
 const REG_COUNT = 32
+const u32 = (n: number): number => (n + 0x1_00_00_00_00) % 0x1_00_00_00_00
 const zeroRegisters = (): Record<RegisterNumber, number> => {
   const r = {} as Record<RegisterNumber, number>
   for (let i = 0; i < REG_COUNT; i += 1) r[i as RegisterNumber] = 0
@@ -64,27 +68,27 @@ const executeR = (state: MachineState, ins: Instruction & { type: 'R' }): Machin
       result = addU32(rs, rt)
       break
     case 'and':
-      result = Math.trunc(rs & rt)
+      result = u32(rs & rt)
       break
     case 'jr':
       return { ...state, pc: rs }
     case 'nor':
-      result = Math.trunc(~(rs | rt))
+      result = u32(~(rs | rt))
       break
     case 'or':
-      result = Math.trunc(rs | rt)
+      result = u32(rs | rt)
       break
     case 'sll':
-      result = Math.trunc(rt << ins.shamt)
+      result = u32(rt << ins.shamt)
       break
     case 'slt':
       result = rsSigned < rtSigned ? 1 : 0
       break
     case 'sltu':
-      result = Math.trunc(rs) < Math.trunc(rt) ? 1 : 0
+      result = u32(rs) < u32(rt) ? 1 : 0
       break
     case 'sra':
-      result = Math.trunc(rtSigned >> ins.shamt)
+      result = u32(rtSigned >> ins.shamt)
       break
     case 'srl':
       result = rt >>> ins.shamt
@@ -93,7 +97,7 @@ const executeR = (state: MachineState, ins: Instruction & { type: 'R' }): Machin
       result = subU32(rs, rt)
       break
     case 'xor':
-      result = Math.trunc(rs ^ rt)
+      result = u32(rs ^ rt)
       break
     default:
       return state
@@ -109,27 +113,29 @@ const executeI = (
   const immSE = signExtend(ins.imm, 16)
   switch (ins.name) {
     case 'addi':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, addU32(rs, Math.trunc(immSE))) }
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, addU32(rs, u32(immSE))) }
     case 'andi':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(rs & ins.imm)) }
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, u32(rs & ins.imm)) }
     case 'beq':
       return { branchTaken: rs === rt, nextState: state }
     case 'bne':
       return { branchTaken: rs !== rt, nextState: state }
     case 'lui':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(ins.imm << 16)) }
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, u32(ins.imm << 16)) }
     case 'lw': {
-      const addr = addU32(rs, Math.trunc(immSE))
+      const addr = addU32(rs, u32(immSE))
       return { branchTaken: false, nextState: writeRegister(state, ins.rt, readMemory(state, addr)) }
     }
-    case 'ori':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(rs || ins.imm)) }
+    case 'ori': {
+      const ored = u32(rs + ins.imm - (rs & ins.imm))
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, ored) }
+    }
     case 'sw': {
-      const addr = addU32(rs, Math.trunc(immSE))
+      const addr = addU32(rs, u32(immSE))
       return { branchTaken: false, nextState: writeMemory(state, addr, rt) }
     }
     case 'xori':
-      return { branchTaken: false, nextState: writeRegister(state, ins.rt, Math.trunc(rs ^ ins.imm)) }
+      return { branchTaken: false, nextState: writeRegister(state, ins.rt, u32(rs ^ ins.imm)) }
     default:
       return { branchTaken: false, nextState: state }
   }
@@ -145,9 +151,9 @@ const executeStep = (state: MachineState, word: number, instruction: Instruction
   } else if (instruction.type === 'I') {
     const out = executeI(state, instruction)
     nextState = out.nextState
-    if (out.branchTaken) nextPc = addU32(pcAfter, Math.trunc(signExtend(instruction.imm, 16) << 2))
+    if (out.branchTaken) nextPc = addU32(pcAfter, u32(signExtend(instruction.imm, 16) << 2))
   } else {
-    const targetAddr = Math.trunc((pcAfter & 0xf0_00_00_00) | (instruction.target << 2))
+    const targetAddr = u32((pcAfter & 0xf0_00_00_00) | (instruction.target << 2))
     if (instruction.name === 'jal') nextState = writeRegister(state, 31, pcAfter)
     nextPc = targetAddr
   }
