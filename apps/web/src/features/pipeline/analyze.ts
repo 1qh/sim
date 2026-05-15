@@ -18,7 +18,6 @@ const writesRegister = (ins: Instruction): RegisterNumber | undefined => {
       default:
         return
     }
-
   if (ins.name === 'jal') return 31
 }
 const readsRegisters = (ins: Instruction): RegisterNumber[] => {
@@ -73,7 +72,6 @@ const analyzePipeline = (
                 start += need
                 stalls += need
               } else forwarding.push({ fromIndex: j, fromStage: 'MEM', register: reg, toIndex: i, toStage: 'EX' })
-
               hazards.push({
                 consumerCycle: start + 2,
                 consumerIndex: i,
@@ -113,7 +111,6 @@ const analyzePipeline = (
           break
         }
       }
-
     if (i > 0 && isBranchOrJump(instructions[i - 1]) && taken.has(i - 1)) {
       stalls += 1
       start = Math.max(start, startCycles[i - 1] + 2)
