@@ -40,12 +40,11 @@ const verifyPath = `${repoRoot}/../simdocs/VERIFY.md`
 const verify = await file(verifyPath)
   .text()
   .catch(() => '')
-const gatePattern = /`(?<gate>[a-z][a-z0-9._-]+)`/gu
+const gatePattern = /^- \[[ x]\] `(?<gate>[a-z][a-z0-9._-]+)`/gmu
 for (const m of verify.matchAll(gatePattern)) {
   const t = m.groups?.gate
   if (!t) continue
-  if (t.includes('.') && !t.startsWith('apps/') && !t.includes('/') && !t.endsWith('.md') && !t.endsWith('.ts'))
-    expected.add(t)
+  expected.add(t)
 }
 if (mode === 'green') {
   if (knownGreen.length === 0) console.log('no green-at-HEAD gates')

@@ -114,7 +114,7 @@ describe('findPrimeImplicants', () => {
   test('returns one prime for a constant function', () => {
     const primes = findPrimeImplicants([0, 1, 2, 3], [], 2)
     expect(primes).toHaveLength(1)
-    expect(primes[0].bits).toBe('--')
+    expect((primes[0] as { bits: string }).bits).toBe('--')
   })
 })
 describe('minimize empty inputs', () => {

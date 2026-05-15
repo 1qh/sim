@@ -30,19 +30,19 @@ const replay = <S, E>(config: MachineConfig<S, E>, events: E[]): Trace<S, E> => 
 const scrub = <S, E>(trace: Trace<S, E>, step: number): S => {
   if (step < 0 || step >= trace.states.length)
     throw new Error(`scrub: step ${step} out of range [0, ${trace.states.length})`)
-  return trace.states[step] as S
+  return trace.states[step]
 }
 const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
-  for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i] as S) !== trace.hashes[i]) return false
+  for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i]) !== trace.hashes[i]) return false
   for (let i = 0; i < trace.patches.length; i += 1) {
     const patch = trace.patches[i]
     if (patch === undefined) continue
-    const rebuilt = applyDiff(trace.states[i] as S, patch)
+    const rebuilt = applyDiff(trace.states[i], patch)
     if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false
   }
   return true
 }
 const snapshotTrace = <S, E>(trace: Trace<S, E>) =>
-  encode({ events: trace.events, hashes: trace.hashes, initial: trace.states[0] as S })
+  encode({ events: trace.events, hashes: trace.hashes, initial: trace.states[0] })
 export { replay, run, scrub, snapshotTrace, verifyTrace }
 export type { MachineConfig, Trace }
