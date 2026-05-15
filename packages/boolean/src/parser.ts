@@ -85,41 +85,46 @@ class BoolVisitor extends BaseVisitor {
     this.validateVisitor()
   }
   public andExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.notExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = ((ctx.notExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => and(acc, cur))
   }
   public atomExpr(ctx: CstChildren): Expr {
-    if (ctx.Identifier) return v(ctx.Identifier[0].image)
+    if (ctx.Identifier) {
+      const ident = (ctx.Identifier as { image: string }[])[0]
+      if (ident === undefined) throw new Error('atom: empty Identifier')
+      return v(ident.image)
+    }
     if (ctx.True) return c(1)
     if (ctx.False) return c(0)
-    return this.visit(ctx.expr) as Expr
+    return this.visit(ctx.expr as never) as Expr
   }
   public expr(ctx: CstChildren): Expr {
-    return this.visit(ctx.orExpr) as Expr
+    return this.visit(ctx.orExpr as never) as Expr
   }
   public notExpr(ctx: CstChildren): Expr {
-    const inner = this.visit(ctx.atomExpr) as Expr
+    const inner = this.visit(ctx.atomExpr as never) as Expr
     const negations = ctx.NotOp?.length ?? 0
     let out = inner
     for (let i = 0; i < negations; i += 1) out = not(out)
     return out
   }
   public orExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.xorExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = ((ctx.xorExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => or(acc, cur))
   }
   public xorExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.andExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = ((ctx.andExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => xor(acc, cur))
   }
 }
 const visitor = new BoolVisitor()
 const parse = (text: string): Expr => {
   const lex = lexer.tokenize(text)
-  if (lex.errors.length > 0) throw new Error(`lex error: ${lex.errors[0].message}`)
+  if (lex.errors.length > 0) throw new Error(`lex error: ${(lex.errors[0] as { message: string }).message}`)
   parserInstance.input = lex.tokens
   const cst = parserInstance.expr()
-  if (parserInstance.errors.length > 0) throw new Error(`parse error: ${parserInstance.errors[0].message}`)
+  if (parserInstance.errors.length > 0)
+    throw new Error(`parse error: ${(parserInstance.errors[0] as { message: string }).message}`)
   return visitor.visit(cst) as Expr
 }
 export { parse }
