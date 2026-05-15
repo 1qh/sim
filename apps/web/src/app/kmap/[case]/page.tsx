@@ -1,0 +1,36 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { kmap } from '@/features/kmap'
+const CASES: Record<string, { dontCares?: number[]; minterms?: number[]; vars: string[] }> = {
+  v2: { minterms: [0, 1, 2], vars: ['A', 'B'] },
+  v3: { minterms: [1, 3, 5, 7], vars: ['A', 'B', 'C'] },
+  v4: { minterms: [0, 1, 5, 7, 8, 9, 13], vars: ['A', 'B', 'C', 'D'] },
+  'v4-pos': { minterms: [3, 5], vars: ['A', 'B', 'C', 'D'] },
+  v5: { minterms: [0, 1, 5, 7], vars: ['A', 'B', 'C', 'D', 'E'] },
+  'v5-wrap': { minterms: [0, 16], vars: ['A', 'B', 'C', 'D', 'E'] },
+  v6: { minterms: [0, 1], vars: ['A', 'B', 'C', 'D', 'E', 'F'] },
+  'v6-wrap': { minterms: [0, 32], vars: ['A', 'B', 'C', 'D', 'E', 'F'] }
+}
+const generateStaticParams = async () => Object.keys(CASES).map(c => ({ case: c }))
+const Page = async ({ params }: { params: Promise<{ case: string }> }) => {
+  const { case: caseName } = await params
+  const config = CASES[caseName]
+  if (!config) notFound()
+  const result = kmap(config)
+  return (
+    <main aria-label={`kmap-${caseName}`} className='flex min-h-screen flex-col gap-8 p-8'>
+      <h1 className='text-3xl font-bold'>K-map · {caseName}</h1>
+      <section aria-label='kmap-result' className='space-y-1 rounded-lg border p-4 font-mono text-sm'>
+        <div>geometry: {result.geometry}</div>
+        <div>vars: {result.vars.join(', ')}</div>
+        <div>SOP: {result.minimalSop}</div>
+        <div>POS: {result.minimalPos}</div>
+        <div>prime implicants: {result.primeImplicants.length}</div>
+        <div>essential PIs: {result.essentialPrimeImplicants.length}</div>
+      </section>
+      <Link className='text-sm underline' href='/kmap'>back</Link>
+    </main>
+  )
+}
+export { generateStaticParams }
+export default Page
