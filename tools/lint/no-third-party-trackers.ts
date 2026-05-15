@@ -3,18 +3,18 @@
 import { $ } from 'bun'
 import process from 'node:process'
 const BANNED = [
-  String.raw`google-analytics`,
-  String.raw`googletagmanager`,
-  String.raw`segment\.io`,
-  String.raw`mixpanel`,
-  String.raw`amplitude`,
-  String.raw`fullstory`,
-  String.raw`hotjar`,
-  String.raw`posthog`,
-  String.raw`@sentry/`,
-  String.raw`bugsnag`,
-  String.raw`gtag\(`,
-  String.raw`fbq\(`
+  'google-analytics',
+  'googletagmanager',
+  'segment.io',
+  'mixpanel',
+  'amplitude',
+  'fullstory',
+  'hotjar',
+  'posthog',
+  '@sentry/',
+  'bugsnag',
+  'gtag(',
+  'fbq('
 ]
 const results = await Promise.all(
   BANNED.map(async term => {

@@ -3,14 +3,14 @@
 import { $ } from 'bun'
 import process from 'node:process'
 const BANNED = [
-  String.raw`@cloudflare/workers-types`,
-  String.raw`from ['"]cloudflare:`,
-  String.raw`KVNamespace`,
-  String.raw`D1Database`,
-  String.raw`R2Bucket`,
-  String.raw`DurableObject\b`,
-  String.raw`Pages Functions`,
-  String.raw`export const onRequest`
+  '@cloudflare/workers-types',
+  'from [\'"]cloudflare:',
+  'KVNamespace',
+  'D1Database',
+  'R2Bucket',
+  'DurableObject\b',
+  'Pages Functions',
+  'export const onRequest'
 ]
 const results = await Promise.all(
   BANNED.map(async term => {

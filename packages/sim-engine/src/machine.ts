@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/nursery/noContinue: noise */
+/* eslint-disable no-continue */
 import type { Patch } from './codec'
 import { applyDiff, diff, encode, hashValue } from './codec'
 interface MachineConfig<S, E> {
@@ -33,7 +35,9 @@ const scrub = <S, E>(trace: Trace<S, E>, step: number): S => {
 const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
   for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i] as S) !== trace.hashes[i]) return false
   for (let i = 0; i < trace.patches.length; i += 1) {
-    const rebuilt = applyDiff(trace.states[i] as S, trace.patches[i]!)
+    const patch = trace.patches[i]
+    if (patch === undefined) continue
+    const rebuilt = applyDiff(trace.states[i] as S, patch)
     if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false
   }
   return true

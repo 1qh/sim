@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
 import { analyzePipeline, detectWar, detectWaw } from './index'

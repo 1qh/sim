@@ -26,7 +26,8 @@ describe('encodeShare tier selection', () => {
     const enc = encodeShare({ pc: 0, registers: { 1: 5, 2: 7 } })
     expect(enc.tier).toBe('fragment')
     expect(enc.fragment).toBeDefined()
-    expect(enc.fragment!.length).toBeLessThanOrEqual(URL_FRAGMENT_LIMIT_BYTES)
+    if (enc.fragment === undefined) throw new Error('fragment undefined')
+    expect(enc.fragment.length).toBeLessThanOrEqual(URL_FRAGMENT_LIMIT_BYTES)
   })
   test('large payload → convex tier', () => {
     const huge = { data: Array.from({ length: 5000 }, (_, i) => `item-${i}-pad-${Math.sin(i)}`) }
@@ -46,7 +47,8 @@ describe('fragment round-trip', () => {
     const value = { pc: 0x1_00, registers: { 1: 5, 2: 7 }, vars: ['A', 'B', 'C'] }
     const enc = encodeShare(value)
     expect(enc.fragment).toBeDefined()
-    const decoded = decodeFragment<typeof value>(enc.fragment!)
+    if (enc.fragment === undefined) throw new Error('fragment undefined')
+    const decoded = decodeFragment<typeof value>(enc.fragment)
     expect(decoded).toEqual(value)
   })
 })

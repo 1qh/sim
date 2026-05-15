@@ -30,9 +30,13 @@ const NAMES = [
   'srl'
 ] as const
 const buildInstruction = (name: (typeof NAMES)[number]): Instruction => {
-  if (name in FUNCT)
+  const functMap = FUNCT as Record<string, number>
+  const opcodeMap = OPCODE as Record<string, number>
+  if (name in FUNCT) {
+    const funct = functMap[name]
+    if (funct === undefined) throw new Error(`unreachable funct for ${name}`)
     return {
-      funct: (FUNCT as Record<string, number>)[name]!,
+      funct,
       name,
       rd: 3 as RegisterNumber,
       rs: 1 as RegisterNumber,
@@ -40,15 +44,11 @@ const buildInstruction = (name: (typeof NAMES)[number]): Instruction => {
       shamt: 0,
       type: 'R' as const
     }
-  if (name === 'j') return { name: 'j', opcode: OPCODE.j, target: 0x1_00, type: 'J' }
-  return {
-    imm: 0x10,
-    name,
-    opcode: (OPCODE as Record<string, number>)[name]!,
-    rs: 1 as RegisterNumber,
-    rt: 2 as RegisterNumber,
-    type: 'I'
   }
+  if (name === 'j') return { name: 'j', opcode: OPCODE.j, target: 0x1_00, type: 'J' }
+  const opcode = opcodeMap[name]
+  if (opcode === undefined) throw new Error(`unreachable opcode for ${name}`)
+  return { imm: 0x10, name, opcode, rs: 1 as RegisterNumber, rt: 2 as RegisterNumber, type: 'I' }
 }
 const generateStaticParams = async () => NAMES.map(name => ({ name }))
 const Page = async ({ params }: { params: Promise<{ name: string }> }) => {

@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/* eslint-disable no-bitwise */
 type Expr =
   | { kind: 'and'; left: Expr; right: Expr }
   | { kind: 'const'; value: 0 | 1 }

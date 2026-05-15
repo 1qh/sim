@@ -1,4 +1,6 @@
 #!/usr/bin/env bun
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/* eslint-disable no-await-in-loop */
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'

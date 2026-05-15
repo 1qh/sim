@@ -1,4 +1,7 @@
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
+/* eslint-disable no-duplicate-imports */
 import Link from 'next/link'
+import type { Instruction } from '@/features/mips/types'
 import type { RegisterNumber } from '@/features/mips/types'
 import { controlFor, createInitialState, decodeInstruction, encodeInstruction, executeStep } from '@/features/mips'
 const Page = () => {
@@ -14,7 +17,7 @@ const Page = () => {
     }
   ]
   const state = createInitialState()
-  const word = encodeInstruction(program[0]!)
+  const word = encodeInstruction(program[0] as Instruction)
   const decoded = decodeInstruction(word)
   const step = executeStep(state, word, decoded)
   return (

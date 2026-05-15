@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import * as mod from './index'
+import { placeholder } from './index'
 describe('@sim/hud', () => {
-  test('module exports load', () => {
-    expect(typeof mod).toBe('object')
+  test('placeholder export defined', () => {
+    expect(typeof placeholder).toBe('string')
   })
 })

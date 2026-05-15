@@ -1,4 +1,6 @@
 #!/usr/bin/env bun
+/** biome-ignore-all lint/nursery/noContinue: jsonl filter pattern */
+/* eslint-disable no-continue */
 /* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'

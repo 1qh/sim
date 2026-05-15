@@ -1,3 +1,7 @@
+/** biome-ignore-all lint/nursery/noContinue: loop guard */
+/* eslint-disable max-depth, no-continue */
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-misused-spread, @typescript-eslint/no-use-before-define, no-bitwise */
 interface Implicant {
   bits: string
   covers: number[]

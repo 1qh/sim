@@ -5,6 +5,7 @@ export default defineConfig({
   reporter: [['list']],
   retries: 0,
   testDir: './tests',
+  testMatch: '**/*.pw.ts',
   use: {
     baseURL: 'http://127.0.0.1:3000',
     trace: 'off'

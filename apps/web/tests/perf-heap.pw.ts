@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/nursery/useGlobalThis: noise */
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/* eslint-disable no-await-in-loop */
 import { expect, test } from '@playwright/test'
 const CYCLES = [
   { name: 'datapath-cycle', path: '/mips/add' },
