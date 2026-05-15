@@ -9,6 +9,8 @@ const codeTables = new Set<string>()
 for (const m of schemaText.matchAll(/^\s+(?<table>[a-zA-Z_][a-zA-Z0-9_]*):\s*defineTable/gmu)) {
   if (m.groups?.table) codeTables.add(m.groups.table)
 }
+const AUTH_TABLES = ['users', 'authSessions', 'authAccounts', 'authVerifiers', 'authVerificationCodes', 'authRefreshTokens', 'authRateLimits']
+if (schemaText.includes('authTables')) for (const t of AUTH_TABLES) codeTables.add(t)
 const docTables = new Set<string>()
 for (const m of docText.matchAll(/^### `(?<table>[a-zA-Z_][a-zA-Z0-9_]*)`/gmu)) {
   if (m.groups?.table) docTables.add(m.groups.table)
