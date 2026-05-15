@@ -147,3 +147,55 @@ describe('coverage ratchet for codec', () => {
     }
   })
 })
+describe('coverage ratchet for machine + rng', () => {
+  test('scrub throws on negative step', () => {
+    const trace = run({ initial: { value: 0 }, reducer: counterReducer }, ['inc'])
+    expect(() => scrub(trace, -1)).toThrow(/out of range/u)
+  })
+  test('scrub throws beyond range', () => {
+    const trace = run({ initial: { value: 0 }, reducer: counterReducer }, ['inc'])
+    expect(() => scrub(trace, 5)).toThrow(/out of range/u)
+  })
+  test('verifyTrace catches tampered patch', () => {
+    const trace = run({ initial: { value: 0 }, reducer: counterReducer }, ['inc', 'inc'])
+    trace.patches[0] = [{ op: 'replace', path: '/value', value: 999 }] as typeof trace.patches[0]
+    expect(verifyTrace(trace)).toBe(false)
+  })
+  test('snapshotTrace round-trip preserves hashes', () => {
+    const trace = run({ initial: { value: 0 }, reducer: counterReducer }, ['inc', 'inc', 'dec'])
+    const snap = snapshotTrace(trace)
+    expect(snap.payload.hashes).toEqual(trace.hashes)
+    expect(snap.payload.events).toEqual(trace.events)
+  })
+  test('nextInt produces stable sequence', () => {
+    const a = fromSeed(123)
+    const b = fromSeed(123)
+    for (let i = 0; i < 20; i++) {
+      const ai = (next(a) >>> 0) % 1000
+      const bi = (next(b) >>> 0) % 1000
+      expect(ai).toBe(bi)
+    }
+  })
+  test('nextFloat distinct across consecutive calls', () => {
+    const r = fromSeed(456)
+    const xs = new Set<number>()
+    for (let i = 0; i < 30; i++) xs.add(nextFloat(r))
+    expect(xs.size).toBeGreaterThan(25)
+  })
+  test('clone yields independent state object', () => {
+    const a = fromSeed(7)
+    const b = clone(a)
+    a.a = 999
+    expect(b.a).not.toBe(999)
+  })
+  test('fromSeed(0) defaults to non-zero seed', () => {
+    const r = fromSeed(0)
+    expect(r.a + r.b + r.c + r.d).toBeGreaterThan(0)
+  })
+  test('run with empty events returns initial-only trace', () => {
+    const trace = run({ initial: { value: 5 }, reducer: counterReducer }, [])
+    expect(trace.states).toEqual([{ value: 5 }])
+    expect(trace.patches).toEqual([])
+    expect(trace.hashes).toHaveLength(1)
+  })
+})
