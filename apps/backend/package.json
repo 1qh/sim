@@ -8,7 +8,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@auth/core": "latest",
+    "@auth/core": "0.41.x",
     "@convex-dev/auth": "latest",
     "convex": "latest"
   },
