@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/max-params */
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
 import { criticalPath, DELAYS_PS, longestProgramPath, sumDelay } from './index'
