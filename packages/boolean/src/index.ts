@@ -65,7 +65,10 @@ const solve = (input: SolveInput): SolveResult => {
   const essentialPrimeImplicants = findEssentialPrimes(primes, mins)
   const minimalSopImplicants = minimize(mins, dontCares, width)
   const minimalSop = sopExpression(minimalSopImplicants, vars)
-  const minimalPos = posExpression(maxs, dontCares, width, vars)
+  const minimalPos =
+    width <= 4
+      ? posExpression(maxs, dontCares, width, vars)
+      : '(skipped: POS for width > 4 deferred to espresso heuristic)'
   const tt: (0 | 1)[] = []
   if (expr === undefined) {
     const rows = 2 ** width
