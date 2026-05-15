@@ -3,9 +3,19 @@
 import { $ } from 'bun'
 import process from 'node:process'
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const beforeHash = (await $`find apps/backend/convex/_generated -type f -name '*.ts' -o -name '*.js' -o -name '*.d.ts' | sort | xargs cat`.cwd(repoRoot).nothrow().text()).length
+const beforeHash = (
+  await $`find apps/backend/convex/_generated -type f -name '*.ts' -o -name '*.js' -o -name '*.d.ts' | sort | xargs cat`
+    .cwd(repoRoot)
+    .nothrow()
+    .text()
+).length
 await $`cd apps/backend && bunx convex codegen --typecheck disable`.cwd(repoRoot).nothrow().quiet()
-const afterHash = (await $`find apps/backend/convex/_generated -type f -name '*.ts' -o -name '*.js' -o -name '*.d.ts' | sort | xargs cat`.cwd(repoRoot).nothrow().text()).length
+const afterHash = (
+  await $`find apps/backend/convex/_generated -type f -name '*.ts' -o -name '*.js' -o -name '*.d.ts' | sort | xargs cat`
+    .cwd(repoRoot)
+    .nothrow()
+    .text()
+).length
 if (beforeHash === afterHash) {
   console.log(`ok codegen idempotent: ${beforeHash} chars unchanged`)
   process.exit(0)

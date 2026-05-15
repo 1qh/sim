@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Arbitrary } from 'fast-check'
 import { describe, expect, test } from 'bun:test'
 import { assert, integer, property, uniqueArray } from 'fast-check'
