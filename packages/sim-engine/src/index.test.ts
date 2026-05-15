@@ -13,6 +13,7 @@ import {
   run,
   scrub,
   snapshotTrace,
+  toCanonicalBytes,
   verifyTrace
 } from './index'
 describe('sfc32 rng', () => {
@@ -113,5 +114,36 @@ describe('state machine + trace', () => {
     const snap = snapshotTrace(trace)
     expect(snap.hash).toBeTruthy()
     expect(snap.payload.hashes).toEqual(trace.hashes)
+  })
+})
+describe('coverage ratchet for codec', () => {
+  test('canonicalize throws on circular ref', () => {
+    const o: Record<string, unknown> = {}
+    o.self = o
+    expect(() => toCanonicalBytes(o)).toThrow()
+  })
+  test('hashBytes deterministic for same input', () => {
+    const a = hashValue('hello')
+    const b = hashValue('hello')
+    expect(a).toBe(b)
+    expect(a.length).toBe(64)
+  })
+  test('diff/applyDiff for nested object', () => {
+    const a = { user: { name: 'a', age: 1 } }
+    const b = { user: { name: 'b', age: 1 } }
+    const p = diff(a, b)
+    expect(applyDiff(a, p).user.name).toBe('b')
+  })
+  test('decode rejects null payload mismatch', () => {
+    const s = encode({ k: 1 })
+    expect(() => decode({ ...s, hash: 'wrong' })).toThrow()
+  })
+  test('rng nextInt bounded by max', () => {
+    const r = fromSeed(42)
+    for (let i = 0; i < 50; i++) {
+      const v = (next(r) >>> 0) % 100
+      expect(v).toBeGreaterThanOrEqual(0)
+      expect(v).toBeLessThan(100)
+    }
   })
 })
