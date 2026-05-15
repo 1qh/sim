@@ -10,8 +10,12 @@ await new Promise(r => setTimeout(r, 3000))
 let allGreen = true
 for (const path of ROUTES) {
   const tmp = `/tmp/lh-${path.replaceAll('/', '_')}.json`
-  await $`bunx lighthouse http://127.0.0.1:3000${path} --quiet --chrome-flags=--headless --output=json --output-path=${tmp}`.nothrow().quiet()
-  const j = (await file(tmp).json()) as { categories: { accessibility: { score: number }; performance: { score: number } } }
+  await $`bunx lighthouse http://127.0.0.1:3000${path} --quiet --chrome-flags=--headless --output=json --output-path=${tmp}`
+    .nothrow()
+    .quiet()
+  const j = (await file(tmp).json()) as {
+    categories: { accessibility: { score: number }; performance: { score: number } }
+  }
   const perf = j.categories.performance.score
   const a11y = j.categories.accessibility.score
   const passed = perf >= PERF_MIN && a11y >= A11Y_MIN

@@ -4,7 +4,6 @@ COPY . .
 RUN bun install --no-frozen-lockfile
 WORKDIR /app/apps/web
 RUN bun run build
-
 FROM oven/bun:1.3 AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
