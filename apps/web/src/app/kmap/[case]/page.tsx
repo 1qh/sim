@@ -28,7 +28,9 @@ const Page = async ({ params }: { params: Promise<{ case: string }> }) => {
         <div>prime implicants: {result.primeImplicants.length}</div>
         <div>essential PIs: {result.essentialPrimeImplicants.length}</div>
       </section>
-      <Link className='text-sm underline' href='/kmap'>back</Link>
+      <Link className='text-sm underline' href='/kmap'>
+        back
+      </Link>
     </main>
   )
 }
