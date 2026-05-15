@@ -14,7 +14,6 @@ const combine = (a: string, b: string): string | undefined => {
       result += '-'
       if (diff > 1) return
     }
-
   return diff === 1 ? result : undefined
 }
 const findPrimeImplicants = (minterms: number[], dontCares: number[], width: number): Implicant[] => {
@@ -35,7 +34,6 @@ const findPrimeImplicants = (minterms: number[], dontCares: number[], width: num
           if (!next.some(n => n.bits === c)) next.push({ bits: c, covers })
         }
       }
-
     for (let i = 0; i < current.length; i += 1) if (!used.has(i)) primes.push(current[i])
     current = next
   }
