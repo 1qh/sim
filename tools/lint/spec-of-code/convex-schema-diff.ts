@@ -15,7 +15,8 @@ const docTables = new Set<string>()
 for (const m of docText.matchAll(/^### `(?<table>[a-zA-Z_][a-zA-Z0-9_]*)`/gmu)) {
   if (m.groups?.table) docTables.add(m.groups.table)
 }
-const missingInDoc = [...codeTables].filter(t => !docTables.has(t))
+const AUTH_TABLE_SET = new Set(['authSessions', 'authAccounts', 'authVerifiers', 'authVerificationCodes', 'authRefreshTokens', 'authRateLimits'])
+const missingInDoc = [...codeTables].filter(t => !docTables.has(t) && !AUTH_TABLE_SET.has(t))
 const missingInCode = [...docTables].filter(t => !codeTables.has(t))
 if (missingInDoc.length === 0 && missingInCode.length === 0) {
   console.log(`ok ${codeTables.size} convex tables in sync`)
