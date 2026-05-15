@@ -51,17 +51,17 @@ const analyzePipeline = (
   const forwarding: ForwardingArrow[] = []
   let stalls = 0
   for (let i = 0; i < instructions.length; i += 1) {
-    const ins = instructions[i] as Instruction
-    let start = i === 0 ? 0 : (startCycles[i - 1] as number) + 1
+    const ins = instructions[i]!
+    let start = i === 0 ? 0 : startCycles[i - 1]! + 1
     const consumed = readsRegisters(ins)
     for (const reg of consumed)
       for (let j = i - 1; j >= 0; j -= 1) {
-        const producer = instructions[j] as Instruction
+        const producer = instructions[j]!
         const written = writesRegister(producer)
         if (written === reg && reg !== 0) {
-          const producerExEnd = (startCycles[j] as number) + 3
-          const producerMemEnd = (startCycles[j] as number) + 4
-          const producerWbEnd = (startCycles[j] as number) + 5
+          const producerExEnd = startCycles[j]! + 3
+          const producerMemEnd = startCycles[j]! + 4
+          const producerWbEnd = startCycles[j]! + 5
           const consumerEx = start + 2
           const consumerId = start + 1
           if (enableForwarding) {
@@ -111,23 +111,23 @@ const analyzePipeline = (
           break
         }
       }
-    if (i > 0 && isBranchOrJump(instructions[i - 1] as Instruction) && taken.has(i - 1)) {
+    if (i > 0 && isBranchOrJump(instructions[i - 1]!) && taken.has(i - 1)) {
       stalls += 1
-      start = Math.max(start, (startCycles[i - 1] as number) + 2)
+      start = Math.max(start, startCycles[i - 1]! + 2)
       hazards.push({
         consumerCycle: start,
         consumerIndex: i,
         kind: 'control',
-        producerCycle: (startCycles[i - 1] as number) + 1,
+        producerCycle: startCycles[i - 1]! + 1,
         producerIndex: i - 1,
         register: undefined
       })
     }
     startCycles.push(start)
   }
-  const cycleCount = instructions.length === 0 ? 0 : (startCycles.at(-1) as number) + STAGES.length
+  const cycleCount = instructions.length === 0 ? 0 : startCycles.at(-1)! + STAGES.length
   const rows: PipelineRow[] = instructions.map((ins, idx) => {
-    const startCycle = startCycles[idx] as number
+    const startCycle = startCycles[idx]!
     const cells: ('bubble' | Stage | undefined)[] = []
     for (let c = 0; c < cycleCount; c += 1) {
       const offset = c - startCycle
@@ -143,9 +143,9 @@ const analyzePipeline = (
 const detectWar = (instructions: Instruction[]): Hazard[] => {
   const hazards: Hazard[] = []
   for (let i = 0; i < instructions.length; i += 1) {
-    const reads = readsRegisters(instructions[i] as Instruction)
+    const reads = readsRegisters(instructions[i]!)
     for (let j = i + 1; j < instructions.length; j += 1) {
-      const written = writesRegister(instructions[j] as Instruction)
+      const written = writesRegister(instructions[j]!)
       if (written !== undefined && reads.includes(written) && written !== 0)
         hazards.push({
           consumerCycle: 0,
@@ -162,10 +162,10 @@ const detectWar = (instructions: Instruction[]): Hazard[] => {
 const detectWaw = (instructions: Instruction[]): Hazard[] => {
   const hazards: Hazard[] = []
   for (let i = 0; i < instructions.length; i += 1) {
-    const writtenA = writesRegister(instructions[i] as Instruction)
+    const writtenA = writesRegister(instructions[i]!)
     if (writtenA === undefined || writtenA === 0) continue
     for (let j = i + 1; j < instructions.length; j += 1) {
-      const writtenB = writesRegister(instructions[j] as Instruction)
+      const writtenB = writesRegister(instructions[j]!)
       if (writtenB === writtenA)
         hazards.push({
           consumerCycle: 0,

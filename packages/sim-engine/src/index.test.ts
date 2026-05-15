@@ -129,8 +129,8 @@ describe('coverage ratchet for codec', () => {
     expect(a.length).toBe(64)
   })
   test('diff/applyDiff for nested object', () => {
-    const a = { user: { name: 'a', age: 1 } }
-    const b = { user: { name: 'b', age: 1 } }
+    const a = { user: { age: 1, name: 'a' } }
+    const b = { user: { age: 1, name: 'b' } }
     const p = diff(a, b)
     expect(applyDiff(a, p).user.name).toBe('b')
   })
@@ -140,8 +140,8 @@ describe('coverage ratchet for codec', () => {
   })
   test('rng nextInt bounded by max', () => {
     const r = fromSeed(42)
-    for (let i = 0; i < 50; i++) {
-      const v = (next(r) >>> 0) % 100
+    for (let i = 0; i < 50; i += 1) {
+      const v = Math.trunc(next(r)) % 100
       expect(v).toBeGreaterThanOrEqual(0)
       expect(v).toBeLessThan(100)
     }
@@ -158,7 +158,7 @@ describe('coverage ratchet for machine + rng', () => {
   })
   test('verifyTrace catches tampered patch', () => {
     const trace = run({ initial: { value: 0 }, reducer: counterReducer }, ['inc', 'inc'])
-    trace.patches[0] = [{ op: 'replace', path: '/value', value: 999 }] as typeof trace.patches[0]
+    trace.patches[0] = [{ op: 'replace', path: '/value', value: 999 }] as (typeof trace.patches)[0]
     expect(verifyTrace(trace)).toBe(false)
   })
   test('snapshotTrace round-trip preserves hashes', () => {
@@ -170,16 +170,16 @@ describe('coverage ratchet for machine + rng', () => {
   test('nextInt produces stable sequence', () => {
     const a = fromSeed(123)
     const b = fromSeed(123)
-    for (let i = 0; i < 20; i++) {
-      const ai = (next(a) >>> 0) % 1000
-      const bi = (next(b) >>> 0) % 1000
+    for (let i = 0; i < 20; i += 1) {
+      const ai = Math.trunc(next(a)) % 1000
+      const bi = Math.trunc(next(b)) % 1000
       expect(ai).toBe(bi)
     }
   })
   test('nextFloat distinct across consecutive calls', () => {
     const r = fromSeed(456)
     const xs = new Set<number>()
-    for (let i = 0; i < 30; i++) xs.add(nextFloat(r))
+    for (let i = 0; i < 30; i += 1) xs.add(nextFloat(r))
     expect(xs.size).toBeGreaterThan(25)
   })
   test('clone yields independent state object', () => {

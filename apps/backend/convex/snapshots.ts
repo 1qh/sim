@@ -19,7 +19,7 @@ export const saveSnapshot = mutation({
   handler: async (ctx, args) => {
     const keyHash = await fingerprintHash(args.fingerprint)
     const now = Date.now()
-    const existingWindow = await ctx.db
+    const existingWindow = ctx.db
       .query('rateLimitWindows')
       .withIndex('byKeyHash', q => q.eq('keyHash', keyHash))
       .first()
@@ -28,8 +28,7 @@ export const saveSnapshot = mutation({
       await ctx.db.patch(existingWindow._id, { count: existingWindow.count + 1 })
     } else if (existingWindow === null) await ctx.db.insert('rateLimitWindows', { count: 1, keyHash, windowStartMs: now })
     else await ctx.db.patch(existingWindow._id, { count: 1, windowStartMs: now })
-
-    const existing = await ctx.db
+    const existing = ctx.db
       .query('snapshots')
       .withIndex('byHash', q => q.eq('hash', args.hash))
       .first()

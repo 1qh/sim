@@ -26,7 +26,14 @@ describe.if(!SKIP)('snapshots live against local self-host', () => {
   test('duplicate hash idempotent', async () => {
     const hash = uniqueHash()
     const fp = uniqueHash()
-    const args = { bytes: 1, canonicalJson: '{"y":1}', fingerprint: fp, hash, kind: 'kmap' as const, parentHash: undefined }
+    const args = {
+      bytes: 1,
+      canonicalJson: '{"y":1}',
+      fingerprint: fp,
+      hash,
+      kind: 'kmap' as const,
+      parentHash: undefined
+    }
     const a = await client.mutation(api.snapshots.saveSnapshot, args)
     const b = await client.mutation(api.snapshots.saveSnapshot, args)
     expect(a.created).toBe(true)
@@ -34,7 +41,7 @@ describe.if(!SKIP)('snapshots live against local self-host', () => {
   }, 30_000)
   test('rate-limit: 31st request in window throws', async () => {
     const fp = uniqueHash()
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 30; i += 1)
       await client.mutation(api.snapshots.saveSnapshot, {
         bytes: 1,
         canonicalJson: `{"i":${i}}`,
@@ -43,7 +50,6 @@ describe.if(!SKIP)('snapshots live against local self-host', () => {
         kind: 'mips',
         parentHash: undefined
       })
-    }
     await expect(
       client.mutation(api.snapshots.saveSnapshot, {
         bytes: 1,

@@ -405,7 +405,7 @@ describe('golden: lui', () => {
       type: 'I'
     }
     const out = step(state, ins)
-    expect(Math.trunc(readRegister(out.nextState, 1))).toBe(0xab_cd_00_00)
+    expect(Math.trunc(readRegister(out.nextState, 1)).toString(16)).toBe('abcd0000')
   })
 })
 describe('golden: nor', () => {
@@ -421,7 +421,7 @@ describe('golden: nor', () => {
       type: 'R'
     })
     const out = step(state, ins)
-    expect(Math.trunc(readRegister(out.nextState, 3))).toBe(0xff_ff_ff_ff)
+    expect(Math.trunc(readRegister(out.nextState, 3)).toString(16)).toBe('ffffffff')
   })
 })
 describe('golden: ori', () => {
