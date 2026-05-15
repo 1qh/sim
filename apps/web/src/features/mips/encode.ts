@@ -1,6 +1,6 @@
 import { insertField } from '@sim/bits'
 import type { Instruction, RegisterNumber } from './types'
-const OPCODE: Record<string, number> = {
+const OPCODE = {
   R: 0,
   addi: 0x08,
   andi: 0x0c,
@@ -13,8 +13,8 @@ const OPCODE: Record<string, number> = {
   ori: 0x0d,
   sw: 0x2b,
   xori: 0x0e
-}
-const FUNCT: Record<string, number> = {
+} as const
+const FUNCT = {
   add: 0x20,
   and: 0x24,
   jr: 0x08,
@@ -27,7 +27,7 @@ const FUNCT: Record<string, number> = {
   srl: 0x02,
   sub: 0x22,
   xor: 0x26
-}
+} as const
 const reg = (n: RegisterNumber): number => n & 0x1f
 const encode16 = (imm: number): number => imm & 0xff_ff
 const encodeInstruction = (instruction: Instruction): number => {

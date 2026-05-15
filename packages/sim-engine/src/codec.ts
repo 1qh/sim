@@ -13,7 +13,7 @@ const toCanonicalBytes = <T>(value: T): Uint8Array => {
 const hashBytes = (bytes: Uint8Array): string => {
   const digest = blake3(bytes)
   let out = ''
-  for (let i = 0; i < digest.length; i += 1) out += digest[i].toString(16).padStart(2, '0')
+  for (let i = 0; i < digest.length; i += 1) out += (digest[i] as number).toString(16).padStart(2, '0')
   return out
 }
 const hashValue = <T>(value: T): string => hashBytes(toCanonicalBytes(value))
