@@ -10,7 +10,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-namespace, no-console */
+/* eslint-disable no-console */
 import { contrastRatio, getTheme } from '@sim/design-tokens'
 import process from 'node:process'
 const variantArg = (process.argv[2] ?? 'normal') as 'deuteranopia' | 'normal' | 'protanopia' | 'tritanopia'

@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/max-params, no-namespace */
+/* eslint-disable @typescript-eslint/max-params */
 const HEX_PREFIX = /^0x/iu
 const TWO_POW_32 = 4_294_967_296
 type S32 = number

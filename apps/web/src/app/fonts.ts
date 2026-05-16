@@ -9,7 +9,6 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-namespace */
 import { Inter, JetBrains_Mono } from 'next/font/google'
 const sans = Inter({ subsets: ['vietnamese'], variable: '--font-sans' })
 const mono = JetBrains_Mono({ variable: '--font-mono' })

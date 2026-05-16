@@ -10,7 +10,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-namespace, no-console */
+/* eslint-disable no-console */
 import { $, argv, file, spawn, write } from 'bun'
 import { createHash } from 'node:crypto'
 import process from 'node:process'
@@ -29,7 +29,9 @@ if (!gate || cmd.length === 0) {
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const ledgerPath = `${repoRoot}/ledger.jsonl`
 const commit = (await $`git rev-parse HEAD`.text()).trim()
-const treeRaw = (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*"`.text()) + (await $`git diff -- ":!apps/backend/convex/_generated/*"`.text())
+const treeRaw =
+  (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*"`.text()) +
+  (await $`git diff -- ":!apps/backend/convex/_generated/*"`.text())
 const tree = createHash('sha256').update(treeRaw).digest('hex').slice(0, 16)
 const start = performance.now()
 const proc = spawn(cmd, { stderr: 'pipe', stdout: 'pipe' })

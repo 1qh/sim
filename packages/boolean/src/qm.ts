@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise, no-continue, max-depth, no-namespace */
+/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise, no-continue, max-depth */
 interface Implicant {
   bits: string
   covers: number[]

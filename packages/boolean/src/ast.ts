@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/switch-exhaustiveness-check, @typescript-eslint/naming-convention, no-bitwise, no-namespace */
+/* eslint-disable @typescript-eslint/switch-exhaustiveness-check, @typescript-eslint/naming-convention, no-bitwise */
 type Expr =
   | { kind: 'and'; left: Expr; right: Expr }
   | { kind: 'const'; value: 0 | 1 }

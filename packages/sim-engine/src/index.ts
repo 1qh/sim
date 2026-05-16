@@ -9,7 +9,6 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-namespace */
 export { applyDiff, decode, diff, encode, hashBytes, hashValue, toCanonicalBytes } from './codec'
 export type { Patch, Snapshot } from './codec'
 export { replay, run, scrub, snapshotTrace, verifyTrace } from './machine'

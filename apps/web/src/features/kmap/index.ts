@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-bitwise, no-namespace */
+/* eslint-disable no-bitwise */
 import type { Implicant, SolveResult } from '@sim/boolean'
 import { solve } from '@sim/boolean'
 type Geometry = '2d' | '3d-toroidal'

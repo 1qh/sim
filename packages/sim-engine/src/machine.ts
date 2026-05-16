@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, no-continue, no-namespace */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition, no-continue */
 import type { Patch } from './codec'
 import { applyDiff, diff, encode, hashValue } from './codec'
 interface MachineConfig<S, E> {

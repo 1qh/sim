@@ -10,7 +10,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-promise-executor-return, @typescript-eslint/strict-void-return, no-await-in-loop, no-namespace, no-console */
+/* eslint-disable no-promise-executor-return, @typescript-eslint/strict-void-return, no-await-in-loop, no-console */
 import { $, file, spawn } from 'bun'
 import process from 'node:process'
 const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/learn/foundation', '/s/abc123']

@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise, no-namespace */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise */
 import { addU32, signExtend, subU32 } from '@sim/bits'
 import type { ControlSignals, ExecutionStep, Instruction, MachineState, RegisterNumber } from './types'
 const ZERO_CONTROL: ControlSignals = {

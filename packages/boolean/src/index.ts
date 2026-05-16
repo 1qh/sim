@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable complexity, @typescript-eslint/naming-convention, no-namespace */
+/* eslint-disable complexity, @typescript-eslint/naming-convention */
 import type { Expr } from './ast'
 import type { Implicant } from './qm'
 import { evalExpr, maxterms, minterms, sortedVars, truthTable } from './ast'
