@@ -14,8 +14,8 @@
 import { $, file, spawn } from 'bun'
 import process from 'node:process'
 const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/learn/foundation', '/s/abc123']
-const PERF_MIN = 0.7
-const A11Y_MIN = 0.9
+const PERF_MIN = 0.88
+const A11Y_MIN = 0.97
 const server = spawn(['bun', 'run', 'start', '--', '-p', '3000'], { stderr: 'pipe', stdout: 'pipe' })
 await new Promise(r => setTimeout(r, 3000))
 let allGreen = true

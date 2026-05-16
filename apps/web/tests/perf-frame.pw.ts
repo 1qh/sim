@@ -18,7 +18,7 @@ const SCENES = [
   { name: 'pipeline', path: '/pipeline/raw' },
   { name: 'foundation', path: '/learn/foundation' }
 ]
-const FCP_BUDGET_MS = 1500
+const FCP_BUDGET_MS = 800
 SCENES.map(({ name, path }) =>
   test(`perf.frame-budget.${name}: FCP < ${FCP_BUDGET_MS}ms`, async ({ page }) => {
     await page.goto(path, { waitUntil: 'load' })
