@@ -21,6 +21,7 @@
     "@noble/hashes": "latest",
     "@thi.ng/dgraph": "latest",
     "canonicalize": "latest",
+    "pure-rand": "latest",
     "rfc6902": "latest",
     "zod": "latest"
   }
