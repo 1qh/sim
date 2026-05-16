@@ -187,3 +187,37 @@ describe('coercions', () => {
     expect(toS32(TWO_POW_32 - 1)).toBe(-1)
   })
 })
+describe('targeted mutation kills', () => {
+  test('mask(33) saturates (>= 32 not > 32)', () => {
+    expect(mask(33)).toBe(0xff_ff_ff_ff)
+    expect(mask(32)).toBe(0xff_ff_ff_ff)
+  })
+  test('extractField width = hi-lo+1', () => {
+    expect(extractField(0b1111_0000, 7, 4)).toBe(0b1111)
+    expect(extractField(0b1010_0101, 7, 4)).toBe(0b1010)
+  })
+  test('sarS32 modulo (not multiply) shamt', () => {
+    expect(sarS32(0x80_00_00_00, 1)).toBe(-1_073_741_824)
+    expect(sarS32(0x80_00_00_00, 33)).toBe(-1_073_741_824)
+  })
+  test('ltS32 strict less', () => {
+    expect(ltS32(1, 1)).toBe(false)
+    expect(ltS32(0, 1)).toBe(true)
+  })
+  test('ltU32 strict less', () => {
+    expect(ltU32(1, 1)).toBe(false)
+    expect(ltU32(0, 1)).toBe(true)
+  })
+  test('toHex32 pads 0 not empty', () => {
+    expect(toHex32(0)).toBe('0x00000000')
+    expect(toHex32(0xff)).toBe('0x000000ff')
+  })
+  test('toBin32 pads 0 to length 32', () => {
+    expect(toBin32(0)).toBe('0'.repeat(32))
+    expect(toBin32(1)).toBe(`${'0'.repeat(31)}1`)
+  })
+  test('fromHex anchored regex strips only leading 0x', () => {
+    expect(fromHex('0xff')).toBe(255)
+    expect(fromHex('0XFF')).toBe(255)
+  })
+})
