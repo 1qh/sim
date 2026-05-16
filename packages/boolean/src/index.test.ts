@@ -16,6 +16,7 @@ import { describe, expect, test } from 'bun:test'
 import { assert, integer, property, uniqueArray } from 'fast-check'
 import {
   evalExpr,
+  findEssentialPrimes,
   findPrimeImplicants,
   maxterms,
   minimize,
@@ -379,5 +380,155 @@ describe('boolean POS edge — empty maxterms', () => {
   test('POS XOR (A^B) yields two clauses with mixed polarity', () => {
     const r = solve({ minterms: [1, 2], vars: ['A', 'B'] })
     expect(r.minimalPos).toBe('(A + B)·(!A + !B)')
+  })
+})
+describe('boolean solve input shapes', () => {
+  test('width from vars.length when width omitted', () => {
+    const r = solve({ minterms: [3], vars: ['X', 'Y'] })
+    expect(r.width).toBe(2)
+    expect(r.vars).toEqual(['X', 'Y'])
+  })
+  test('throws when neither expression/minterms/maxterms given', () => {
+    expect(() => solve({ vars: ['A', 'B'] })).toThrow('expression / minterms / maxterms required')
+  })
+  test('throws when no vars and no width', () => {
+    expect(() => solve({ minterms: [0] })).toThrow('vars or width required')
+  })
+  test('maxterms input partitions cube correctly', () => {
+    const r = solve({ maxterms: [0, 1], vars: ['A', 'B'] })
+    expect(r.minterms).toEqual([2, 3])
+    expect(r.maxterms).toEqual([0, 1])
+  })
+  test('minterms input partitions cube correctly with dontCares', () => {
+    const r = solve({ dontCares: [2], minterms: [3], vars: ['A', 'B'] })
+    expect(r.maxterms).toEqual([0, 1])
+    expect(r.minterms).toEqual([3])
+    expect(r.dontCares).toEqual([2])
+  })
+  test('width > 4 skips POS', () => {
+    const r = solve({ minterms: [0], width: 5 })
+    expect(r.minimalPos).toBe('(skipped: POS for width > 4 deferred to espresso heuristic)')
+    expect(r.width).toBe(5)
+  })
+  test('expression input rebuilds truthTable from expr', () => {
+    const r = solve({ expression: 'A & B' })
+    expect(r.truthTable).toEqual([0, 0, 0, 1])
+    expect(r.expr).toBeDefined()
+  })
+  test('minterm path truthTable uses dontCares as 1s', () => {
+    const r = solve({ dontCares: [1], minterms: [3], vars: ['A', 'B'] })
+    expect(r.truthTable).toEqual([0, 1, 0, 1])
+  })
+  test('all minterms (F=1) with 2 vars: maxterms empty, sop=1', () => {
+    const r = solve({ minterms: [0, 1, 2, 3], vars: ['A', 'B'] })
+    expect(r.maxterms).toEqual([])
+    expect(r.minimalSop).toBe('1')
+  })
+})
+describe('boolean ast direct branch coverage', () => {
+  test('evalExpr xor 0^0=0, 0^1=1, 1^0=1, 1^1=0', () => {
+    const e = parse('A ^ B')
+    expect(evalExpr(e, { A: 0, B: 0 })).toBe(0)
+    expect(evalExpr(e, { A: 0, B: 1 })).toBe(1)
+    expect(evalExpr(e, { A: 1, B: 0 })).toBe(1)
+    expect(evalExpr(e, { A: 1, B: 1 })).toBe(0)
+  })
+  test('evalExpr or 0|0=0, others=1', () => {
+    const e = parse('A | B')
+    expect(evalExpr(e, { A: 0, B: 0 })).toBe(0)
+    expect(evalExpr(e, { A: 1, B: 0 })).toBe(1)
+    expect(evalExpr(e, { A: 0, B: 1 })).toBe(1)
+    expect(evalExpr(e, { A: 1, B: 1 })).toBe(1)
+  })
+  test('evalExpr var defaults to 0 when not in env', () => {
+    const e = parse('A')
+    expect(evalExpr(e, {})).toBe(0)
+    expect(evalExpr(e, { A: 1 })).toBe(1)
+  })
+  test('sortedVars stable for X<Y<Z', () => {
+    expect(sortedVars(parse('Z & X & Y'))).toEqual(['X', 'Y', 'Z'])
+  })
+  test('sortedVars equal vars dedupe', () => {
+    expect(sortedVars(parse('A & A'))).toEqual(['A'])
+  })
+  test('minterms returns exact 1-positions for XOR', () => {
+    expect(minterms(parse('A ^ B'), ['A', 'B'])).toEqual([1, 2])
+  })
+  test('maxterms returns exact 0-positions for XOR', () => {
+    expect(maxterms(parse('A ^ B'), ['A', 'B'])).toEqual([0, 3])
+  })
+  test('minterms for constant 0 is empty', () => {
+    expect(minterms(parse('0'), ['A'])).toEqual([])
+  })
+  test('maxterms for constant 1 is empty', () => {
+    expect(maxterms(parse('1'), ['A'])).toEqual([])
+  })
+})
+describe('boolean targeted mutation kills', () => {
+  test('sortedVars on NOT expression sees inner var', () => {
+    expect(sortedVars(parse('!A'))).toEqual(['A'])
+    expect(sortedVars(parse('!(A & B)'))).toEqual(['A', 'B'])
+  })
+  test('solve(A&B) maxterms exactly [0,1,2]', () => {
+    expect(solve({ expression: 'A & B' }).maxterms).toEqual([0, 1, 2])
+  })
+  test('solve(A|B) minterms+maxterms exact', () => {
+    const r = solve({ expression: 'A | B' })
+    expect(r.minterms).toEqual([1, 2, 3])
+    expect(r.maxterms).toEqual([0])
+  })
+  test('width=4 POS still computed (boundary <= 4)', () => {
+    const r = solve({ minterms: [0], width: 4 })
+    expect(r.minimalPos.startsWith('(')).toBe(true)
+  })
+  test('width=5 POS skipped', () => {
+    const r = solve({ minterms: [0], width: 5 })
+    expect(r.minimalPos).toContain('skipped')
+  })
+  test('truthTable length matches 2^width for minterm input', () => {
+    expect(solve({ minterms: [3], width: 2 }).truthTable).toHaveLength(4)
+    expect(solve({ minterms: [3], width: 3 }).truthTable).toHaveLength(8)
+  })
+  test('truthTable length matches 2^width for expression input', () => {
+    expect(solve({ expression: 'A & B & C' }).truthTable).toHaveLength(8)
+  })
+})
+describe('boolean qm internals deeper', () => {
+  test('findPrimeImplicants returns empty when no minterms or dontcares', () => {
+    expect(findPrimeImplicants([], [], 2)).toEqual([])
+  })
+  test('combine: identical bits do not combine (diff=0)', () => {
+    expect(findPrimeImplicants([0], [], 2)).toEqual([{ bits: '00', covers: [0] }])
+  })
+  test('combine: diff=2 does not combine', () => {
+    const r = findPrimeImplicants([0, 3], [], 2)
+    expect(r).toHaveLength(2)
+    expect(r.map(p => p.bits).toSorted()).toEqual(['00', '11'])
+  })
+  test('findPrimeImplicants 4-term square reduces to two 2-cubes', () => {
+    const r = findPrimeImplicants([0, 1, 2, 3], [], 2)
+    expect(r).toHaveLength(1)
+    expect(r[0].bits).toBe('--')
+  })
+  test('findPrimeImplicants 3-cube collapses to all-dash', () => {
+    const r = findPrimeImplicants([0, 1, 2, 3, 4, 5, 6, 7], [], 3)
+    expect(r).toHaveLength(1)
+    expect(r[0].bits).toBe('---')
+  })
+  test('findEssentialPrimes picks the single covering prime per minterm', () => {
+    const primes: { bits: string; covers: number[] }[] = [
+      { bits: '0-', covers: [0, 1] },
+      { bits: '1-', covers: [2, 3] }
+    ]
+    const essential = findEssentialPrimes(primes, [0, 2])
+    expect(essential).toHaveLength(2)
+  })
+  test('findEssentialPrimes excludes prime when minterm covered by multiple', () => {
+    const primes: { bits: string; covers: number[] }[] = [
+      { bits: '0-', covers: [0, 1] },
+      { bits: '-1', covers: [1, 3] }
+    ]
+    const essential = findEssentialPrimes(primes, [1])
+    expect(essential).toHaveLength(0)
   })
 })
