@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+/** biome-ignore-all lint/style/noProcessEnv: ledger harness reads env-passed tree/commit */
 /** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
 /** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
@@ -11,8 +12,9 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable no-console */
-import { $, argv, file, spawn, write } from 'bun'
+import { $, argv, spawn } from 'bun'
 import { createHash } from 'node:crypto'
+import { appendFileSync } from 'node:fs'
 import process from 'node:process'
 const args = argv.slice(2)
 const dashIdx = args.indexOf('--')
@@ -26,13 +28,18 @@ if (!gate || cmd.length === 0) {
   console.error('usage: record <gate-name> -- <cmd...>')
   process.exit(2)
 }
-const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
+const repoRoot = process.env.LEDGER_REPO_ROOT ?? (await $`git rev-parse --show-toplevel`.text()).trim()
 const ledgerPath = `${repoRoot}/ledger.jsonl`
-const commit = (await $`git rev-parse HEAD`.text()).trim()
-const treeRaw =
-  (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*" ":!tools/ledger/*"`.text()) +
-  (await $`git diff -- ":!apps/backend/convex/_generated/*" ":!tools/ledger/*"`.text())
-const tree = createHash('sha256').update(treeRaw).digest('hex').slice(0, 16)
+const commit = process.env.LEDGER_COMMIT ?? (await $`git rev-parse HEAD`.text()).trim()
+const tree =
+  process.env.LEDGER_TREE ??
+  createHash('sha256')
+    .update(
+      (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*" ":!tools/ledger/*"`.text()) +
+        (await $`git diff -- ":!apps/backend/convex/_generated/*" ":!tools/ledger/*"`.text())
+    )
+    .digest('hex')
+    .slice(0, 16)
 const start = performance.now()
 const proc = spawn(cmd, { stderr: 'pipe', stdout: 'pipe' })
 const out = await new Response(proc.stdout).text()
@@ -42,12 +49,7 @@ const durationMs = Math.round(performance.now() - start)
 const status = exit === 0 ? 'pass' : 'fail'
 const notes = exit === 0 ? `ok ${durationMs}ms` : (err || out).slice(-2000)
 const row = { commit, durationMs, gate, notes, status, tree, ts: new Date().toISOString() }
-const line = `${JSON.stringify(row)}\n`
-const existing =
-  (await file(ledgerPath)
-    .text()
-    .catch(() => '')) || ''
-await write(ledgerPath, existing + line)
+appendFileSync(ledgerPath, `${JSON.stringify(row)}\n`)
 if (exit !== 0) {
   process.stderr.write(err)
   process.stdout.write(out)
