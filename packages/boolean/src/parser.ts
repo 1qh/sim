@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/nursery/noExcessiveClassesPerFile: chevrotain parser + visitor */
 /** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
 /** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
@@ -9,7 +10,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-void-return, max-classes-per-file, no-namespace */
+/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-void-return, max-classes-per-file */
 import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'

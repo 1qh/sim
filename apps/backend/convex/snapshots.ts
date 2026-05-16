@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-await-in-loop, no-continue, no-namespace */
+/* eslint-disable no-await-in-loop, no-continue */
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 const RATE_LIMIT_WINDOW_MS = 60_000

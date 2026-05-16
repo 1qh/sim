@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters, no-namespace */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 import { blake3 } from '@noble/hashes/blake3.js'
 import canonicalize from 'canonicalize'
 import { applyPatch, createPatch } from 'rfc6902'

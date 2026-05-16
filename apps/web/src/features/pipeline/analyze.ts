@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable complexity, @typescript-eslint/switch-exhaustiveness-check, no-continue, max-depth, no-namespace */
+/* eslint-disable complexity, @typescript-eslint/switch-exhaustiveness-check, no-continue, max-depth */
 import type { Instruction, RegisterNumber } from '../mips/types'
 import type { ForwardingArrow, Hazard, PipelineReport, PipelineRow, Stage } from './types'
 const STAGES: Stage[] = ['IF', 'ID', 'EX', 'MEM', 'WB']
