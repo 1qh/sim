@@ -192,4 +192,32 @@ describe('boolean POS edge — empty maxterms', () => {
     const r = solve({ minterms: [0, 1, 2, 3], vars: ['A', 'B'] })
     expect(r.minimalPos).toBe('1')
   })
+  test('F=0 yields minimalPos="0"', () => {
+    const r = solve({ minterms: [], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('0')
+  })
+  test('F=A yields minimalPos="(A)"', () => {
+    const r = solve({ minterms: [2, 3], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(A)')
+  })
+  test('F=!A yields minimalPos="(!A)"', () => {
+    const r = solve({ minterms: [0, 1], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(!A)')
+  })
+  test('F=A·B yields two clauses joined by "·"', () => {
+    const r = solve({ minterms: [3], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(A)·(B)')
+  })
+  test('F=A+B yields one clause with " + " literal separator', () => {
+    const r = solve({ minterms: [1, 2, 3], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(A + B)')
+  })
+  test('F=!A·!B yields "(A + B)" alternative? no: minterm=0', () => {
+    const r = solve({ minterms: [0], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(!B)·(!A)')
+  })
+  test('POS XOR (A^B) yields two clauses with mixed polarity', () => {
+    const r = solve({ minterms: [1, 2], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('(A + B)·(!A + !B)')
+  })
 })

@@ -29,9 +29,10 @@ const NAMES = [
   'sll',
   'srl'
 ]
-for (const name of NAMES)
+NAMES.map(name =>
   test(`visual.datapath.${name}`, async ({ page }) => {
     await page.goto(`/mips/${name}`)
     await expect(page.locator('h1')).toContainText(name)
     await expect(page).toHaveScreenshot(`mips-${name}.png`, { maxDiffPixelRatio: 0.05 })
   })
+)

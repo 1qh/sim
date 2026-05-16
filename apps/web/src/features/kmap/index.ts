@@ -30,7 +30,7 @@ interface UserGrouping {
   cells: number[]
   label?: string
 }
-const GRAY_CODE = (n: number): number[] => {
+const grayCode = (n: number): number[] => {
   const out: number[] = []
   for (let i = 0; i < 1 << n; i += 1) out.push(i ^ (i >>> 1))
   return out
@@ -89,5 +89,5 @@ const isUserCoverComplete = (impl: Implicant[], minterms: number[]): boolean => 
   for (const i of impl) for (const c of i.covers) covered.add(c)
   return minterms.every(m => covered.has(m))
 }
-export { buildGrid, GRAY_CODE, isUserCoverComplete, kmap, validateGrouping }
+export { buildGrid, grayCode, isUserCoverComplete, kmap, validateGrouping }
 export type { Geometry, KmapGrid, KmapResult, UserGrouping }

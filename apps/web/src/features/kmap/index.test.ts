@@ -10,16 +10,16 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { describe, expect, test } from 'bun:test'
-import { buildGrid, GRAY_CODE, isUserCoverComplete, kmap, validateGrouping } from './index'
-describe('GRAY_CODE', () => {
+import { buildGrid, grayCode, isUserCoverComplete, kmap, validateGrouping } from './index'
+describe('grayCode', () => {
   test('1-bit', () => {
-    expect(GRAY_CODE(1)).toEqual([0, 1])
+    expect(grayCode(1)).toEqual([0, 1])
   })
   test('2-bit', () => {
-    expect(GRAY_CODE(2)).toEqual([0, 1, 3, 2])
+    expect(grayCode(2)).toEqual([0, 1, 3, 2])
   })
   test('3-bit', () => {
-    expect(GRAY_CODE(3)).toEqual([0, 1, 3, 2, 6, 7, 5, 4])
+    expect(grayCode(3)).toEqual([0, 1, 3, 2, 6, 7, 5, 4])
   })
 })
 describe('kmap 2D', () => {
