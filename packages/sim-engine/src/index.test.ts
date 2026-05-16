@@ -191,7 +191,7 @@ describe('coverage ratchet for codec', () => {
   })
   test('applyDiff with malformed patch throws with applyPatch prefix', () => {
     const state = { x: 1 }
-    const bad = [{ op: 'replace', path: '/nonexistent/deep/path', value: 9 }]
+    const bad = [{ op: 'replace' as const, path: '/nonexistent/deep/path', value: 9 }]
     expect(() => applyDiff(state, bad)).toThrow(/applyPatch failed/u)
   })
   test('hashBytes deterministic for same input', () => {
