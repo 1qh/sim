@@ -187,3 +187,9 @@ describe('boolean coverage ratchet', () => {
     expect(evalExpr(e, { A: 0, B: 0, C: 0, D: 1 })).toBe(1)
   })
 })
+describe('boolean POS edge — empty maxterms', () => {
+  test('maxterms=[] yields minimalPos="1"', () => {
+    const r = solve({ minterms: [0, 1, 2, 3], vars: ['A', 'B'] })
+    expect(r.minimalPos).toBe('1')
+  })
+})
