@@ -98,6 +98,9 @@ for (const c of [
 for (const c of ['v5-basic', 'v5-wrap', 'v5-petrick', 'v6-basic', 'v6-wrap', 'v6-multi-output'])
   GATES.push({ cmd: featureTest('kmap'), name: `test.e2e.kmap-3d.${c}` })
 GATES.push({ cmd: featureTest('share'), name: 'test.e2e.share' })
+GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts', name: 'test.convex' })
+GATES.push({ cmd: 'cd apps/backend && bun test convex/auth.live.test.ts', name: 'test.auth-flow' })
+GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts -t rate', name: 'test.rate-limit' })
 GATES.push({ cmd: featureTest('compare'), name: 'test.e2e.compare' })
 for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'foundation', 'share']) {
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `anon: ${r} `), name: `test.e2e.anon.${r}` })
