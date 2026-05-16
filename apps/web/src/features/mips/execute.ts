@@ -71,7 +71,7 @@ const executeR = (state: MachineState, ins: Instruction & { type: 'R' }): Machin
   const rt = readRegister(state, ins.rt)
   const rsSigned = signedNumber(rs)
   const rtSigned = signedNumber(rt)
-  let result = 0
+  let result: number
   switch (ins.name) {
     case 'add':
       result = addU32(rs, rt)

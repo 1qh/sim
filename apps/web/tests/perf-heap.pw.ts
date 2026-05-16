@@ -17,7 +17,7 @@ const CYCLES = [
   { name: 'share-cycle', path: '/s/abc123' }
 ]
 const MAX_GROWTH_BYTES = 5_000_000
-for (const { name, path } of CYCLES)
+CYCLES.map(({ name, path }) =>
   test(`perf.heap-leak.${name}: ${path} repeated navigation no leak`, async ({ page }) => {
     await page.goto(path)
     await page.evaluate(() => ('gc' in window ? (window as unknown as { gc: () => void }).gc() : undefined))
@@ -35,3 +35,4 @@ for (const { name, path } of CYCLES)
     const growth = after - before
     expect(growth).toBeLessThan(MAX_GROWTH_BYTES)
   })
+)
