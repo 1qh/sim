@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/require-await, no-namespace */
+/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/require-await */
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'

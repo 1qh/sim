@@ -7,17 +7,21 @@
  * To regenerate, run `npx convex dev`.
  * @module
  */
+
 import type * as auth from "../auth.js";
 import type * as snapshots from "../snapshots.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
+
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   snapshots: typeof snapshots;
 }>;
+
 /**
  * A utility for referencing Convex functions in your app's public API.
  *
@@ -30,6 +34,7 @@ export declare const api: FilterApi<
   typeof fullApi,
   FunctionReference<any, "public">
 >;
+
 /**
  * A utility for referencing Convex functions in your app's internal API.
  *
@@ -42,4 +47,5 @@ export declare const internal: FilterApi<
   typeof fullApi,
   FunctionReference<any, "internal">
 >;
+
 export declare const components: {};
