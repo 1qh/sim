@@ -141,7 +141,7 @@ for (const p of ['bits', 'boolean', 'sim-engine'])
 GATES.push({ cmd: 'curl -sf http://127.0.0.1:3220/version', name: 'verify.local' })
 GATES.push({ cmd: liveCurl('/'), name: 'verify.bearer' })
 GATES.push({
-  cmd: '(rm -rf node_modules && bun i >/dev/null 2>&1 && bun test packages/bits/src/index.test.ts >/dev/null 2>&1)',
+  cmd: 'D=$(mktemp -d) && git clone -q --depth 1 "file://$(git rev-parse --show-toplevel)" "$D" && (cd "$D" && bun i >/dev/null 2>&1 && bun test packages/bits/src/index.test.ts >/dev/null 2>&1); R=$?; rm -rf "$D"; exit $R',
   name: 'verify.fresh'
 })
 for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'share'])

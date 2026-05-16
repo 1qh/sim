@@ -20,9 +20,6 @@
   "overrides": {
     "@auth/core": "0.41.x"
   },
-  "dependencies": {
-    "pure-rand": "^8.4.0"
-  },
   "devDependencies": {
     "@axe-core/playwright": "latest",
     "@logtape/logtape": "latest",
