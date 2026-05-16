@@ -17,7 +17,7 @@ import process from 'node:process'
 const mode = argv[2] ?? 'green'
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const ledgerPath = `${repoRoot}/ledger.jsonl`
-const treeRaw = (await $`git ls-files -s`.text()) + (await $`git diff`.text())
+const treeRaw = (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*"`.text()) + (await $`git diff -- ":!apps/backend/convex/_generated/*"`.text())
 const tree = createHash('sha256').update(treeRaw).digest('hex').slice(0, 16)
 const text = await file(ledgerPath)
   .text()

@@ -29,7 +29,7 @@ if (!gate || cmd.length === 0) {
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const ledgerPath = `${repoRoot}/ledger.jsonl`
 const commit = (await $`git rev-parse HEAD`.text()).trim()
-const treeRaw = (await $`git ls-files -s`.text()) + (await $`git diff`.text())
+const treeRaw = (await $`git ls-files -s -- ":!apps/backend/convex/_generated/*"`.text()) + (await $`git diff -- ":!apps/backend/convex/_generated/*"`.text())
 const tree = createHash('sha256').update(treeRaw).digest('hex').slice(0, 16)
 const start = performance.now()
 const proc = spawn(cmd, { stderr: 'pipe', stdout: 'pipe' })
