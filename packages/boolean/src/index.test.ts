@@ -270,7 +270,7 @@ describe('boolean qm helpers', () => {
     expect(sopExpression([], ['A', 'B'])).toBe('0')
   })
   test('sopExpression for all-dash implicant is "1"', () => {
-    expect(sopExpression([{ bits: '--', mintermsCovered: [0, 1, 2, 3] }], ['A', 'B'])).toBe('1')
+    expect(sopExpression([{ bits: '--', covers: [0, 1, 2, 3] }], ['A', 'B'])).toBe('1')
   })
   test('posExpression for empty maxterms is "1"', () => {
     expect(posExpression([], [], 2, ['A', 'B'])).toBe('1')
