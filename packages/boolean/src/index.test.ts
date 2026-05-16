@@ -405,9 +405,10 @@ describe('boolean solve input shapes', () => {
     expect(r.minterms).toEqual([3])
     expect(r.dontCares).toEqual([2])
   })
-  test('width > 4 skips POS', () => {
+  test('width=5 POS computed by handroll Q-M', () => {
     const r = solve({ minterms: [0], width: 5 })
-    expect(r.minimalPos).toBe('(skipped: POS for width > 4 deferred to espresso heuristic)')
+    expect(r.minimalPos.startsWith('(')).toBe(true)
+    expect(r.minimalPos).toContain('!A')
     expect(r.width).toBe(5)
   })
   test('expression input rebuilds truthTable from expr', () => {
@@ -477,13 +478,13 @@ describe('boolean targeted mutation kills', () => {
     expect(r.minterms).toEqual([1, 2, 3])
     expect(r.maxterms).toEqual([0])
   })
-  test('width=4 POS still computed (boundary <= 4)', () => {
+  test('width=4 POS computed', () => {
     const r = solve({ minterms: [0], width: 4 })
     expect(r.minimalPos.startsWith('(')).toBe(true)
   })
-  test('width=5 POS skipped', () => {
-    const r = solve({ minterms: [0], width: 5 })
-    expect(r.minimalPos).toContain('skipped')
+  test('width=6 POS computed by handroll Q-M', () => {
+    const r = solve({ minterms: [0, 63], width: 6 })
+    expect(r.minimalPos.startsWith('(')).toBe(true)
   })
   test('truthTable length matches 2^width for minterm input', () => {
     expect(solve({ minterms: [3], width: 2 }).truthTable).toHaveLength(4)

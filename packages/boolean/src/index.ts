@@ -13,6 +13,7 @@
 import type { Expr } from './ast'
 import type { Implicant } from './qm'
 import { evalExpr, maxterms, minterms, sortedVars, truthTable } from './ast'
+import { espressoPos } from './espresso'
 import { parse } from './parser'
 import { findEssentialPrimes, findPrimeImplicants, minimize, posExpression, sopExpression } from './qm'
 interface SolveInput {
@@ -77,10 +78,7 @@ const solve = (input: SolveInput): SolveResult => {
   const essentialPrimeImplicants = findEssentialPrimes(primes, mins)
   const minimalSopImplicants = minimize(mins, dontCares, width)
   const minimalSop = sopExpression(minimalSopImplicants, vars)
-  const minimalPos =
-    width <= 4
-      ? posExpression(maxs, dontCares, width, vars)
-      : '(skipped: POS for width > 4 deferred to espresso heuristic)'
+  const minimalPos = width <= 4 ? posExpression(maxs, dontCares, width, vars) : espressoPos(maxs, dontCares, width, vars)
   const tt: (0 | 1)[] = []
   if (expr === undefined) {
     const rows = 2 ** width
