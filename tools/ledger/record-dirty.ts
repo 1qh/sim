@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/performance/noNamespaceImport: noise */
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
-/* eslint-disable no-console, no-await-in-loop, no-continue, no-empty */
+/* eslint-disable no-console, no-await-in-loop, no-continue */
 import { $, argv, file } from 'bun'
 import { createHash } from 'node:crypto'
 import process from 'node:process'
@@ -34,7 +34,9 @@ for (const line of text.split('\n')) {
   try {
     const r = JSON.parse(line) as Row
     if (r.tree === tree) byGate.set(r.gate, r)
-  } catch {}
+  } catch {
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: malformed rows skipped silently
+  }
 }
 const explicit = argv.slice(2).filter(a => !a.startsWith('-'))
 const dirty =
