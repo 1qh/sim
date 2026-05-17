@@ -19,5 +19,5 @@
   "concurrency": 4,
   "timeoutMS": 30000,
   "incremental": true,
-  "incrementalFile": ".stryker-incremental.json"
+  "incrementalFile": "/tmp/stryker-incremental-bits.json"
 }
