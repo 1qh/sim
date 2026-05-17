@@ -10,15 +10,69 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import Link from 'next/link'
-const Page = () => (
-  <main className='flex min-h-screen flex-col gap-8 p-8'>
-    <h1 className='text-3xl font-bold'>Compare</h1>
-    <p className='text-muted-foreground'>
-      Side-by-side execution-step diff with synchronized step + register + memory + control comparison.
-    </p>
-    <Link className='text-sm underline' href='/'>
-      back
-    </Link>
-  </main>
-)
+import type { ControlSignals, Instruction, RegisterNumber } from '@/features/mips/types'
+import CompareIsland from '@/features/compare/compare-island'
+import { criticalComponents, criticalPath } from '@/features/critical-path'
+import { controlFor } from '@/features/mips'
+const build = (name: string): Instruction => {
+  if (name === 'addi' || name === 'lw' || name === 'sw' || name === 'ori' || name === 'andi')
+    return {
+      imm: 4,
+      name: name as Instruction['name'],
+      opcode: name === 'lw' ? 0x23 : name === 'sw' ? 0x2b : name === 'ori' ? 0x0d : name === 'andi' ? 0x0c : 0x08,
+      rs: 1 as RegisterNumber,
+      rt: 2 as RegisterNumber,
+      type: 'I'
+    }
+  if (name === 'beq' || name === 'bne')
+    return {
+      imm: 2,
+      name,
+      opcode: name === 'beq' ? 0x04 : 0x05,
+      rs: 1 as RegisterNumber,
+      rt: 2 as RegisterNumber,
+      type: 'I'
+    }
+  const functMap: Record<string, number> = { add: 0x20, and: 0x24, nor: 0x27, or: 0x25, slt: 0x2a, sub: 0x22 }
+  return {
+    funct: functMap[name] ?? 0x20,
+    name: name as Instruction['name'],
+    rd: 3 as RegisterNumber,
+    rs: 1 as RegisterNumber,
+    rt: 2 as RegisterNumber,
+    shamt: 0,
+    type: 'R'
+  }
+}
+const diffControl = (a: ControlSignals, b: ControlSignals): string[] => {
+  const out: string[] = []
+  for (const k of Object.keys(a) as (keyof ControlSignals)[]) if (a[k] !== b[k]) out.push(`${k}: ${a[k]} → ${b[k]}`)
+  return out
+}
+const pane = (name: string) => {
+  const ins = build(name)
+  return {
+    control: controlFor(ins),
+    critical: criticalComponents(ins, 'timing'),
+    criticalDelayPs: criticalPath(ins, 'timing').delayPs,
+    name
+  }
+}
+const Page = async ({ searchParams }: { searchParams: Promise<{ l?: string; r?: string }> }) => {
+  const sp = await searchParams
+  const left = pane(sp.l ?? 'add')
+  const right = pane(sp.r ?? 'addi')
+  return (
+    <main aria-label='compare' className='flex min-h-screen flex-col gap-8 p-8'>
+      <h1 className='text-3xl font-bold'>
+        Compare · {left.name} vs {right.name}
+      </h1>
+      <p className='text-muted-foreground'>Side-by-side 3D datapath with synchronized step and control-signal diff.</p>
+      <CompareIsland controlDiff={diffControl(left.control, right.control)} left={left} right={right} />
+      <Link className='text-sm underline' href='/'>
+        back
+      </Link>
+    </main>
+  )
+}
 export default Page
