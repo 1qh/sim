@@ -105,6 +105,85 @@ add(
   pageMissing.length === 0,
   pageMissing.length === 0 ? '17/17 wired' : `missing: ${pageMissing.join(',')}`
 )
+const asmGrammar = await read('apps/web/src/features/datapath/asm-grammar.ts')
+add(
+  'asm editor MIPS grammar (ASM-EDITOR.md)',
+  asmGrammar.length > 0 && /\.data|\.text|monarch|chevrotain|tokeniz/iu.test(asmGrammar),
+  asmGrammar.length > 0 ? 'present' : 'missing apps/web/src/features/datapath/asm-grammar.ts'
+)
+const mipsSrc = await Promise.all(
+  ['apps/web/src/features/mips', 'apps/web/src/features/datapath'].map(async d =>
+    (
+      await $`git grep -lIE "breakpoint|watchpoint|runToCursor|stepBack|syscall|speedControl" -- ${d}`.nothrow().text()
+    ).trim()
+  )
+)
+const execOk = mipsSrc.some(s => s.length > 0)
+add(
+  'execution/debug controls: breakpoint+watchpoint+run-to-cursor+step-back+syscall (REQUIREMENTS.md)',
+  execOk,
+  execOk ? 'present' : 'missing all debug/exec/syscall code'
+)
+const pipePage = await read('apps/web/src/app/pipeline/[program]/page.tsx')
+add(
+  'pipeline stage-time diagram UI (PIPELINE.md)',
+  /StageMatrix|PipelineDiagram|stage-time|<table|gridcell/iu.test(pipePage) && pipePage.length > 1500,
+  /StageMatrix|PipelineDiagram|stage-time|<table|gridcell/iu.test(pipePage) && pipePage.length > 1500
+    ? 'diagram present'
+    : 'stub page, no diagram'
+)
+const cmpPage = await read('apps/web/src/app/compare/page.tsx')
+const cmpIsland = exists('apps/web/src/features/compare/compare-island.tsx')
+add(
+  'compare dual 3D scene (COMPARE.md)',
+  cmpIsland || /DatapathIsland[\s\S]*DatapathIsland|split-pane|two.*scene/iu.test(cmpPage),
+  cmpIsland ? 'present' : 'no dual-scene compare island'
+)
+const learnDir = `${repoRoot}/apps/web/content/learn`
+const exDir = `${repoRoot}/apps/web/content/examples`
+const learnMdx = existsSync(learnDir)
+  ? (await $`find ${learnDir} -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
+  : []
+const mipsEx = existsSync(`${exDir}/mips`)
+  ? (await $`find ${exDir}/mips -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
+  : []
+const kmapEx = existsSync(`${exDir}/kmap`)
+  ? (await $`find ${exDir}/kmap -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
+  : []
+add('learn MDX pages >= 17 (LEARN.md/CONTENT-DESIGN.md)', learnMdx.length >= 17, `${learnMdx.length} pages`)
+add('MIPS example library >= 20 (adr/example-library.md)', mipsEx.length >= 20, `${mipsEx.length} examples`)
+add('K-map example library >= 20 (adr/example-library.md)', kmapEx.length >= 20, `${kmapEx.length} examples`)
+const killer = await read('apps/web/content/learn/cross-link/derive-control-in-kmap.mdx')
+add(
+  'killer cross-link demo derive-control-in-kmap (LEARN.md headline)',
+  killer.length > 0 && /datapath/iu.test(killer) && /kmap|k-map/iu.test(killer),
+  killer.length > 0 ? 'present' : 'missing'
+)
+const palette = (
+  await $`git grep -lIE "CommandPalette|command-palette|Cmd\\+K|cmdk" -- apps/web/src`.nothrow().text()
+).trim()
+add('command palette Cmd+K (adr/command-palette.md)', palette.length > 0, palette.length > 0 ? 'present' : 'missing')
+const bookmarks = (
+  await $`git grep -lIE "cameraBookmark|CameraBookmark|useBookmark|bookmark" -- apps/web/src packages/three-kit/src`
+    .nothrow()
+    .text()
+).trim()
+add('camera bookmarks (UX-DOCTRINE.md)', bookmarks.length > 0, bookmarks.length > 0 ? 'present' : 'missing')
+for (const r of [
+  'apps/web/src/app/me/page.tsx',
+  'apps/web/src/app/learn/[slug]/page.tsx',
+  'apps/web/src/app/api/og/[type]/[hash]/route.ts',
+  'apps/web/src/app/accessibility/page.tsx',
+  'apps/web/src/app/privacy/page.tsx',
+  'apps/web/src/app/terms/page.tsx',
+  'apps/web/src/app/api/healthz/route.ts',
+  'apps/web/src/app/sitemap.ts'
+])
+  add(
+    `route ${r.replace('apps/web/src/app', '').replace('/page.tsx', '').replace('/route.ts', '')}`,
+    exists(r),
+    exists(r) ? 'present' : 'missing'
+  )
 const { GATES } = await import('../../ledger/record-all-gates')
 const NOOP = /^\s*(?:true|:|echo\b|exit 0)\s*$/u
 const noopGates = GATES.filter(g => NOOP.test(g.cmd) || g.cmd.includes('|| true') || g.cmd.includes('; true'))
