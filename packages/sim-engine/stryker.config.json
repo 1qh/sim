@@ -7,10 +7,16 @@
     "command": "bun test src/index.test.ts src/replay.test.ts"
   },
   "mutate": ["src/codec.ts", "src/machine.ts", "src/rng.ts"],
-  "thresholds": { "high": 90, "low": 70, "break": 70 },
+  "thresholds": {
+    "high": 90,
+    "low": 70,
+    "break": 70
+  },
   "checkers": [],
   "coverageAnalysis": "off",
   "tempDirName": ".stryker-tmp",
   "concurrency": 4,
-  "timeoutMS": 60000
+  "timeoutMS": 60000,
+  "incremental": true,
+  "incrementalFile": ".stryker-incremental.json"
 }
