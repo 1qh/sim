@@ -19,7 +19,8 @@ const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/lear
 const PERF_MIN = 0.88
 const A11Y_MIN = 0.97
 const routeArg = argv[2]
-const cacheKey = process.env.LEDGER_TREE ?? 'nokey'
+const envTree = process.env.LEDGER_TREE
+const cacheKey = envTree ?? 'manual'
 const cacheDir = `/tmp/lh-cache-${cacheKey}`
 const lockDir = `${cacheDir}.lock`
 const slug = (p: string): string => p.replaceAll('/', '_') || '_root'

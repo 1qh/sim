@@ -113,7 +113,7 @@ for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'founda
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `anon: ${r} `), name: `test.e2e.anon.${r}` })
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `a11y: ${r} `), name: `a11y.axe.${r}` })
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `keyboard: ${r} `), name: `a11y.keyboard.${r}` })
-  GATES.push({ cmd: 'cd apps/web && bunx size-limit', name: `perf.bundle-size.${r}` })
+  GATES.push({ cmd: 'cd apps/web && bun scripts/size-limit-cached.ts', name: `perf.bundle-size.${r}` })
   GATES.push({ cmd: `cd apps/web && bun scripts/lighthouse.ts ${lhPath[r]}`, name: `perf.lighthouse.${r}` })
 }
 for (const v of ['reduced-motion', 'high-contrast', 'color-blind'])
