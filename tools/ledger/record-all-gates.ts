@@ -33,6 +33,7 @@ GATES.push({ cmd: lint('agent-first-output.ts'), name: 'lint.agent-first-output'
 GATES.push({ cmd: lint('cloudflare-bearer.ts'), name: 'lint.cloudflare-bearer' })
 GATES.push({ cmd: lint('no-dangerously-set-inner-html.ts'), name: 'lint.no-dangerous-html' })
 GATES.push({ cmd: lint('no-third-party-trackers.ts'), name: 'lint.no-third-party-trackers' })
+GATES.push({ cmd: lintSpec('vision-coverage.ts'), name: 'spec.vision-coverage' })
 GATES.push({ cmd: lintSpec('datapath-diff.ts'), name: 'spec.datapath' })
 GATES.push({ cmd: lintSpec('isa-diff.ts'), name: 'spec.isa' })
 GATES.push({ cmd: lintSpec('stack-presence.ts'), name: 'spec.stack' })
