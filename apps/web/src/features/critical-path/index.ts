@@ -95,5 +95,31 @@ const longestProgramPath = (instructions: Instruction[], mode: 'structural' | 't
   }
   return best
 }
-export { buildStructural, criticalPath, DELAYS_PS, longestProgramPath, sumDelay }
+const SEGMENT_COMPONENTS: Record<'IF' | 'WB' | Segment, readonly string[]> = {
+  ALU: ['ALU'],
+  Branch: ['BranchAdder'],
+  IF: ['PC', 'IM', 'IR'],
+  ImmExtend: ['SE'],
+  MemAccess: ['DM'],
+  MuxALUSrc: ['ALUSrcMux'],
+  MuxMemToReg: ['MemToRegMux'],
+  MuxPCSrc: ['PCSrcMux'],
+  MuxRegDst: ['RegDstMux'],
+  PCIncrement: ['Add4'],
+  PCMux: ['PCSrcMux'],
+  RegFileRead: ['RF'],
+  RegFileWrite: ['RF', 'WB'],
+  SignExtend: ['SE'],
+  WB: ['WB']
+}
+const criticalComponents = (instruction: Instruction, mode: 'structural' | 'timing' = 'structural'): string[] => {
+  const { edges } = criticalPath(instruction, mode)
+  const ids = new Set<string>()
+  for (const e of edges) {
+    for (const id of SEGMENT_COMPONENTS[e.from]) ids.add(id)
+    for (const id of SEGMENT_COMPONENTS[e.to]) ids.add(id)
+  }
+  return [...ids]
+}
+export { buildStructural, criticalComponents, criticalPath, DELAYS_PS, longestProgramPath, SEGMENT_COMPONENTS, sumDelay }
 export type { CriticalPath, PathEdge, Segment }

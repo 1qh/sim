@@ -13,6 +13,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
+import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
@@ -76,6 +77,8 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
   const decoded = decodeInstruction(word)
   const step = executeStep(seeded, word, decoded)
   const ctl = controlFor(ins)
+  const critical = criticalComponents(ins, 'timing')
+  const criticalDelayPs = criticalPath(ins, 'timing').delayPs
   return (
     <main aria-label={`mips-${name}`} className='flex min-h-screen flex-col gap-8 p-8'>
       <h1 className='text-3xl font-bold'>MIPS · {name}</h1>
@@ -93,7 +96,7 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
           MemRead={ctl.MemRead} MemWrite={ctl.MemWrite} Branch={ctl.Branch} BranchNE={ctl.BranchNE} ALUOp={ctl.ALUOp}
         </div>
       </section>
-      <DatapathIsland control={ctl} name={name} />
+      <DatapathIsland control={ctl} critical={critical} criticalDelayPs={criticalDelayPs} name={name} />
       <DatapathA11yProxies activeComponents={componentsForPaths(activePaths(ctl, 'EX'))} control={ctl} name={name} />
       <Link className='text-sm underline' href='/mips'>
         back
