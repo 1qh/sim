@@ -13,6 +13,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { kmap } from '@/features/kmap'
+import KmapIsland from '@/features/kmap/scene/kmap-island'
+const buildTruthTable = (vars: number, minterms: readonly number[], dontCares: readonly number[]): (0 | 1 | 'X')[] => {
+  const mins = new Set(minterms)
+  const dcs = new Set(dontCares)
+  return Array.from({ length: 2 ** vars }, (_, i) => (dcs.has(i) ? 'X' : mins.has(i) ? 1 : 0))
+}
 const CASES: Record<string, { dontCares?: number[]; minterms?: number[]; vars: string[] }> = {
   v2: { minterms: [0, 1, 2], vars: ['A', 'B'] },
   v3: { minterms: [1, 3, 5, 7], vars: ['A', 'B', 'C'] },
@@ -40,6 +46,12 @@ const Page = async ({ params }: { params: Promise<{ case: string }> }) => {
         <div>prime implicants: {result.primeImplicants.length}</div>
         <div>essential PIs: {result.essentialPrimeImplicants.length}</div>
       </section>
+      {config.vars.length >= 5 ? (
+        <KmapIsland
+          truthTable={buildTruthTable(config.vars.length, config.minterms ?? [], config.dontCares ?? [])}
+          vars={config.vars.length}
+        />
+      ) : undefined}
       <Link className='text-sm underline' href='/kmap'>
         back
       </Link>
