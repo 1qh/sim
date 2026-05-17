@@ -16,7 +16,15 @@ const DatapathScene = dynamic(async () => import('./datapath-scene'), {
   loading: () => <div className='h-[420px] w-full animate-pulse rounded-lg border bg-muted/30' />,
   ssr: false
 })
-const DatapathIsland = ({ name, control }: { control: ControlSignals; name: string }) => (
-  <DatapathScene control={control} name={name} />
-)
+const DatapathIsland = ({
+  name,
+  control,
+  critical,
+  criticalDelayPs
+}: {
+  control: ControlSignals
+  critical: readonly string[]
+  criticalDelayPs: number
+  name: string
+}) => <DatapathScene control={control} critical={critical} criticalDelayPs={criticalDelayPs} name={name} />
 export default DatapathIsland

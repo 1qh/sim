@@ -12,7 +12,7 @@
 /* eslint-disable @typescript-eslint/max-params */
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
-import { criticalPath, DELAYS_PS, longestProgramPath, sumDelay } from './index'
+import { criticalComponents, criticalPath, DELAYS_PS, longestProgramPath, sumDelay } from './index'
 const r = (rd: number, rs: number, rt: number, name = 'add' as const): Instruction => ({
   funct: 0x20,
   name,
@@ -68,6 +68,18 @@ describe('critical path timing', () => {
   test('every segment delay defined', () => {
     const cp = criticalPath(lw(1, 2, 0), 'timing')
     for (const e of cp.edges) expect(DELAYS_PS[e.from]).toBeGreaterThan(0)
+  })
+})
+describe('criticalComponents', () => {
+  test('lw critical path includes memory + writeback components', () => {
+    const ids = criticalComponents(lw(1, 2, 0))
+    expect(ids).toContain('DM')
+    expect(ids).toContain('WB')
+    expect(ids).toContain('ALU')
+    expect(ids).toContain('PC')
+  })
+  test('R-type excludes ALU-source mux (no immediate)', () => {
+    expect(criticalComponents(r(3, 1, 2))).not.toContain('ALUSrcMux')
   })
 })
 describe('longestProgramPath', () => {
