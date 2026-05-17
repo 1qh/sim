@@ -18,7 +18,7 @@ const lintSpec = (s: string): string => `bun tools/lint/spec-of-code/${s}`
 const pkgTest = (p: string): string => `bun test packages/${p}/src/index.test.ts`
 const pkgTsc = (p: string): string => `cd packages/${p} && bunx tsc --noEmit`
 const featureTest = (p: string): string => `bun test apps/web/src/features/${p}`
-const pwTest = (file: string, grep: string): string => `cd apps/web && bunx playwright test tests/${file} -g "${grep}"`
+const pwTest = (file: string, grep: string): string => `cd apps/web && bun scripts/pw-cached.ts ${file} "${grep}"`
 const liveCurl = (path: string): string => `/usr/bin/curl -sf https://sim.noboil.dev${path}`
 const GATES: Gate[] = []
 GATES.push({ cmd: 'bun run fix', name: 'format' })
