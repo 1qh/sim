@@ -1,0 +1,11 @@
+# Derive Control in K-map
+
+The Control unit is nine Boolean functions of the opcode bits. Each can be minimized in a K-map — and the result is the actual logic in the datapath. Group the cells, then watch the same function fire as instructions step through the datapath.
+
+<KmapView vars={4} minterms={[0,1,2,5,8,9]} />
+
+<DatapathView instruction="add" />
+
+---
+
+[← kmap-hazard-analysis](/learn/kmap-hazard-analysis)

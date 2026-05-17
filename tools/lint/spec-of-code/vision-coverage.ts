@@ -153,7 +153,7 @@ const kmapEx = existsSync(`${exDir}/kmap`)
 add('learn MDX pages >= 17 (LEARN.md/CONTENT-DESIGN.md)', learnMdx.length >= 17, `${learnMdx.length} pages`)
 add('MIPS example library >= 20 (adr/example-library.md)', mipsEx.length >= 20, `${mipsEx.length} examples`)
 add('K-map example library >= 20 (adr/example-library.md)', kmapEx.length >= 20, `${kmapEx.length} examples`)
-const killer = await read('apps/web/content/learn/cross-link/derive-control-in-kmap.mdx')
+const killer = await read('apps/web/content/learn/cross-link-derive-control-in-kmap.mdx')
 add(
   'killer cross-link demo derive-control-in-kmap (LEARN.md headline)',
   killer.length > 0 && /datapath/iu.test(killer) && /kmap|k-map/iu.test(killer),
@@ -172,7 +172,7 @@ add('camera bookmarks (UX-DOCTRINE.md)', bookmarks.length > 0, bookmarks.length 
 for (const r of [
   'apps/web/src/app/me/page.tsx',
   'apps/web/src/app/learn/[slug]/page.tsx',
-  'apps/web/src/app/api/og/[type]/[hash]/route.ts',
+  'apps/web/src/app/api/og/[type]/[hash]/route.tsx',
   'apps/web/src/app/accessibility/page.tsx',
   'apps/web/src/app/privacy/page.tsx',
   'apps/web/src/app/terms/page.tsx',
