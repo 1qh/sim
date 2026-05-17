@@ -72,6 +72,39 @@ add(
   exists('apps/web/src/features/datapath/a11y/proxies.tsx'),
   exists('apps/web/src/features/datapath/a11y/proxies.tsx') ? 'present' : 'missing'
 )
+const LOCKED_FLOOR_ISA = [
+  'add',
+  'addi',
+  'and',
+  'andi',
+  'beq',
+  'bne',
+  'j',
+  'lui',
+  'lw',
+  'nor',
+  'or',
+  'ori',
+  'sll',
+  'slt',
+  'srl',
+  'sub',
+  'sw'
+] as const
+const golden = await read('apps/web/src/features/mips/golden.test.ts')
+const goldenMissing = LOCKED_FLOOR_ISA.filter(m => !new RegExp(`['"\`]${m}['"\`]`, 'u').test(golden))
+add(
+  'golden traces cover all 17 locked-floor instructions',
+  goldenMissing.length === 0,
+  goldenMissing.length === 0 ? '17/17 present' : `missing: ${goldenMissing.join(',')}`
+)
+const datapathPage = await read('apps/web/src/app/mips/[name]/page.tsx')
+const pageMissing = LOCKED_FLOOR_ISA.filter(m => !new RegExp(`'${m}'`, 'u').test(datapathPage))
+add(
+  'datapath page animates all 17 locked-floor instructions',
+  pageMissing.length === 0,
+  pageMissing.length === 0 ? '17/17 wired' : `missing: ${pageMissing.join(',')}`
+)
 const failed = checks.filter(c => !c.ok)
 for (const c of checks) console.log(`${c.ok ? 'ok ' : 'XX '}${c.deliverable} — ${c.why}`)
 if (failed.length > 0) {
