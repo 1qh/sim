@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { analyzePipeline } from '@/features/pipeline'
+import StageMatrix from '@/features/pipeline/stage-matrix'
 const r = (rd: number, rs: number, rt: number, name: 'add' | 'sub' = 'add', funct = 0x20): Instruction => ({
   funct,
   name,
@@ -56,14 +57,7 @@ const Page = async ({ params }: { params: Promise<{ program: string }> }) => {
   return (
     <main aria-label={`pipeline-${program}`} className='flex min-h-screen flex-col gap-8 p-8'>
       <h1 className='text-3xl font-bold'>Pipeline · {program}</h1>
-      <section aria-label='pipeline-report' className='space-y-1 rounded-lg border p-4 font-mono text-sm'>
-        <div>instruction count: {report.instructionCount}</div>
-        <div>cycles: {report.cycleCount}</div>
-        <div>stalls: {report.stalls}</div>
-        <div>CPI: {report.cpi.toFixed(2)}</div>
-        <div>hazards: {report.hazards.map(h => h.kind).join(', ') || 'none'}</div>
-        <div>forwarding: {report.forwarding.length}</div>
-      </section>
+      <StageMatrix report={report} />
       <Link className='text-sm underline' href='/pipeline'>
         back
       </Link>
