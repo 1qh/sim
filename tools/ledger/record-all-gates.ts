@@ -167,6 +167,6 @@ GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.sim-pushed' })
 GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.simdocs-pushed' })
 GATES.push({ cmd: 'gh api /repos/1qh/sim/actions/permissions | grep -q enabled', name: 'infra.ci.actions-enabled' })
 GATES.push({ cmd: 'bun test packages apps/web apps/backend', name: 'infra.ci.green-on-main' })
-GATES.push({ cmd: 'true', name: 'infra.ledger.stale-empty' })
+GATES.push({ cmd: 'bun tools/ledger/stale-empty.ts', name: 'infra.ledger.stale-empty' })
 export { GATES }
 export type { Gate }
