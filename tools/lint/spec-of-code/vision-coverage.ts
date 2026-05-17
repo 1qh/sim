@@ -153,11 +153,82 @@ const kmapEx = existsSync(`${exDir}/kmap`)
 add('learn MDX pages >= 17 (LEARN.md/CONTENT-DESIGN.md)', learnMdx.length >= 17, `${learnMdx.length} pages`)
 add('MIPS example library >= 20 (adr/example-library.md)', mipsEx.length >= 20, `${mipsEx.length} examples`)
 add('K-map example library >= 20 (adr/example-library.md)', kmapEx.length >= 20, `${kmapEx.length} examples`)
+const BOILERPLATE_MIPS = /addi \$t0, \$zero, 1\s*\n\s*add \$t1, \$t0, \$t0/u
+const BOILERPLATE_KMAP = /<KmapView vars=\{3\} minterms=\{\[1,2,4,7\]\} \/>/u
+const countBoilerplate = async (files: string[], re: RegExp): Promise<number> => {
+  let n = 0
+  for (const f of files) if (re.test(await file(f).text())) n += 1
+  return n
+}
+const mipsBoiler = await countBoilerplate(mipsEx, BOILERPLATE_MIPS)
+const kmapBoiler = await countBoilerplate(kmapEx, BOILERPLATE_KMAP)
+add(
+  'MIPS examples are distinct real programs (not generator boilerplate)',
+  mipsBoiler === 0 && mipsEx.length >= 20,
+  mipsBoiler === 0 ? `${mipsEx.length} real` : `${mipsBoiler} boilerplate stubs`
+)
+add(
+  'K-map examples are distinct real exercises (not generator boilerplate)',
+  kmapBoiler === 0 && kmapEx.length >= 20,
+  kmapBoiler === 0 ? `${kmapEx.length} real` : `${kmapBoiler} boilerplate stubs`
+)
 const killer = await read('apps/web/content/learn/cross-link-derive-control-in-kmap.mdx')
 add(
-  'killer cross-link demo derive-control-in-kmap (LEARN.md headline)',
-  killer.length > 0 && /datapath/iu.test(killer) && /kmap|k-map/iu.test(killer),
-  killer.length > 0 ? 'present' : 'missing'
+  'killer cross-link demo is the operable 8-step sequence (LEARN.md headline)',
+  killer.includes('KmapInteractive') &&
+    /DatapathStep|DatapathView/u.test(killer) &&
+    /show .*datapath|cross-?link/iu.test(killer) &&
+    killer.length > 700,
+  killer.length > 700 ? 'interactive sequence' : 'thin stub'
+)
+const islandsSrc = await read('apps/web/src/features/learn/islands.tsx')
+const REQUIRED_ISLANDS = [
+  'DatapathView',
+  'DatapathStep',
+  'KmapView',
+  'KmapInteractive',
+  'PipelineDiagram',
+  'TruthTable',
+  'Signal',
+  'RegisterValue'
+]
+const missingIslands = REQUIRED_ISLANDS.filter(n => !new RegExp(`\\b${n}\\b`, 'u').test(islandsSrc))
+add(
+  'all 8 learn island components (LEARN.md)',
+  missingIslands.length === 0,
+  missingIslands.length === 0 ? '8/8' : `missing: ${missingIslands.join(',')}`
+)
+const editorMounted = (
+  await $`git grep -lIE "@sim/editor|EditorMount|monaco" -- apps/web/src/app/mips apps/web/src/features/datapath`
+    .nothrow()
+    .text()
+).trim()
+add(
+  'Monaco asm editor mounted in /mips product surface (ASM-EDITOR.md)',
+  editorMounted.length > 0,
+  editorMounted.length > 0 ? 'mounted' : 'grammar exists but editor not in product'
+)
+const kmapInteractive = (
+  await $`git grep -lIE "onPointer|drag|grouping|snap|undo" -- apps/web/src/features/kmap/scene apps/web/src/app/kmap`
+    .nothrow()
+    .text()
+).trim()
+add(
+  'K-map interactive grouping UI (KMAP.md/REQUIREMENTS.md)',
+  kmapInteractive.length > 0,
+  kmapInteractive.length > 0 ? 'present' : 'solver only, no grouping interaction'
+)
+const pipeIsland = await read('apps/web/src/features/pipeline/pipeline-island.tsx')
+const pipeInteractive =
+  pipeIsland.includes("'use client'") &&
+  pipeIsland.includes('useState') &&
+  /scrub|cycle/iu.test(pipeIsland) &&
+  /forwarding/iu.test(pipeIsland) &&
+  /stall/iu.test(pipeIsland)
+add(
+  'pipeline cycle-scrub + forwarding/stall toggles (PIPELINE.md)',
+  pipeInteractive,
+  pipeInteractive ? 'interactive island' : 'static diagram only — no scrub/toggle island'
 )
 const palette = (
   await $`git grep -lIE "CommandPalette|command-palette|Cmd\\+K|cmdk" -- apps/web/src`.nothrow().text()
