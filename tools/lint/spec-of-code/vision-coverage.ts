@@ -105,6 +105,14 @@ add(
   pageMissing.length === 0,
   pageMissing.length === 0 ? '17/17 wired' : `missing: ${pageMissing.join(',')}`
 )
+const { GATES } = await import('../../ledger/record-all-gates')
+const NOOP = /^\s*(?:true|:|echo\b|exit 0)\s*$/u
+const noopGates = GATES.filter(g => NOOP.test(g.cmd) || g.cmd.includes('|| true') || g.cmd.includes('; true'))
+add(
+  'zero no-op/placeholder ledger gates',
+  noopGates.length === 0,
+  noopGates.length === 0 ? `${GATES.length} gates all assert` : `no-op: ${noopGates.map(g => g.name).join(',')}`
+)
 const failed = checks.filter(c => !c.ok)
 for (const c of checks) console.log(`${c.ok ? 'ok ' : 'XX '}${c.deliverable} — ${c.why}`)
 if (failed.length > 0) {
