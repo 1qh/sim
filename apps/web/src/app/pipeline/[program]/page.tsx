@@ -13,8 +13,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
-import { analyzePipeline } from '@/features/pipeline'
-import StageMatrix from '@/features/pipeline/stage-matrix'
+import PipelineIsland from '@/features/pipeline/pipeline-island'
 const r = (rd: number, rs: number, rt: number, name: 'add' | 'sub' = 'add', funct = 0x20): Instruction => ({
   funct,
   name,
@@ -53,11 +52,10 @@ const Page = async ({ params }: { params: Promise<{ program: string }> }) => {
   const { program } = await params
   const config = PROGRAMS[program]
   if (!config) notFound()
-  const report = analyzePipeline(config.instructions, { takenBranches: config.takenBranches })
   return (
     <main aria-label={`pipeline-${program}`} className='flex min-h-screen flex-col gap-8 p-8'>
       <h1 className='text-3xl font-bold'>Pipeline · {program}</h1>
-      <StageMatrix report={report} />
+      <PipelineIsland instructions={config.instructions} />
       <Link className='text-sm underline' href='/pipeline'>
         back
       </Link>

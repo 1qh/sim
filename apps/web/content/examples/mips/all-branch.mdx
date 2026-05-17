@@ -7,9 +7,17 @@ tags: [mips, example]
 
 # all-branch
 
-MIPS example program: all-branch.
+MIPS program — all branch.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t0, $zero, 2
+beq $t0, $zero, a
+bne $t0, $zero, b
+a:
+j c
+b:
+addi $t0, $t0, -1
+beq $t0, $zero, c
+j b
+c:
 ```

@@ -1,10 +1,29 @@
 # Derive Control in K-map
 
-The Control unit is nine Boolean functions of the opcode bits. Each can be minimized in a K-map — and the result is the actual logic in the datapath. Group the cells, then watch the same function fire as instructions step through the datapath.
+The headline link: the Control unit is nine Boolean functions of the opcode bits. Each one can be minimized in a K-map, and the minimized expression IS the actual logic wired into the datapath.
 
-<KmapView vars={4} minterms={[0,1,2,5,8,9]} />
+## 1. The RegDst truth table
 
-<DatapathView instruction="add" />
+RegDst as a function of the opcode bits across the locked instruction set. R-type sets it 1; loads/stores/branches set it 0 or don’t-care.
+
+<TruthTable headers={["op","RegDst"]} rows={[[0,1],[1,0]]} />
+
+## 2. Group it yourself
+
+Select cells to form prime-implicant groups, then reveal the solver’s minimal cover and compare.
+
+<KmapInteractive vars={4} minterms={[0,1,2,5,8,9]} />
+
+## 3. Show this function in the datapath
+
+Step any instruction: the Control unit emits RegDst, the RegDst mux selects rt vs rd, and the K-map cell for that opcode is exactly the value driving the mux. Same function, two views.
+
+<DatapathStep instruction="add" step="ID" />
+<DatapathStep instruction="lw" step="ID" />
+
+## 4. The point
+
+K-map theory and datapath practice are the same thing. Try ALUSrc and MemToReg — each is its own K-map exercise on this site, and each drives a real mux you can watch fire.
 
 ---
 

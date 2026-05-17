@@ -125,12 +125,13 @@ add(
   execOk ? 'present' : 'missing all debug/exec/syscall code'
 )
 const pipePage = await read('apps/web/src/app/pipeline/[program]/page.tsx')
+const stageMatrix = await read('apps/web/src/features/pipeline/stage-matrix.tsx')
+const pipeDiagramReal =
+  pipePage.includes('PipelineIsland') && /<table|gridcell/iu.test(stageMatrix) && stageMatrix.length > 1500
 add(
   'pipeline stage-time diagram UI (PIPELINE.md)',
-  /StageMatrix|PipelineDiagram|stage-time|<table|gridcell/iu.test(pipePage) && pipePage.length > 1500,
-  /StageMatrix|PipelineDiagram|stage-time|<table|gridcell/iu.test(pipePage) && pipePage.length > 1500
-    ? 'diagram present'
-    : 'stub page, no diagram'
+  pipeDiagramReal,
+  pipeDiagramReal ? 'diagram present (StageMatrix via PipelineIsland)' : 'stub page, no diagram'
 )
 const cmpPage = await read('apps/web/src/app/compare/page.tsx')
 const cmpIsland = exists('apps/web/src/features/compare/compare-island.tsx')

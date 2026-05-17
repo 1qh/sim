@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
+import AsmEditor from '@/features/datapath/asm-editor'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
 import {
@@ -96,6 +97,7 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
           MemRead={ctl.MemRead} MemWrite={ctl.MemWrite} Branch={ctl.Branch} BranchNE={ctl.BranchNE} ALUOp={ctl.ALUOp}
         </div>
       </section>
+      <AsmEditor initial={`${name} $t0, $t1, $t2`} />
       <DatapathIsland control={ctl} critical={critical} criticalDelayPs={criticalDelayPs} name={name} />
       <DatapathA11yProxies activeComponents={componentsForPaths(activePaths(ctl, 'EX'))} control={ctl} name={name} />
       <Link className='text-sm underline' href='/mips'>

@@ -7,9 +7,14 @@ tags: [mips, example]
 
 # alu-only
 
-MIPS example program: alu-only.
+MIPS program — alu only.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t0, $zero, 6
+addi $t1, $zero, 9
+add $t2, $t0, $t1
+sub $t3, $t1, $t0
+and $t4, $t2, $t3
+or $t5, $t2, $t3
+slt $t6, $t0, $t1
 ```

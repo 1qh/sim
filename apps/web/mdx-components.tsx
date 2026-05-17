@@ -10,10 +10,23 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import type { MDXComponents } from 'mdx/types'
-import { DatapathView, KmapView, Signal, TruthTable } from '@/features/learn/islands'
-const useMDXComponents = (components: MDXComponents): MDXComponents => ({
+import {
+  DatapathStep,
   DatapathView,
+  KmapInteractive,
   KmapView,
+  PipelineDiagram,
+  RegisterValue,
+  Signal,
+  TruthTable
+} from '@/features/learn/islands'
+const useMDXComponents = (components: MDXComponents): MDXComponents => ({
+  DatapathStep,
+  DatapathView,
+  KmapInteractive,
+  KmapView,
+  PipelineDiagram,
+  RegisterValue,
   Signal,
   TruthTable,
   h1: ({ children, ...p }: React.ComponentPropsWithoutRef<'h1'>) => (

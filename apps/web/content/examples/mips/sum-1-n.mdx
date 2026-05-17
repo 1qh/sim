@@ -7,9 +7,13 @@ tags: [mips, example]
 
 # sum-1-n
 
-MIPS example program: sum-1-n.
+MIPS program — sum 1 n.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t0, $zero, 10
+add $t1, $zero, $zero
+loop:
+add $t1, $t1, $t0
+addi $t0, $t0, -1
+bne $t0, $zero, loop
 ```

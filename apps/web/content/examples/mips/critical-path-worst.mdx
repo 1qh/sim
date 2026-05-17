@@ -7,9 +7,10 @@ tags: [mips, example]
 
 # critical-path-worst
 
-MIPS example program: critical-path-worst.
+MIPS program — critical path worst.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+lw $t0, 0($t1)
+add $t2, $t0, $t3
+sw $t2, 4($t1)
 ```
