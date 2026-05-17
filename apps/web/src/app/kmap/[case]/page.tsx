@@ -8,11 +8,12 @@
 /** biome-ignore-all lint/performance/noNamespaceImport: noise */
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, react-perf/jsx-no-new-array-as-prop */
 /* eslint-disable @typescript-eslint/require-await */
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { kmap } from '@/features/kmap'
+import KmapGrid from '@/features/kmap/scene/kmap-grid'
 import KmapIsland from '@/features/kmap/scene/kmap-island'
 const buildTruthTable = (vars: number, minterms: readonly number[], dontCares: readonly number[]): (0 | 1 | 'X')[] => {
   const mins = new Set(minterms)
@@ -51,7 +52,9 @@ const Page = async ({ params }: { params: Promise<{ case: string }> }) => {
           truthTable={buildTruthTable(config.vars.length, config.minterms ?? [], config.dontCares ?? [])}
           vars={config.vars.length}
         />
-      ) : undefined}
+      ) : (
+        <KmapGrid minterms={config.minterms ?? []} vars={config.vars.length} />
+      )}
       <Link className='text-sm underline' href='/kmap'>
         back
       </Link>

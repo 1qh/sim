@@ -7,9 +7,17 @@ tags: [mips, example]
 
 # gcd
 
-MIPS example program: gcd.
+MIPS program — gcd.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+g:
+beq $t0, $t1, done
+slt $t2, $t0, $t1
+bne $t2, $zero, swap
+sub $t0, $t0, $t1
+j g
+swap:
+sub $t1, $t1, $t0
+j g
+done:
 ```

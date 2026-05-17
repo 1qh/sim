@@ -7,9 +7,13 @@ tags: [mips, example]
 
 # pseudo-zoo
 
-MIPS example program: pseudo-zoo.
+MIPS program — pseudo zoo.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+li $t0, 0x12345678
+move $t1, $t0
+nop
+beqz $t1, z
+bnez $t0, z
+z:
 ```

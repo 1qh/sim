@@ -54,9 +54,10 @@ const isBranchOrJump = (ins: Instruction): boolean => {
 }
 const analyzePipeline = (
   instructions: Instruction[],
-  options: { enableForwarding?: boolean; takenBranches?: Set<number> } = {}
+  options: { enableForwarding?: boolean; stallInsertion?: boolean; takenBranches?: Set<number> } = {}
 ): PipelineReport => {
   const enableForwarding = options.enableForwarding ?? true
+  const stallInsertion = options.stallInsertion ?? true
   const taken = options.takenBranches ?? new Set<number>()
   const startCycles: number[] = []
   const hazards: Hazard[] = []
@@ -81,7 +82,7 @@ const analyzePipeline = (
           if (enableForwarding) {
             if (isLoad(producer)) {
               const required = producerMemEnd
-              if (consumerEx < required) {
+              if (consumerEx < required && stallInsertion) {
                 const need = required - consumerEx
                 start += need
                 stalls += need
@@ -94,7 +95,7 @@ const analyzePipeline = (
                 producerIndex: j,
                 register: reg
               })
-            } else if (consumerEx < producerExEnd) {
+            } else if (consumerEx < producerExEnd && stallInsertion) {
               const need = producerExEnd - consumerEx
               start += need
               stalls += need
@@ -109,7 +110,7 @@ const analyzePipeline = (
                 register: reg
               })
             }
-          } else if (consumerId < producerWbEnd) {
+          } else if (consumerId < producerWbEnd && stallInsertion) {
             const need = producerWbEnd - consumerId
             start += need
             stalls += need

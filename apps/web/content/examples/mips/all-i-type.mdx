@@ -7,9 +7,13 @@ tags: [mips, example]
 
 # all-i-type
 
-MIPS example program: all-i-type.
+MIPS program — all i type.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t0, $zero, 7
+andi $t1, $t0, 3
+ori $t2, $t1, 8
+lui $t3, 1
+lw $t4, 0($t0)
+sw $t4, 4($t0)
 ```

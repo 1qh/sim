@@ -7,9 +7,13 @@ tags: [mips, example]
 
 # all-r-type
 
-MIPS example program: all-r-type.
+MIPS program — all r type.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+add $t0, $t1, $t2
+sub $t3, $t0, $t1
+and $t4, $t3, $t0
+or $t5, $t4, $t3
+slt $t6, $t5, $t4
+nor $t7, $t6, $t5
 ```

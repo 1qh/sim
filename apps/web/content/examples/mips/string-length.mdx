@@ -7,9 +7,15 @@ tags: [mips, example]
 
 # string-length
 
-MIPS example program: string-length.
+MIPS program — string length.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+add $t1, $zero, $zero
+sl:
+lw $t2, 0($t0)
+beq $t2, $zero, sd
+addi $t1, $t1, 1
+addi $t0, $t0, 4
+j sl
+sd:
 ```

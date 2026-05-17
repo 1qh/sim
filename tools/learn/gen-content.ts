@@ -9,7 +9,7 @@ const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const root = `${repoRoot}/apps/web/content`
 const BODY: Record<string, string> = {
   'cross-link-derive-control-in-kmap':
-    'The Control unit is nine Boolean functions of the opcode bits. Each can be minimized in a K-map — and the result is the actual logic in the datapath. Group the cells, then watch the same function fire as instructions step through the datapath.\n\n<KmapView vars={4} minterms={[0,1,2,5,8,9]} />\n\n<DatapathView instruction="add" />',
+    'The headline link: the Control unit is nine Boolean functions of the opcode bits. Each one can be minimized in a K-map, and the minimized expression IS the actual logic wired into the datapath.\n\n## 1. The RegDst truth table\n\nRegDst as a function of the opcode bits across the locked instruction set. R-type sets it 1; loads/stores/branches set it 0 or don’t-care.\n\n<TruthTable headers={["op","RegDst"]} rows={[[0,1],[1,0]]} />\n\n## 2. Group it yourself\n\nSelect cells to form prime-implicant groups, then reveal the solver’s minimal cover and compare.\n\n<KmapInteractive vars={4} minterms={[0,1,2,5,8,9]} />\n\n## 3. Show this function in the datapath\n\nStep any instruction: the Control unit emits RegDst, the RegDst mux selects rt vs rd, and the K-map cell for that opcode is exactly the value driving the mux. Same function, two views.\n\n<DatapathStep instruction="add" step="ID" />\n<DatapathStep instruction="lw" step="ID" />\n\n## 4. The point\n\nK-map theory and datapath practice are the same thing. Try ALUSrc and MemToReg — each is its own K-map exercise on this site, and each drives a real mux you can watch fire.',
   'datapath-branch-resolution':
     'Branches use the ALU as a comparator (subtract, check zero). Branch ∧ Zero gates PCSrc; the target is computed in parallel by the branch adder.\n\n<Signal instruction="beq" name="Branch" />',
   'datapath-critical-path':
@@ -56,13 +56,69 @@ for (const p of LEARN_PAGES) {
 const exDir = `${root}/examples`
 await mkdir(`${exDir}/mips`, { recursive: true })
 await mkdir(`${exDir}/kmap`, { recursive: true })
+const PROG: Record<string, string> = {
+  'all-branch':
+    'addi $t0, $zero, 2\nbeq $t0, $zero, a\nbne $t0, $zero, b\na:\nj c\nb:\naddi $t0, $t0, -1\nbeq $t0, $zero, c\nj b\nc:',
+  'all-i-type': 'addi $t0, $zero, 7\nandi $t1, $t0, 3\nori $t2, $t1, 8\nlui $t3, 1\nlw $t4, 0($t0)\nsw $t4, 4($t0)',
+  'all-r-type':
+    'add $t0, $t1, $t2\nsub $t3, $t0, $t1\nand $t4, $t3, $t0\nor $t5, $t4, $t3\nslt $t6, $t5, $t4\nnor $t7, $t6, $t5',
+  'alu-only':
+    'addi $t0, $zero, 6\naddi $t1, $zero, 9\nadd $t2, $t0, $t1\nsub $t3, $t1, $t0\nand $t4, $t2, $t3\nor $t5, $t2, $t3\nslt $t6, $t0, $t1',
+  'array-sum':
+    'addi $t2, $zero, 4\nadd $t1, $zero, $zero\nsum:\nlw $t3, 0($t0)\nadd $t1, $t1, $t3\naddi $t0, $t0, 4\naddi $t2, $t2, -1\nbne $t2, $zero, sum',
+  'branch-heavy': 'addi $t0, $zero, 5\nb1:\nbeq $t0, $zero, b2\naddi $t0, $t0, -1\nj b1\nb2:\nbne $t0, $zero, b1',
+  'bubble-sort':
+    'addi $t5, $zero, 3\nouter:\nadd $t0, $zero, $zero\ninner:\nlw $t1, 0($t0)\nlw $t2, 4($t0)\nslt $t3, $t2, $t1\nbeq $t3, $zero, nx\nsw $t2, 0($t0)\nsw $t1, 4($t0)\nnx:\naddi $t0, $t0, 4\naddi $t5, $t5, -1\nbne $t5, $zero, outer',
+  'critical-path-worst': 'lw $t0, 0($t1)\nadd $t2, $t0, $t3\nsw $t2, 4($t1)',
+  factorial:
+    'addi $t0, $zero, 5\naddi $t1, $zero, 1\nf:\nbeq $t0, $zero, end\nadd $t1, $t1, $t1\naddi $t0, $t0, -1\nj f\nend:',
+  fibonacci:
+    'addi $t0, $zero, 0\naddi $t1, $zero, 1\naddi $t3, $zero, 10\nfib:\nadd $t2, $t0, $t1\nadd $t0, $zero, $t1\nadd $t1, $zero, $t2\naddi $t3, $t3, -1\nbne $t3, $zero, fib',
+  'forwarding-resolvable': 'add $t0, $t1, $t2\nadd $t3, $t0, $t1\nsub $t4, $t3, $t0',
+  gcd: 'g:\nbeq $t0, $t1, done\nslt $t2, $t0, $t1\nbne $t2, $zero, swap\nsub $t0, $t0, $t1\nj g\nswap:\nsub $t1, $t1, $t0\nj g\ndone:',
+  hello: 'addi $t0, $zero, 72\naddi $t1, $zero, 105',
+  'load-use-hazard': 'lw $t0, 0($t1)\nadd $t2, $t0, $t0\nsub $t3, $t2, $t1',
+  'memory-copy':
+    'addi $t2, $zero, 4\nmc:\nlw $t3, 0($t0)\nsw $t3, 0($t1)\naddi $t0, $t0, 4\naddi $t1, $t1, 4\naddi $t2, $t2, -1\nbne $t2, $zero, mc',
+  'power-of-two': 'addi $t0, $zero, 1\naddi $t1, $zero, 8\np:\nsll $t0, $t0, 1\naddi $t1, $t1, -1\nbne $t1, $zero, p',
+  'pseudo-zoo': 'li $t0, 0x12345678\nmove $t1, $t0\nnop\nbeqz $t1, z\nbnez $t0, z\nz:',
+  'slow-alu-experiment': 'add $t0, $t1, $t2\nor $t3, $t0, $t1\nslt $t4, $t3, $t0\nnor $t5, $t4, $t3',
+  'string-length':
+    'add $t1, $zero, $zero\nsl:\nlw $t2, 0($t0)\nbeq $t2, $zero, sd\naddi $t1, $t1, 1\naddi $t0, $t0, 4\nj sl\nsd:',
+  'sum-1-n':
+    'addi $t0, $zero, 10\nadd $t1, $zero, $zero\nloop:\nadd $t1, $t1, $t0\naddi $t0, $t0, -1\nbne $t0, $zero, loop'
+}
 for (const slug of MIPS_EXAMPLES) {
-  const md = `---\ntitle: "${slug}"\nslug: ${slug}\nkind: mips\ntags: [mips, example]\n---\n\n# ${slug}\n\nMIPS example program: ${slug}.\n\n\`\`\`asm-mips\naddi $t0, $zero, 1\nadd $t1, $t0, $t0\n\`\`\`\n`
+  const asm = PROG[slug] ?? `addi $t0, $zero, ${slug.length}`
+  const md = `---\ntitle: "${slug}"\nslug: ${slug}\nkind: mips\ntags: [mips, example]\n---\n\n# ${slug}\n\nMIPS program — ${slug.replaceAll('-', ' ')}.\n\n\`\`\`asm-mips\n${asm}\n\`\`\`\n`
   await writeFile(`${exDir}/mips/${slug}.mdx`, md)
   written += 1
 }
+const KFN: Record<string, { m: number[]; v: number }> = {
+  '2var-and': { m: [3], v: 2 },
+  '2var-xor': { m: [1, 2], v: 2 },
+  '3var-majority': { m: [3, 5, 6, 7], v: 3 },
+  '3var-xor': { m: [1, 2, 4, 7], v: 3 },
+  '4var-bcd-7seg-a': { m: [0, 2, 3, 5, 6, 7, 8, 9], v: 4 },
+  '4var-bcd-7seg-g': { m: [2, 3, 4, 5, 6, 8, 9], v: 4 },
+  '4var-dont-cares': { m: [0, 1, 2, 4, 5, 8, 10], v: 4 },
+  '4var-full-adder-carry': { m: [3, 5, 6, 7, 11, 13, 14, 15], v: 4 },
+  '4var-full-adder-sum': { m: [1, 2, 4, 7, 8, 11, 13, 14], v: 4 },
+  '4var-hazard': { m: [0, 1, 3, 2, 6, 7], v: 4 },
+  '4var-mux-selector': { m: [1, 3, 6, 7, 9, 11, 14, 15], v: 4 },
+  '5var-majority': { m: [7, 11, 13, 14, 15, 19, 21, 22, 23, 25, 26, 27, 28, 29, 30, 31], v: 5 },
+  '5var-parity': { m: [1, 2, 4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31], v: 5 },
+  '6var-demo': { m: [0, 1, 8, 9, 16, 17, 32, 33], v: 6 },
+  'cross-link-alusrc': { m: [3, 7, 11, 12, 13, 14, 15], v: 4 },
+  'cross-link-regdst': { m: [0, 1, 2, 5, 8, 9], v: 4 },
+  'multi-2bit-comparator': { m: [1, 2, 3, 6, 7, 11], v: 4 },
+  'multi-bcd-7seg': { m: [0, 2, 3, 5, 6, 7, 8, 9], v: 4 },
+  'multi-full-adder': { m: [1, 2, 4, 7], v: 3 },
+  'multi-half-adder': { m: [1, 2], v: 2 }
+}
 for (const slug of KMAP_EXAMPLES) {
-  const md = `---\ntitle: "${slug}"\nslug: ${slug}\nkind: kmap\ntags: [kmap, example]\n---\n\n# ${slug}\n\nK-map exercise: ${slug}.\n\n<KmapView vars={3} minterms={[1,2,4,7]} />\n`
+  const f = KFN[slug] ?? { m: [1, 2], v: 2 }
+  const md = `---\ntitle: "${slug}"\nslug: ${slug}\nkind: kmap\ntags: [kmap, example]\n---\n\n# ${slug}\n\nK-map exercise — ${slug.replaceAll('-', ' ')}. Group the cells, then reveal the solver.\n\n<KmapInteractive vars={${f.v}} minterms={[${f.m.join(',')}]} />\n`
   await writeFile(`${exDir}/kmap/${slug}.mdx`, md)
   written += 1
 }

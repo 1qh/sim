@@ -7,9 +7,21 @@ tags: [mips, example]
 
 # bubble-sort
 
-MIPS example program: bubble-sort.
+MIPS program — bubble sort.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t5, $zero, 3
+outer:
+add $t0, $zero, $zero
+inner:
+lw $t1, 0($t0)
+lw $t2, 4($t0)
+slt $t3, $t2, $t1
+beq $t3, $zero, nx
+sw $t2, 0($t0)
+sw $t1, 4($t0)
+nx:
+addi $t0, $t0, 4
+addi $t5, $t5, -1
+bne $t5, $zero, outer
 ```

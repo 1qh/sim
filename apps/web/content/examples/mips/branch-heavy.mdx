@@ -7,9 +7,14 @@ tags: [mips, example]
 
 # branch-heavy
 
-MIPS example program: branch-heavy.
+MIPS program — branch heavy.
 
 ```asm-mips
-addi $t0, $zero, 1
-add $t1, $t0, $t0
+addi $t0, $zero, 5
+b1:
+beq $t0, $zero, b2
+addi $t0, $t0, -1
+j b1
+b2:
+bne $t0, $zero, b1
 ```

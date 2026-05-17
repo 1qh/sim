@@ -1,0 +1,71 @@
+/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
+/** biome-ignore-all lint/nursery/useGlobalThis: noise */
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
+/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
+/** biome-ignore-all lint/nursery/noContinue: noise */
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/** biome-ignore-all lint/performance/noNamespaceImport: noise */
+/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, promise/prefer-await-to-then */
+'use client'
+import { toMonacoMarkers } from '@sim/editor'
+import { useEffect, useRef, useState } from 'react'
+import { assemble } from './asm-grammar'
+const AsmEditor = ({ initial }: { initial: string }): React.JSX.Element => {
+  const ref = useRef<HTMLDivElement | null>(null)
+  const [diagCount, setDiagCount] = useState(0)
+  const [wordCount, setWordCount] = useState(0)
+  useEffect(() => {
+    let disposed = false
+    let editor: undefined | { dispose: () => void }
+    const mount = async (): Promise<void> => {
+      const monaco = await import('monaco-editor')
+      if (disposed || !ref.current) return
+      const model = monaco.editor.createModel(initial, 'mips')
+      const ed = monaco.editor.create(ref.current, {
+        automaticLayout: true,
+        fontSize: 13,
+        minimap: { enabled: false },
+        model,
+        theme: 'vs-dark'
+      })
+      editor = ed
+      const lint = (): void => {
+        const r = assemble(model.getValue())
+        setDiagCount(r.diagnostics.length)
+        setWordCount(r.words.length)
+        monaco.editor.setModelMarkers(
+          model,
+          'mips',
+          toMonacoMarkers(
+            r.diagnostics.map(d => ({
+              endColumn: d.col + d.len + 1,
+              line: d.line + 1,
+              message: `${d.code}: ${d.message}`,
+              severity: 'error' as const,
+              startColumn: d.col + 1
+            }))
+          )
+        )
+      }
+      lint()
+      model.onDidChangeContent(lint)
+    }
+    mount().catch(() => undefined)
+    return () => {
+      disposed = true
+      editor?.dispose()
+    }
+  }, [initial])
+  return (
+    <section aria-label='asm editor' className='flex flex-col gap-2'>
+      <div className='h-64 w-full overflow-hidden rounded-lg border' ref={ref} />
+      <p className='font-mono text-xs text-muted-foreground'>
+        {wordCount} encoded words · {diagCount} diagnostic{diagCount === 1 ? '' : 's'}
+      </p>
+    </section>
+  )
+}
+export default AsmEditor
