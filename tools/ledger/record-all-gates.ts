@@ -99,12 +99,22 @@ GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts', n
 GATES.push({ cmd: 'cd apps/backend && bun test convex/auth.live.test.ts', name: 'test.auth-flow' })
 GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts -t rate', name: 'test.rate-limit' })
 GATES.push({ cmd: featureTest('compare'), name: 'test.e2e.compare' })
+const lhPath: Record<string, string> = {
+  compare: '/compare',
+  foundation: '/learn/foundation',
+  home: '/',
+  kmap: '/kmap',
+  learn: '/learn',
+  mips: '/mips',
+  pipeline: '/pipeline',
+  share: '/s/abc123'
+}
 for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'foundation', 'share']) {
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `anon: ${r} `), name: `test.e2e.anon.${r}` })
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `a11y: ${r} `), name: `a11y.axe.${r}` })
   GATES.push({ cmd: pwTest('anon-routes.pw.ts', `keyboard: ${r} `), name: `a11y.keyboard.${r}` })
   GATES.push({ cmd: 'cd apps/web && bunx size-limit', name: `perf.bundle-size.${r}` })
-  GATES.push({ cmd: 'cd apps/web && bun scripts/lighthouse.ts', name: `perf.lighthouse.${r}` })
+  GATES.push({ cmd: `cd apps/web && bun scripts/lighthouse.ts ${lhPath[r]}`, name: `perf.lighthouse.${r}` })
 }
 for (const v of ['reduced-motion', 'high-contrast', 'color-blind'])
   GATES.push({ cmd: pwTest('a11y-variants.pw.ts', v), name: `a11y.axe.${v}` })

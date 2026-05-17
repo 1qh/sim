@@ -18,5 +18,5 @@
   "concurrency": 4,
   "timeoutMS": 60000,
   "incremental": true,
-  "incrementalFile": ".stryker-incremental.json"
+  "incrementalFile": "/tmp/stryker-incremental-sim-engine.json"
 }
