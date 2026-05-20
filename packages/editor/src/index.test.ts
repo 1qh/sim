@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { describe, expect, test } from 'bun:test'
 import { monarchFromTokens, SEVERITY, themeFromTokens, toMonacoMarkers } from './index'
+
 describe('@sim/editor monarchFromTokens', () => {
   test('maps tokens to tokenizer rules', () => {
     const m = monarchFromTokens([{ pattern: '\\d+', scope: 'number' }])

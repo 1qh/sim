@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
+
 const out =
   await $`git grep -nIE -e 'biome-ignore[^:]*$' -- 'packages/*/src/**' 'apps/**' 'tools/**' ':!tools/lint/disable-reasons.ts'`
     .nothrow()

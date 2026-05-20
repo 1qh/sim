@@ -12,6 +12,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise */
 import { addU32, signExtend, subU32 } from '@sim/bits'
 import type { ControlSignals, ExecutionStep, Instruction, MachineState, RegisterNumber } from './types'
+
 const ZERO_CONTROL: ControlSignals = {
   ALUOp: 0,
   ALUSrc: 0,

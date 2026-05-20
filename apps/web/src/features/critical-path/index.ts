@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import type { ControlSignals, Instruction } from '../mips/types'
 import { controlFor } from '../mips/execute'
+
 interface CriticalPath {
   delayPs: number
   edges: PathEdge[]

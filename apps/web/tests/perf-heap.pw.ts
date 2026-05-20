@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable no-await-in-loop */
 import { expect, test } from '@playwright/test'
+
 const CYCLES = [
   { name: 'datapath-cycle', path: '/mips/add' },
   { name: 'kmap-cycle', path: '/kmap/v4' },

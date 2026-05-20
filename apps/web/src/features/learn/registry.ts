@@ -19,6 +19,7 @@ import L11 from '@content/learn/kmap-truth-tables.mdx'
 import L10 from '@content/learn/pipeline-forwarding.mdx'
 import L9 from '@content/learn/pipeline-hazards.mdx'
 import L8 from '@content/learn/pipeline-stages.mdx'
+
 const LEARN_REGISTRY: Record<string, FC> = {
   'cross-link-derive-control-in-kmap': L16,
   'datapath-branch-resolution': L6,

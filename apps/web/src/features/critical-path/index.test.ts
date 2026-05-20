@@ -13,6 +13,7 @@
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
 import { criticalComponents, criticalPath, DELAYS_PS, longestProgramPath, sumDelay } from './index'
+
 const r = (rd: number, rs: number, rt: number, name = 'add' as const): Instruction => ({
   funct: 0x20,
   name,

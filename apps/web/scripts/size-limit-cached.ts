@@ -15,6 +15,7 @@
 import { $, file, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
+
 const envTree = process.env.LEDGER_TREE
 const key = envTree ?? 'manual'
 const resultFile = `/tmp/size-limit-${key}.json`

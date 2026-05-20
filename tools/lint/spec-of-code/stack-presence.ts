@@ -13,6 +13,7 @@
 /* eslint-disable no-continue, no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
+
 interface ManifestPackage {
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>

@@ -10,6 +10,7 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import type { Instruction, RegisterNumber } from '../mips/types'
+
 interface ForwardingArrow {
   fromIndex: number
   fromStage: Stage

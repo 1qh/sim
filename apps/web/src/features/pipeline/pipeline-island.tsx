@@ -15,6 +15,7 @@ import { useMemo, useState } from 'react'
 import type { Instruction } from '@/features/mips/types'
 import { analyzePipeline } from '@/features/pipeline'
 import StageMatrix from './stage-matrix'
+
 const PipelineIsland = ({ instructions }: { instructions: Instruction[] }): React.JSX.Element => {
   const [forwarding, setForwarding] = useState(true)
   const [stall, setStall] = useState(true)

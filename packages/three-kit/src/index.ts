@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import type { ColorRepresentation } from 'three'
 import { Color, MeshPhysicalMaterial, MeshStandardMaterial, Vector3 } from 'three'
+
 interface MaterialTokens {
   accent: ColorRepresentation
   hazard: ColorRepresentation

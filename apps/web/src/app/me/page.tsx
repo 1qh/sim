@@ -13,6 +13,7 @@
 'use client'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+
 const KEY = 'anon-saved-hashes'
 const Page = (): React.JSX.Element => {
   const [hashes, setHashes] = useState<string[]>([])

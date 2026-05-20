@@ -14,6 +14,7 @@ import Link from 'next/link'
 import type { Instruction } from '@/features/mips/types'
 import type { RegisterNumber } from '@/features/mips/types'
 import { controlFor, createInitialState, decodeInstruction, encodeInstruction, executeStep } from '@/features/mips'
+
 const Page = () => {
   const program = [
     {

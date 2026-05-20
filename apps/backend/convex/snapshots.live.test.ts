@@ -12,6 +12,7 @@
 import { describe, expect, test } from 'bun:test'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from './_generated/api'
+
 const URL_ENV = process.env.CONVEX_SELF_HOSTED_URL
 const SKIP = URL_ENV === undefined
 const url = URL_ENV ?? 'http://127.0.0.1:3220'

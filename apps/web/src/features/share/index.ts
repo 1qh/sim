@@ -12,6 +12,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-parameters */
 import { hashValue, toCanonicalBytes } from '@sim/sim-engine'
 import { gunzipSync, gzipSync } from 'node:zlib'
+
 interface ShareEncoding {
   bytes: number
   fragment: string | undefined

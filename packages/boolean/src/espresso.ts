@@ -10,6 +10,7 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* eslint-disable no-bitwise, @typescript-eslint/max-params */
 import { espresso } from 'espresso-iisojs'
+
 const encodeMaxtermClause = (m: number, width: number): number[] => {
   const clause: number[] = []
   for (let i = 0; i < width; i += 1) {

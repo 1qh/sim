@@ -21,6 +21,7 @@ import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS, PATHS } from '@/features/datapath/generated/topology'
+
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
 const SILICON = '#9aa3ad'

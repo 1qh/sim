@@ -21,6 +21,7 @@ import {
   toCssHex,
   toCssOklch
 } from './index'
+
 describe('themes shape', () => {
   test('every theme defines every role', () => {
     const roles = Object.keys(themes.dark)

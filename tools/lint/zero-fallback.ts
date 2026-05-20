@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
+
 const PATTERNS = [
   String.raw`process\.env\.[A-Z_]+ \?\? ['"]`,
   String.raw`Bun\.env\.[A-Z_]+ \?\? ['"]`,

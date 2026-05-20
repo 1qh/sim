@@ -15,6 +15,7 @@
 import { $, argv, file, spawn, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
+
 const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/learn/foundation', '/s/abc123']
 const PERF_MIN = 0.88
 const A11Y_MIN = 0.97

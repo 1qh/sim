@@ -14,6 +14,7 @@
 import type { MetadataRoute } from 'next'
 import process from 'node:process'
 import { LEARN_SLUGS } from '@/features/learn/manifest'
+
 export const dynamic = 'force-dynamic'
 const sitemap = (): MetadataRoute.Sitemap => {
   const base = process.env.SITE_URL

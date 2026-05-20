@@ -5,6 +5,7 @@
 import { $ } from 'bun'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { KMAP_EXAMPLES, LEARN_PAGES, MIPS_EXAMPLES } from '../../apps/web/src/features/learn/manifest'
+
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const root = `${repoRoot}/apps/web/content`
 const BODY: Record<string, string> = {

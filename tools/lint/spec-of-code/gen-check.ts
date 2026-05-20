@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
+
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const readGen = async (): Promise<number> =>
   (

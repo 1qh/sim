@@ -14,6 +14,7 @@
 import { $, file } from 'bun'
 import { existsSync } from 'node:fs'
 import process from 'node:process'
+
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const read = async (p: string): Promise<string> => (existsSync(`${repoRoot}/${p}`) ? file(`${repoRoot}/${p}`).text() : '')
 const exists = (p: string): boolean => existsSync(`${repoRoot}/${p}`)

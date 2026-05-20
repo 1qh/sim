@@ -12,6 +12,7 @@
 import Link from 'next/link'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { analyzePipeline } from '@/features/pipeline'
+
 const program: Instruction[] = [
   {
     funct: 0x20,

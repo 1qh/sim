@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import Link from 'next/link'
 import { LEARN_PAGES } from '@/features/learn/manifest'
+
 const Page = () => (
   <main aria-label='learn index' className='mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-8'>
     <h1 className='text-3xl font-bold'>Learn</h1>

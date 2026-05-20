@@ -13,6 +13,7 @@
 /* eslint-disable react/no-array-index-key, @eslint-react/no-array-index-key */
 import { cn } from '@a/ui'
 import type { PipelineReport, Stage } from './types'
+
 const STAGE_TONE: Record<Stage, string> = {
   EX: 'bg-primary/30',
   ID: 'bg-primary/20',

@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
+
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const schemaText = await file(`${repoRoot}/apps/backend/convex/schema.ts`).text()
 const docText = await file(`${repoRoot}/../simdocs/SCHEMAS.md`).text()

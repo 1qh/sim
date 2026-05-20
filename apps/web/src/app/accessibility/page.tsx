@@ -10,6 +10,7 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import Link from 'next/link'
+
 const Page = (): React.JSX.Element => (
   <main aria-label='accessibility statement' className='mx-auto flex min-h-screen max-w-2xl flex-col gap-6 p-8'>
     <h1 className='text-3xl font-bold'>Accessibility</h1>

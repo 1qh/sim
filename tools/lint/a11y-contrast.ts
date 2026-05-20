@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { contrastRatio, getTheme } from '@sim/design-tokens'
 import process from 'node:process'
+
 const variantArg = (process.argv[2] ?? 'normal') as 'deuteranopia' | 'normal' | 'protanopia' | 'tritanopia'
 const themeArg = (process.argv[3] ?? 'dark') as 'dark' | 'high-contrast' | 'light'
 const tokens = getTheme(themeArg, variantArg)

@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, unicorn/filename-case */
 'use client'
 import dynamic from 'next/dynamic'
+
 const ToroidalKmap = dynamic(async () => import('./toroidal-kmap'), {
   loading: () => <div className='h-[420px] w-full animate-pulse rounded-lg border bg-muted/30' />,
   ssr: false

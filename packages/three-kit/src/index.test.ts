@@ -22,6 +22,7 @@ import {
   siliconMaterial,
   traceMaterial
 } from './index'
+
 describe('@sim/three-kit materials', () => {
   test('silicon is metallic', () => {
     expect(siliconMaterial().metalness).toBeGreaterThan(0.5)

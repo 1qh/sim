@@ -14,6 +14,7 @@ import { kmap } from '@/features/kmap'
 import { controlFor } from '@/features/mips'
 import { analyzePipeline } from '@/features/pipeline'
 import KmapInteractive from './kmap-interactive'
+
 const FUNCT: Record<string, number> = { add: 0x20, and: 0x24, nor: 0x27, or: 0x25, slt: 0x2a, sub: 0x22 }
 const buildInstruction = (name: string): Instruction => {
   if (name in FUNCT)

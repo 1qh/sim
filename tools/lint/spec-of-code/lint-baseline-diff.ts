@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
+
 interface RootPackage {
   devDependencies?: Record<string, string>
   scripts?: Record<string, string>

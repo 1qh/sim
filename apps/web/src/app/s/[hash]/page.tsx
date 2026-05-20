@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import Link from 'next/link'
+
 const Page = ({ params }: { params: Promise<{ hash: string }> }) => <SharePage params={params} />
 const SharePage = async ({ params }: { params: Promise<{ hash: string }> }) => {
   const { hash } = await params

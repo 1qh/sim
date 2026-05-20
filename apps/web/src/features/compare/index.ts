@@ -12,6 +12,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { hashValue } from '@sim/sim-engine'
 import type { ExecutionStep, MachineState, RegisterNumber } from '../mips/types'
+
 interface MemoryDiff {
   address: number
   after: number
