@@ -1,6 +1,11 @@
 {
   "name": "@sim/design-tokens",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1qh/sim",
+    "directory": "packages/design-tokens"
+  },
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -15,7 +20,9 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsdown"
+    "build": "tsdown",
+    "prepublishOnly": "bun run build",
+    "postpublish": "bun ../../tools/prune-versions.ts"
   },
   "dependencies": {
     "colorjs.io": "latest"
