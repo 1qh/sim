@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { describe, expect, test } from 'bun:test'
 import { hashValue } from './index'
+
 const FIXTURES = [
   { expected: '6e46dd10defc9b56c29a6ec56b508c21f54c08192194e4df25bf36f0c9c3c279', name: 'empty-object', payload: {} },
   {

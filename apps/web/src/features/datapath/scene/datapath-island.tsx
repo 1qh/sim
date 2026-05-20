@@ -12,6 +12,7 @@
 'use client'
 import dynamic from 'next/dynamic'
 import type { ControlSignals } from '@/features/mips/types'
+
 const DatapathScene = dynamic(async () => import('./datapath-scene'), {
   loading: () => <div className='h-[420px] w-full animate-pulse rounded-lg border bg-muted/30' />,
   ssr: false

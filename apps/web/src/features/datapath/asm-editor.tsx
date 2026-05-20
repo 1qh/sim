@@ -13,6 +13,7 @@
 import { toMonacoMarkers } from '@sim/editor'
 import { useEffect, useRef, useState } from 'react'
 import { assemble } from './asm-grammar'
+
 const AsmEditor = ({ initial }: { initial: string }): React.JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null)
   const [diagCount, setDiagCount] = useState(0)

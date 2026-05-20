@@ -12,6 +12,7 @@
 /* eslint-disable complexity, @typescript-eslint/switch-exhaustiveness-check, no-continue, max-depth */
 import type { Instruction, RegisterNumber } from '../mips/types'
 import type { ForwardingArrow, Hazard, PipelineReport, PipelineRow, Stage } from './types'
+
 const STAGES: Stage[] = ['IF', 'ID', 'EX', 'MEM', 'WB']
 const writesRegister = (ins: Instruction): RegisterNumber | undefined => {
   if (ins.type === 'R') {

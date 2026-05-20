@@ -15,6 +15,7 @@ import { argv, file } from 'bun'
 import process from 'node:process'
 import { ledgerEnv, runPool } from './pool'
 import { GATES } from './record-all-gates'
+
 const env = await ledgerEnv()
 process.env = { ...process.env, ...env }
 const tree = env.LEDGER_TREE

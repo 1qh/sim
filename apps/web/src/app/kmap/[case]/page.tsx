@@ -15,6 +15,7 @@ import { notFound } from 'next/navigation'
 import { kmap } from '@/features/kmap'
 import KmapGrid from '@/features/kmap/scene/kmap-grid'
 import KmapIsland from '@/features/kmap/scene/kmap-island'
+
 const buildTruthTable = (vars: number, minterms: readonly number[], dontCares: readonly number[]): (0 | 1 | 'X')[] => {
   const mins = new Set(minterms)
   const dcs = new Set(dontCares)

@@ -12,6 +12,7 @@
 /* eslint-disable no-bitwise, no-continue, complexity, @typescript-eslint/max-params */
 import type { Instruction, InstructionName, RegisterNumber } from '@/features/mips/types'
 import { encodeInstruction, FUNCT, OPCODE } from '@/features/mips/encode'
+
 const RE_DEC = /^\d+$/u
 const RE_HEX = /^-?0x[0-9a-fA-F]+$/u
 const RE_BIN = /^-?0b[01]+$/u

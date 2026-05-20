@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+
 const ROUTES = [
   { name: 'home', path: '/' },
   { name: 'mips', path: '/mips' },

@@ -14,6 +14,7 @@
 import { cn } from '@a/ui'
 import { useMemo, useState } from 'react'
 import { kmap } from '@/features/kmap'
+
 const KmapInteractive = ({ minterms, vars }: { minterms: number[]; vars: number }): React.JSX.Element => {
   const [reveal, setReveal] = useState(false)
   const [picked, setPicked] = useState<number[]>([])

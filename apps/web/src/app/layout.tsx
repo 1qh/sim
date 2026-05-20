@@ -16,6 +16,7 @@ import CommandPalette from '@/features/command-palette/command-palette'
 import { mono, sans } from './fonts'
 import { Providers } from './providers'
 import './global.css'
+
 const metadata: Metadata = {
   description: 'Interactive 3D MIPS datapath and Karnaugh map visualizer.',
   title: 'MIPS datapath visualizer + Karnaugh map tool'

@@ -21,6 +21,7 @@ import {
   writeMemory,
   writeRegister
 } from './index'
+
 const buildR = (name: Instruction & { type: 'R' }): Instruction => name
 const seedState = (overrides: (s: MachineState) => MachineState = s => s): MachineState => overrides(createInitialState())
 const step = (state: MachineState, ins: Instruction): ReturnType<typeof executeStep> => {

@@ -16,6 +16,7 @@ import { evalExpr, maxterms, minterms, sortedVars, truthTable } from './ast'
 import { espressoPos } from './espresso'
 import { parse } from './parser'
 import { findEssentialPrimes, findPrimeImplicants, minimize, posExpression, sopExpression } from './qm'
+
 interface SolveInput {
   dontCares?: number[]
   expression?: string

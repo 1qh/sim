@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import Link from 'next/link'
 import { kmap } from '@/features/kmap'
+
 const Page = () => {
   const result = kmap({ expression: '(A&B) | (B&C) | (A&C)' })
   return (

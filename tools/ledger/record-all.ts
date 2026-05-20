@@ -15,6 +15,7 @@
 import process from 'node:process'
 import { ledgerEnv, runPool } from './pool'
 import { GATES } from './record-all-gates'
+
 process.env = { ...process.env, ...(await ledgerEnv()) }
 const failed = await runPool(GATES)
 console.log(`done: ${GATES.length - failed} green / ${GATES.length} total`)

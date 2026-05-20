@@ -11,6 +11,7 @@
 /** biome-ignore-all lint/style/noProcessEnv: Next route handler runs in Next runtime, not Bun */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import process from 'node:process'
+
 const ping = async (url: string): Promise<boolean> => {
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(2000) })

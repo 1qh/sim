@@ -12,6 +12,7 @@
 import { $ } from 'bun'
 import { createHash } from 'node:crypto'
 import type { Gate } from './record-all-gates'
+
 const TREE_PATHSPEC = [':!apps/backend/convex/_generated/*', ':!tools/ledger/*']
 const ledgerEnv = async (): Promise<Record<string, string>> => {
   const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()

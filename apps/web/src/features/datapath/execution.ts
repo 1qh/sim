@@ -13,6 +13,7 @@
 import type { MachineState, RegisterNumber } from '@/features/mips/types'
 import { createInitialState, executeStep, readRegister } from '@/features/mips'
 import { decodeInstruction } from '@/features/mips/decode'
+
 interface Breakpoint {
   kind: 'mem' | 'pc' | 'reg' | 'signal'
   target: number

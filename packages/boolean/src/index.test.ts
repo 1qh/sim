@@ -29,6 +29,7 @@ import {
   truthTable
 } from './index'
 import { countLiterals, countOnes, implicantToSop, petrickSelect, toBitString } from './qm'
+
 describe('parser', () => {
   test('single variable', () => {
     expect(parse('A').kind).toBe('var')

@@ -12,6 +12,7 @@
 import { describe, expect, test } from 'bun:test'
 import { decodeInstruction } from '@/features/mips/decode'
 import { assemble, parseRegister } from './asm-grammar'
+
 describe('asm-grammar parseRegister', () => {
   test('numeric + alias', () => {
     expect(parseRegister('$0')).toBe(0)

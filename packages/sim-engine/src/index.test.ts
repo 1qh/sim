@@ -28,6 +28,7 @@ import {
   toCanonicalBytes,
   verifyTrace
 } from './index'
+
 describe('sfc32 rng', () => {
   test('same seed yields identical streams', () => {
     const a = fromSeed(42)

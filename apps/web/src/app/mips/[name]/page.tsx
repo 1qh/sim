@@ -27,6 +27,7 @@ import {
   writeRegister
 } from '@/features/mips'
 import { FUNCT, OPCODE } from '@/features/mips/encode'
+
 const NAMES = [
   'add',
   'addi',

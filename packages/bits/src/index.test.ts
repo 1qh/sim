@@ -36,6 +36,7 @@ import {
   toU32,
   zeroExtend
 } from './index'
+
 const TWO_POW_32 = 4_294_967_296
 const u32arb = (): Arbitrary<number> => integer({ max: TWO_POW_32 - 1, min: 0 })
 const widthBetween = (lo: number, hi: number): Arbitrary<number> => integer({ max: hi, min: lo })

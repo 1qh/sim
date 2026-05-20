@@ -15,6 +15,7 @@
 import { cn } from '@a/ui'
 import { useMemo, useState } from 'react'
 import { kmap } from '@/features/kmap'
+
 interface Group {
   cells: number[]
 }

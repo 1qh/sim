@@ -12,6 +12,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition, no-continue */
 import type { Patch } from './codec'
 import { applyDiff, diff, encode, hashValue } from './codec'
+
 interface MachineConfig<S, E> {
   initial: S
   reducer: (state: S, event: E) => S

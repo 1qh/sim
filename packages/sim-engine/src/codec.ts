@@ -13,6 +13,7 @@
 import { blake3 } from '@noble/hashes/blake3.js'
 import canonicalize from 'canonicalize'
 import { applyPatch, createPatch } from 'rfc6902'
+
 interface Snapshot<T> {
   hash: string
   payload: T

@@ -12,6 +12,7 @@
 'use client'
 import type { ControlSignals } from '@/features/mips/types'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
+
 interface Pane {
   control: ControlSignals
   critical: readonly string[]

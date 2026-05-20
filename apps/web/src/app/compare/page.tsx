@@ -14,6 +14,7 @@ import type { ControlSignals, Instruction, RegisterNumber } from '@/features/mip
 import CompareIsland from '@/features/compare/compare-island'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import { controlFor } from '@/features/mips'
+
 const build = (name: string): Instruction => {
   if (name === 'addi' || name === 'lw' || name === 'sw' || name === 'ori' || name === 'andi')
     return {

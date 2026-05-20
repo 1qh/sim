@@ -16,6 +16,7 @@ import { $, argv, spawn } from 'bun'
 import { createHash } from 'node:crypto'
 import { appendFileSync } from 'node:fs'
 import process from 'node:process'
+
 const args = argv.slice(2)
 const dashIdx = args.indexOf('--')
 if (dashIdx === -1) {

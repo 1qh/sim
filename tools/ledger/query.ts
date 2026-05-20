@@ -14,6 +14,7 @@
 import { $, argv, file } from 'bun'
 import { createHash } from 'node:crypto'
 import process from 'node:process'
+
 const mode = argv[2] ?? 'green'
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
 const ledgerPath = `${repoRoot}/ledger.jsonl`

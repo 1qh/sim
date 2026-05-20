@@ -13,6 +13,7 @@
 /* eslint-disable no-continue, no-console */
 import { argv, file } from 'bun'
 import process from 'node:process'
+
 const NOW = Date.now()
 const SIX_MONTHS_MS = 6 * 30 * 24 * 60 * 60 * 1000
 const THRESHOLD = NOW - SIX_MONTHS_MS

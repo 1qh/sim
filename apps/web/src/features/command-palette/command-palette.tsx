@@ -17,6 +17,7 @@ import { cn } from '@a/ui'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { LEARN_PAGES, MIPS_EXAMPLES } from '@/features/learn/manifest'
+
 interface Item {
   href: string
   kind: 'example' | 'instruction' | 'learn' | 'route'

@@ -12,6 +12,7 @@
 /* eslint-disable no-await-in-loop, no-continue */
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+
 const RATE_LIMIT_WINDOW_MS = 60_000
 const RATE_LIMIT_MAX = 30
 const fingerprintHash = async (fp: string): Promise<string> => {

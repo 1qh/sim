@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { describe, expect, test } from 'bun:test'
 import { buildGrid, grayCode, isUserCoverComplete, kmap, validateGrouping } from './index'
+
 describe('grayCode', () => {
   test('1-bit', () => {
     expect(grayCode(1)).toEqual([0, 1])

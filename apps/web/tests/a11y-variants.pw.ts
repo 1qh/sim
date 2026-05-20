@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
+
 test('a11y.axe.reduced-motion: home passes AA with reduced-motion emulation', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce' })
   const page = await ctx.newPage()

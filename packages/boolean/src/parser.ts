@@ -14,6 +14,7 @@
 import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'
+
 const Identifier = createToken({ name: 'Identifier', pattern: /[a-zA-Z_][\w]*/u })
 const True = createToken({ longer_alt: Identifier, name: 'True', pattern: /1\b|true|TRUE/u })
 const False = createToken({ longer_alt: Identifier, name: 'False', pattern: /0\b|false|FALSE/u })

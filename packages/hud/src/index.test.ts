@@ -11,6 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { describe, expect, test } from 'bun:test'
 import { buildBreadcrumb, coalesceAnnouncements, dockPanel, formatTelemetry } from './index'
+
 describe('@sim/hud formatTelemetry', () => {
   test('aligns labels to common width', () => {
     const out = formatTelemetry([

@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
+
 const BANNED = [
   '@cloudflare/workers-types',
   'from [\'"]cloudflare:',

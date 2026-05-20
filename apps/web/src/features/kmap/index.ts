@@ -12,6 +12,7 @@
 /* eslint-disable no-bitwise */
 import type { Implicant, SolveResult } from '@sim/boolean'
 import { solve } from '@sim/boolean'
+
 type Geometry = '2d' | '3d-toroidal'
 interface KmapGrid {
   cells: ((0 | 1) | undefined)[]

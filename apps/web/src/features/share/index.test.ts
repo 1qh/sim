@@ -19,6 +19,7 @@ import {
   permalinkPath,
   URL_FRAGMENT_LIMIT_BYTES
 } from './index'
+
 describe('base64url codec', () => {
   test('round-trip byte preservation', () => {
     const bytes = new Uint8Array([0, 1, 2, 254, 255, 100, 200])

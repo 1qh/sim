@@ -20,6 +20,7 @@ import {
   Signal,
   TruthTable
 } from '@/features/learn/islands'
+
 const useMDXComponents = (components: MDXComponents): MDXComponents => ({
   DatapathStep,
   DatapathView,

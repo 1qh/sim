@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import PipelineIsland from '@/features/pipeline/pipeline-island'
+
 const r = (rd: number, rs: number, rt: number, name: 'add' | 'sub' = 'add', funct = 0x20): Instruction => ({
   funct,
   name,

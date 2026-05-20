@@ -15,6 +15,7 @@
 import { $, argv, file, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
+
 const spec = argv[2]
 const titleMatch = argv[3]
 if (spec === undefined || titleMatch === undefined) {

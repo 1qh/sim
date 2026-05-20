@@ -13,6 +13,7 @@
 import { describe, expect, test } from 'bun:test'
 import type { Instruction, RegisterNumber } from '../mips/types'
 import { analyzePipeline, detectWar, detectWaw } from './index'
+
 const r = (rd: number, rs: number, rt: number, name: 'add' | 'and' | 'or' | 'sub' = 'add', funct = 0x20): Instruction => ({
   funct,
   name,

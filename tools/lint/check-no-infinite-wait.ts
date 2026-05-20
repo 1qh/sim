@@ -13,6 +13,7 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
+
 const PATTERNS = [
   String.raw`\buntil\b.*\bdo\b(?![\s\S]{0,400}\bdate\b)`,
   String.raw`\bwhile true\b(?![\s\S]{0,400}AbortSignal\.timeout)`,

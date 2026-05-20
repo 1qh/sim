@@ -13,6 +13,7 @@ import { describe, expect, test } from 'bun:test'
 import type { MachineState } from '@/features/mips/types'
 import { assemble } from './asm-grammar'
 import { createProgram, current, reset, runSyscall, runToCursor, stepBack, stepForward } from './execution'
+
 const prog = (src: string) => createProgram(assemble(src).words)
 describe('execution stepForward / stepBack history', () => {
   test('addi advances pc and is reversible', () => {

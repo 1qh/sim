@@ -14,6 +14,7 @@ import { describe, expect, test } from 'bun:test'
 import type { RegisterNumber } from '../mips/types'
 import { createInitialState, decodeInstruction, encodeInstruction, executeStep, writeRegister } from '../mips/index'
 import { diffMemory, diffRegisters, diffSteps, stepsEqual } from './index'
+
 const makeR = (rd: number, rs: number, rt: number, name: 'add' | 'sub' = 'add', funct = 0x20) => ({
   funct,
   name,

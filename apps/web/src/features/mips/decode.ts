@@ -12,6 +12,7 @@
 import { extractField } from '@sim/bits'
 import type { Instruction, InstructionName, RegisterNumber } from './types'
 import { FUNCT, OPCODE } from './encode'
+
 const R_NAME_BY_FUNCT: Record<number, InstructionName> = {
   [FUNCT.add]: 'add',
   [FUNCT.and]: 'and',
