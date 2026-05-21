@@ -11,66 +11,16 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable @typescript-eslint/require-await */
 import { notFound } from 'next/navigation'
-import type { Instruction, RegisterNumber } from '@/features/mips/types'
-import { criticalComponents, criticalPath } from '@/features/critical-path'
-import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
-import { datapathValues } from '@/features/datapath/values'
-import {
-  controlFor,
-  createInitialState,
-  decodeInstruction,
-  encodeInstruction,
-  executeStep,
-  writeRegister
-} from '@/features/mips'
-import { FUNCT, OPCODE } from '@/features/mips/encode'
+import FocusSandbox from '@/features/datapath/focus/focus-sandbox'
 import { MIPS_NAMES } from '@/lib/nav'
 
-const NAMES = MIPS_NAMES
-const buildInstruction = (name: (typeof NAMES)[number]): Instruction => {
-  const functMap = FUNCT as Record<string, number>
-  const opcodeMap = OPCODE as Record<string, number>
-  if (name in FUNCT) {
-    const funct = functMap[name]
-    if (funct === undefined) throw new Error(`unreachable funct for ${name}`)
-    return {
-      funct,
-      name,
-      rd: 3 as RegisterNumber,
-      rs: 1 as RegisterNumber,
-      rt: 2 as RegisterNumber,
-      shamt: 0,
-      type: 'R' as const
-    }
-  }
-  if (name === 'j') return { name: 'j', opcode: OPCODE.j, target: 0x1_00, type: 'J' }
-  const opcode = opcodeMap[name]
-  if (opcode === undefined) throw new Error(`unreachable opcode for ${name}`)
-  return { imm: 0x10, name, opcode, rs: 1 as RegisterNumber, rt: 2 as RegisterNumber, type: 'I' }
-}
-const generateStaticParams = async () => NAMES.map(name => ({ name }))
+const generateStaticParams = async () => MIPS_NAMES.map(name => ({ name }))
 const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
   const { name } = await params
-  if (!(NAMES as readonly string[]).includes(name)) notFound()
-  const typed = name as (typeof NAMES)[number]
-  const ins = buildInstruction(typed)
-  const ctl = controlFor(ins)
-  const critical = criticalComponents(ins, 'timing')
-  const criticalDelayPs = criticalPath(ins, 'timing').delayPs
-  const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
-  const word = encodeInstruction(ins)
-  const stepRes = executeStep(seeded, word, decodeInstruction(word))
-  const values = datapathValues(seeded, stepRes.nextState, ins)
+  if (!(MIPS_NAMES as readonly string[]).includes(name)) notFound()
   return (
     <main aria-label={`mips-${name}`}>
-      <DatapathWorkspace
-        asmInitial={`${name} $t0, $t1, $t2`}
-        control={ctl}
-        critical={critical}
-        criticalDelayPs={criticalDelayPs}
-        name={name}
-        values={values}
-      />
+      <FocusSandbox name={name} />
     </main>
   )
 }
