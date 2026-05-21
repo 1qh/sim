@@ -57,7 +57,8 @@ const Box = ({
   useFrame(({ clock }) => {
     if (matRef.current === null) return
     const base = selected ? 2 : critical ? 1.8 : active ? 1.3 : 0
-    matRef.current.emissiveIntensity = lit ? base + Math.sin(clock.elapsedTime * 3) * 0.35 : 0
+    const goal = lit ? base + Math.sin(clock.elapsedTime * 3) * 0.35 : 0
+    matRef.current.emissiveIntensity += (goal - matRef.current.emissiveIntensity) * 0.12
   })
   return (
     <mesh onPointerDown={onSelect} position={position}>
