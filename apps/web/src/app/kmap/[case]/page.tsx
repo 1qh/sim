@@ -10,8 +10,8 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, react-perf/jsx-no-new-array-as-prop */
 /* eslint-disable @typescript-eslint/require-await */
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import MapsSurface from '@/components/maps-surface'
 import { kmap } from '@/features/kmap'
 import KmapGrid from '@/features/kmap/scene/kmap-grid'
 import KmapIsland from '@/features/kmap/scene/kmap-island'
@@ -37,28 +37,30 @@ const Page = async ({ params }: { params: Promise<{ case: string }> }) => {
   const config = CASES[caseName]
   if (!config) notFound()
   const result = kmap(config)
+  const info = (
+    <>
+      <div>geometry: {result.geometry}</div>
+      <div>vars: {result.vars.join(', ')}</div>
+      <div>SOP: {result.minimalSop}</div>
+      <div>POS: {result.minimalPos}</div>
+      <div>prime implicants: {result.primeImplicants.length}</div>
+      <div>essential PIs: {result.essentialPrimeImplicants.length}</div>
+    </>
+  )
   return (
-    <main aria-label={`kmap-${caseName}`} className='flex min-h-screen flex-col gap-8 p-8'>
-      <h1 className='text-3xl font-bold'>K-map · {caseName}</h1>
-      <section aria-label='kmap-result' className='space-y-1 rounded-lg border p-4 font-mono text-sm'>
-        <div>geometry: {result.geometry}</div>
-        <div>vars: {result.vars.join(', ')}</div>
-        <div>SOP: {result.minimalSop}</div>
-        <div>POS: {result.minimalPos}</div>
-        <div>prime implicants: {result.primeImplicants.length}</div>
-        <div>essential PIs: {result.essentialPrimeImplicants.length}</div>
-      </section>
-      {config.vars.length >= 5 ? (
-        <KmapIsland
-          truthTable={buildTruthTable(config.vars.length, config.minterms ?? [], config.dontCares ?? [])}
-          vars={config.vars.length}
-        />
-      ) : (
-        <KmapGrid minterms={config.minterms ?? []} vars={config.vars.length} />
-      )}
-      <Link className='text-sm underline' href='/kmap'>
-        back
-      </Link>
+    <main aria-label={`kmap-${caseName}`}>
+      <MapsSurface info={info} label={`K-map · ${caseName}`}>
+        {config.vars.length >= 5 ? (
+          <KmapIsland
+            truthTable={buildTruthTable(config.vars.length, config.minterms ?? [], config.dontCares ?? [])}
+            vars={config.vars.length}
+          />
+        ) : (
+          <div className='flex size-full items-center justify-center overflow-auto p-8'>
+            <KmapGrid minterms={config.minterms ?? []} vars={config.vars.length} />
+          </div>
+        )}
+      </MapsSurface>
     </main>
   )
 }

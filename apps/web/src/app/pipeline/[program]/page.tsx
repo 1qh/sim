@@ -10,9 +10,9 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable @typescript-eslint/max-params, @typescript-eslint/require-await */
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
+import MapsSurface from '@/components/maps-surface'
 import PipelineIsland from '@/features/pipeline/pipeline-island'
 
 const r = (rd: number, rs: number, rt: number, name: 'add' | 'sub' = 'add', funct = 0x20): Instruction => ({
@@ -54,12 +54,12 @@ const Page = async ({ params }: { params: Promise<{ program: string }> }) => {
   const config = PROGRAMS[program]
   if (!config) notFound()
   return (
-    <main aria-label={`pipeline-${program}`} className='flex min-h-screen flex-col gap-8 p-8'>
-      <h1 className='text-3xl font-bold'>Pipeline · {program}</h1>
-      <PipelineIsland instructions={config.instructions} />
-      <Link className='text-sm underline' href='/pipeline'>
-        back
-      </Link>
+    <main aria-label={`pipeline-${program}`}>
+      <MapsSurface label={`Pipeline · ${program}`}>
+        <div className='size-full overflow-auto pt-20 pr-6 pb-8 pl-16'>
+          <PipelineIsland instructions={config.instructions} />
+        </div>
+      </MapsSurface>
     </main>
   )
 }
