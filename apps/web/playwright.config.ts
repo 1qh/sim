@@ -9,6 +9,7 @@ export default defineConfig({
   testMatch: '**/*.pw.ts',
   use: {
     baseURL: 'http://127.0.0.1:3000',
+    contextOptions: { reducedMotion: 'reduce' },
     trace: 'off'
   },
   webServer: {

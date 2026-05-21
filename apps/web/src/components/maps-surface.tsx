@@ -24,7 +24,7 @@ const MapsSurface = ({
 }): React.JSX.Element => (
   <div className='fixed inset-0'>
     <div className='size-full'>{children}</div>
-    <div className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>{label}</div>
+    <h1 className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>{label}</h1>
     {info === undefined ? undefined : (
       <div className={cn('absolute top-4 right-4 flex max-w-80 flex-col gap-1 p-3 font-mono text-xs', PANEL)}>{info}</div>
     )}

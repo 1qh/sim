@@ -92,7 +92,7 @@ const DatapathWorkspace = ({
         showCritical={showCritical}
         step={step}
       />
-      <div className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</div>
+      <h1 className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
       {editorOpen ? (
         <div
           className={cn(
