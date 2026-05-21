@@ -63,6 +63,12 @@ const REG_NAMES = [
   '$fp',
   '$ra'
 ]
+const EXAMPLES = [
+  { name: 'sum', src: 'addi $t0, $zero, 5\naddi $t1, $zero, 7\nadd $t2, $t0, $t1' },
+  { name: 'shift', src: 'addi $t0, $zero, 3\nsll $t1, $t0, 4\nsrl $t2, $t1, 2' },
+  { name: 'mask', src: 'addi $t0, $zero, 255\nandi $t1, $t0, 15\nori $t2, $t1, 240' },
+  { name: 'branch', src: 'addi $t0, $zero, 4\naddi $t1, $zero, 4\nbeq $t0, $t1, 2' }
+]
 const STEP_SET = new Set<string>(STEPS)
 const readParam = (key: string): string | undefined => {
   if (typeof window === 'undefined') return
@@ -103,6 +109,7 @@ const DatapathWorkspace = ({
   const [playing, setPlaying] = useState(false)
   const [liveProgram, setLiveProgram] = useState<readonly Instruction[]>([])
   const [insIndex, setInsIndex] = useState(0)
+  const [presetSrc, setPresetSrc] = useState<string | undefined>(undefined)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
@@ -112,9 +119,20 @@ const DatapathWorkspace = ({
   }, [step, selected])
   useEffect(() => {
     if (!playing) return
-    const id = setInterval(() => setStep(s => STEPS[(STEPS.indexOf(s) + 1) % STEPS.length] ?? 'IF'), 1100)
+    const id = setInterval(() => {
+      setStep(s => {
+        const si = STEPS.indexOf(s)
+        if (si < STEPS.length - 1) return STEPS[si + 1] ?? 'IF'
+        setInsIndex(i => {
+          if (i < liveProgram.length - 1) return i + 1
+          setPlaying(false)
+          return i
+        })
+        return 'IF'
+      })
+    }, 900)
     return () => clearInterval(id)
-  }, [playing])
+  }, [playing, liveProgram.length])
   const live = useMemo(() => {
     if (liveProgram.length === 0) return
     const idx = Math.min(insIndex, liveProgram.length - 1)
@@ -187,13 +205,25 @@ const DatapathWorkspace = ({
             PANEL
           )}>
           <div className='flex items-center justify-between'>
-            <span className='font-mono text-xs text-muted-foreground'>assembly</span>
+            <span className='font-mono text-xs text-muted-foreground'>assembly · type to drive the datapath</span>
             <button onClick={() => setEditorOpen(false)} type='button'>
               <ChevronLeft className='size-4' />
             </button>
           </div>
+          <div className='flex flex-wrap gap-1'>
+            {EXAMPLES.map(ex => (
+              <button
+                className='rounded border px-2 py-0.5 text-xs hover:bg-muted'
+                key={ex.name}
+                onClick={() => setPresetSrc(ex.src)}
+                type='button'>
+                {ex.name}
+              </button>
+            ))}
+          </div>
           <AsmEditor
-            initial={asmInitial}
+            initial={presetSrc ?? asmInitial}
+            key={presetSrc ?? 'init'}
             onAssembled={ins => {
               setLiveProgram(ins)
               setInsIndex(0)
