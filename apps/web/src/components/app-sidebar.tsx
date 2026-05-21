@@ -17,16 +17,15 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
-  SidebarMenuSubItem
+  SidebarMenuSubItem,
+  SidebarRail
 } from '@a/ui/sidebar'
-import { ChevronRight, Cpu } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { NavSection } from '@/lib/nav'
@@ -77,22 +76,11 @@ const AppSidebar = (): React.JSX.Element => {
   const pathname = usePathname()
   return (
     <Sidebar collapsible='icon'>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton render={<Link href='/' />} size='lg' tooltip='sim'>
-              <Cpu className='size-5' />
-              <span className='font-bold'>sim</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Visualizers</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV.map(section => (
+              {NAV.filter(section => section.href !== '/').map(section => (
                 <Section key={section.href} pathname={pathname} section={section} />
               ))}
             </SidebarMenu>
@@ -106,6 +94,7 @@ const AppSidebar = (): React.JSX.Element => {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }
