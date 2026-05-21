@@ -46,6 +46,7 @@ services:
       retries: 12
   next-app:
     image: ghcr.io/1qh/sim-web:latest
+    pull_policy: always
     restart: unless-stopped
     depends_on:
       convex-backend:
