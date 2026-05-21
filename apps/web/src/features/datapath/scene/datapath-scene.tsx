@@ -12,39 +12,43 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, unicorn/filename-case, react/no-unknown-property, react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop, eslint/no-bitwise */
 /* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
 'use client'
-import { cn } from '@a/ui'
 import { OrbitControls, Text } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Vector3 } from 'three'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
-import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
+import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS, PATHS } from '@/features/datapath/generated/topology'
 
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
 const SILICON = '#9aa3ad'
 const SUBSTRATE = '#0b0f14'
+const SELECTED = '#a855f7'
 const Box = ({
   position,
   size,
   active,
-  critical
+  critical,
+  selected,
+  onSelect
 }: {
   active: boolean
   critical: boolean
+  onSelect: () => void
   position: readonly [number, number, number]
+  selected: boolean
   size: readonly [number, number, number]
 }) => {
-  const color = critical ? CRITICAL : active ? ACCENT : SILICON
+  const color = selected ? SELECTED : critical ? CRITICAL : active ? ACCENT : SILICON
   return (
-    <mesh position={position}>
+    <mesh onPointerDown={onSelect} position={position}>
       <boxGeometry args={size} />
       <meshStandardMaterial
         color={color}
-        emissive={critical || active ? color : SUBSTRATE}
-        emissiveIntensity={critical ? 1.8 : active ? 1.4 : 0}
+        emissive={selected || critical || active ? color : SUBSTRATE}
+        emissiveIntensity={selected ? 2 : critical ? 1.8 : active ? 1.4 : 0}
         metalness={0.85}
         roughness={0.42}
       />
@@ -63,18 +67,20 @@ const Wire = ({ from, to, active }: { active: boolean; from: Vector3; to: Vector
   )
 }
 const DatapathScene = ({
-  name,
   control,
   critical,
-  criticalDelayPs
+  step,
+  showCritical,
+  selected,
+  onSelect
 }: {
   control: ControlSignals
   critical: readonly string[]
-  criticalDelayPs: number
-  name: string
+  onSelect: (id: string) => void
+  selected: string | undefined
+  showCritical: boolean
+  step: Step
 }) => {
-  const [step, setStep] = useState<Step>('EX')
-  const [showCritical, setShowCritical] = useState(false)
   const criticalSet = useMemo(() => new Set(critical), [critical])
   const center = useMemo(() => new Map(COMPONENTS.map(c => [c.id, new Vector3(...c.pos)])), [])
   const wires = useMemo(() => {
@@ -89,61 +95,41 @@ const DatapathScene = ({
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   return (
-    <div className='flex flex-col gap-2'>
-      <div aria-label='datapath step' className='flex gap-2' role='tablist'>
-        {STEPS.map(s => (
-          <button
-            aria-selected={s === step}
-            className={cn('rounded px-3 py-1 text-sm', s === step ? 'bg-primary' : 'border')}
-            key={s}
-            onClick={() => setStep(s)}
-            role='tab'
-            type='button'>
-            {s}
-          </button>
+    <div className='size-full' data-testid='datapath-canvas'>
+      <Canvas camera={{ fov: 42, position: [0, 6, 18] }}>
+        <color args={[SUBSTRATE]} attach='background' />
+        <ambientLight intensity={0.6} />
+        <directionalLight intensity={1.1} position={[6, 10, 8]} />
+        {wires.map(w => (
+          <Wire active={activeP.has(w.id)} from={w.from} key={w.id} to={w.to} />
         ))}
-        <button
-          aria-pressed={showCritical}
-          className={cn('ml-auto rounded px-3 py-1 text-sm', showCritical ? 'bg-primary' : 'border')}
-          onClick={() => setShowCritical(v => !v)}
-          type='button'>
-          critical path
-        </button>
-      </div>
-      <div
-        className='h-[calc(100vh-9rem)] min-h-[420px] w-full overflow-hidden rounded-lg border'
-        data-testid='datapath-canvas'>
-        <Canvas camera={{ fov: 42, position: [0, 6, 18] }}>
-          <color args={[SUBSTRATE]} attach='background' />
-          <ambientLight intensity={0.6} />
-          <directionalLight intensity={1.1} position={[6, 10, 8]} />
-          {wires.map(w => (
-            <Wire active={activeP.has(w.id)} from={w.from} key={w.id} to={w.to} />
-          ))}
-          {COMPONENTS.map(c => {
-            const isCritical = showCritical && criticalSet.has(c.id)
-            const isActive = activeC.has(c.id)
-            const labelColor = isCritical ? CRITICAL : isActive ? ACCENT : '#cbd5e1'
-            return (
-              <group key={c.id}>
-                <Box active={isActive} critical={isCritical} position={c.pos} size={c.size} />
-                <Text
-                  anchorX='center'
-                  color={labelColor}
-                  fontSize={0.42}
-                  position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.4, c.pos[2]]}>
-                  {c.id}
-                </Text>
-              </group>
-            )
-          })}
-          <OrbitControls enablePan makeDefault />
-        </Canvas>
-      </div>
-      <p className='font-mono text-xs text-muted-foreground'>
-        {name} · step {step} · {activeC.size} components / {activeP.size} paths active
-        {showCritical ? ` · critical ${critical.length} components · ${criticalDelayPs} ps` : ''}
-      </p>
+        {COMPONENTS.map(c => {
+          const isCritical = showCritical && criticalSet.has(c.id)
+          const isActive = activeC.has(c.id)
+          const isSelected = selected === c.id
+          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : isActive ? ACCENT : '#cbd5e1'
+          return (
+            <group key={c.id}>
+              <Box
+                active={isActive}
+                critical={isCritical}
+                onSelect={() => onSelect(c.id)}
+                position={c.pos}
+                selected={isSelected}
+                size={c.size}
+              />
+              <Text
+                anchorX='center'
+                color={labelColor}
+                fontSize={0.42}
+                position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.4, c.pos[2]]}>
+                {c.id}
+              </Text>
+            </group>
+          )
+        })}
+        <OrbitControls enablePan makeDefault />
+      </Canvas>
     </div>
   )
 }

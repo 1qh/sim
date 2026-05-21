@@ -14,17 +14,9 @@ import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
-import AsmEditor from '@/features/datapath/asm-editor'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
-import DatapathIsland from '@/features/datapath/scene/datapath-island'
-import {
-  controlFor,
-  createInitialState,
-  decodeInstruction,
-  encodeInstruction,
-  executeStep,
-  writeRegister
-} from '@/features/mips'
+import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
+import { controlFor } from '@/features/mips'
 import { FUNCT, OPCODE } from '@/features/mips/encode'
 import { MIPS_NAMES } from '@/lib/nav'
 
@@ -56,32 +48,18 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
   if (!(NAMES as readonly string[]).includes(name)) notFound()
   const typed = name as (typeof NAMES)[number]
   const ins = buildInstruction(typed)
-  const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
-  const word = encodeInstruction(ins)
-  const decoded = decodeInstruction(word)
-  const step = executeStep(seeded, word, decoded)
   const ctl = controlFor(ins)
   const critical = criticalComponents(ins, 'timing')
   const criticalDelayPs = criticalPath(ins, 'timing').delayPs
   return (
-    <main aria-label={`mips-${name}`} className='flex min-h-screen flex-col gap-8 p-8'>
-      <h1 className='text-3xl font-bold'>MIPS · {name}</h1>
-      <section aria-label='execution-step' className='space-y-1 rounded-lg border p-4 font-mono text-sm'>
-        <div>word: 0x{word.toString(16).padStart(8, '0')}</div>
-        <div>
-          instruction: {decoded.name} ({decoded.type})
-        </div>
-        <div>nextPc: 0x{step.nextPc.toString(16)}</div>
-        <div>
-          control: RegDst={ctl.RegDst} ALUSrc={ctl.ALUSrc} MemToReg={ctl.MemToReg} RegWrite={ctl.RegWrite}
-        </div>
-        <div>
-          {' '}
-          MemRead={ctl.MemRead} MemWrite={ctl.MemWrite} Branch={ctl.Branch} BranchNE={ctl.BranchNE} ALUOp={ctl.ALUOp}
-        </div>
-      </section>
-      <AsmEditor initial={`${name} $t0, $t1, $t2`} />
-      <DatapathIsland control={ctl} critical={critical} criticalDelayPs={criticalDelayPs} name={name} />
+    <main aria-label={`mips-${name}`}>
+      <DatapathWorkspace
+        asmInitial={`${name} $t0, $t1, $t2`}
+        control={ctl}
+        critical={critical}
+        criticalDelayPs={criticalDelayPs}
+        name={name}
+      />
       <DatapathA11yProxies activeComponents={componentsForPaths(activePaths(ctl, 'EX'))} control={ctl} name={name} />
     </main>
   )
