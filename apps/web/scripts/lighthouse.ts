@@ -11,7 +11,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable no-promise-executor-return, @typescript-eslint/strict-void-return, no-await-in-loop, no-console */
+/* eslint-disable no-await-in-loop, no-console */
 import { $, argv, file, spawn, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
@@ -37,7 +37,9 @@ const readCache = async (path: string): Promise<Score | undefined> => {
 const audit = async (): Promise<void> => {
   mkdirSync(cacheDir, { recursive: true })
   const server = spawn(['bun', 'run', 'start', '--', '-p', '3000'], { stderr: 'pipe', stdout: 'pipe' })
-  await new Promise(r => setTimeout(r, 3000))
+  await new Promise(r => {
+    setTimeout(r, 3000)
+  })
   for (const path of ROUTES) {
     const tmp = `/tmp/lh-${slug(path)}.json`
     await $`bunx lighthouse http://127.0.0.1:3000${path} --quiet --chrome-flags=--headless --output=json --output-path=${tmp}`
@@ -57,7 +59,10 @@ const ensureCache = async (): Promise<void> => {
   try {
     mkdirSync(lockDir)
   } catch {
-    while (existsSync(lockDir) && !existsSync(`${cacheDir}/_root.json`)) await new Promise(r => setTimeout(r, 1000))
+    while (existsSync(lockDir) && !existsSync(`${cacheDir}/_root.json`))
+      await new Promise(r => {
+        setTimeout(r, 1000)
+      })
     return
   }
   try {

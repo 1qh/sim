@@ -11,7 +11,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable promise/param-names */
-/* eslint-disable no-promise-executor-return, @typescript-eslint/strict-void-return, no-await-in-loop, no-console */
+/* eslint-disable no-await-in-loop, no-console */
 import { $, argv, file, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
@@ -56,7 +56,10 @@ const ensureCache = async (): Promise<void> => {
   try {
     mkdirSync(lockDir)
   } catch {
-    while (!existsSync(cacheFile)) await new Promise(r => setTimeout(r, 1000))
+    while (!existsSync(cacheFile))
+      await new Promise(r => {
+        setTimeout(r, 1000)
+      })
     return
   }
   try {

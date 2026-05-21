@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise */
+/* eslint-disable @typescript-eslint/prefer-destructuring, @typescript-eslint/switch-exhaustiveness-check, no-bitwise */
 import { addU32, signExtend, subU32 } from '@sim/bits'
 import type { ControlSignals, ExecutionStep, Instruction, MachineState, RegisterNumber } from './types'
 
@@ -32,6 +32,7 @@ const zeroRegisters = (): Record<RegisterNumber, number> => {
   return r
 }
 const createInitialState = (): MachineState => ({ dataMemory: {}, pc: 0, registers: zeroRegisters() })
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 const readRegister = (state: MachineState, reg: RegisterNumber): number => state.registers[reg] ?? 0
 const writeRegister = (state: MachineState, reg: RegisterNumber, value: number): MachineState => {
   if (reg === 0) return state
