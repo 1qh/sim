@@ -20,17 +20,22 @@ interface Pane {
   criticalDelayPs: number
   name: string
 }
+const noop = (): undefined => undefined
 const ComparePane = ({ pane, side }: { pane: Pane; side: 'left' | 'right' }): React.JSX.Element => (
   <section aria-label={`compare ${side}: ${pane.name}`} className='flex min-w-0 flex-1 flex-col gap-2'>
     <h2 className='font-mono text-sm text-muted-foreground'>
       {side} · {pane.name}
     </h2>
-    <DatapathIsland
-      control={pane.control}
-      critical={pane.critical}
-      criticalDelayPs={pane.criticalDelayPs}
-      name={pane.name}
-    />
+    <div className='h-[60vh] overflow-hidden rounded-lg border'>
+      <DatapathIsland
+        control={pane.control}
+        critical={pane.critical}
+        onSelect={noop}
+        selected={undefined}
+        showCritical={false}
+        step='EX'
+      />
+    </div>
   </section>
 )
 const CompareIsland = ({

@@ -15,13 +15,10 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@a/ui/sidebar'
 import AppSidebar from './app-sidebar'
 
 const AppShell = ({ children }: { children: ReactNode }): React.JSX.Element => (
-  <SidebarProvider>
+  <SidebarProvider defaultOpen={false}>
     <AppSidebar />
     <SidebarInset>
-      <header className='flex h-12 items-center gap-2 border-b px-4'>
-        <SidebarTrigger />
-        <span className='font-mono text-sm text-muted-foreground'>sim · ⌘K to search</span>
-      </header>
+      <SidebarTrigger className='fixed top-4 left-4 z-20 rounded-lg border bg-background/80 shadow-lg backdrop-blur-md' />
       {children}
     </SidebarInset>
   </SidebarProvider>
