@@ -19,6 +19,7 @@ const ThemeToggle = (): React.JSX.Element => {
   const { resolvedTheme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setMounted(true)
   }, [])
   const dark = mounted && resolvedTheme === 'dark'
