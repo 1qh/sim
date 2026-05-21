@@ -160,7 +160,7 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         view={view}
       />
       <div className={cn('absolute top-4 left-4 flex items-center gap-3 px-3 py-1.5 font-mono text-sm', PANEL)}>
-        <span>MIPS · {name}</span>
+        <h1>MIPS · {name}</h1>
         <span className='rounded bg-muted px-1.5 text-xs text-muted-foreground'>{fmt.kind}-type</span>
         <Link className='flex items-center gap-1 text-xs text-[#22d3ee] hover:underline' href='/mips/assembly'>
           assembly <ArrowRight className='size-3' />
