@@ -8,18 +8,29 @@
 /** biome-ignore-all lint/performance/noNamespaceImport: noise */
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity */
+/* eslint-disable complexity */
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, Code2, Pause, Play, Route, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
-import type { ControlSignals } from '@/features/mips/types'
+import type { ControlSignals, Instruction } from '@/features/mips/types'
+import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
+import { datapathValues } from '@/features/datapath/values'
+import {
+  controlFor,
+  createInitialState,
+  decodeInstruction,
+  encodeInstruction,
+  executeStep,
+  writeRegister
+} from '@/features/mips'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
@@ -62,6 +73,7 @@ const DatapathWorkspace = ({
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
   const [playing, setPlaying] = useState(false)
+  const [liveIns, setLiveIns] = useState<Instruction | undefined>(undefined)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
@@ -74,19 +86,35 @@ const DatapathWorkspace = ({
     const id = setInterval(() => setStep(s => STEPS[(STEPS.indexOf(s) + 1) % STEPS.length] ?? 'IF'), 1100)
     return () => clearInterval(id)
   }, [playing])
-  const valueEntries = useMemo(() => Object.entries(values), [values])
+  const live = useMemo(() => {
+    if (liveIns === undefined) return
+    const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
+    const word = encodeInstruction(liveIns)
+    const stepRes = executeStep(seeded, word, decodeInstruction(word))
+    return {
+      control: controlFor(liveIns),
+      critical: criticalComponents(liveIns, 'timing'),
+      criticalDelayPs: criticalPath(liveIns, 'timing').delayPs,
+      values: datapathValues(seeded, stepRes.nextState, liveIns)
+    }
+  }, [liveIns])
+  const aControl = live?.control ?? control
+  const aCritical = live?.critical ?? critical
+  const aDelay = live?.criticalDelayPs ?? criticalDelayPs
+  const aValues = live?.values ?? values
+  const valueEntries = useMemo(() => Object.entries(aValues), [aValues])
   const dismissHint = (): void => {
     setHint(false)
     localStorage.setItem(HINT_KEY, '1')
   }
-  const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
+  const activeP = useMemo(() => new Set(activePaths(aControl, step)), [aControl, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activeList = useMemo(() => [...activeC], [activeC])
   return (
     <div className='fixed inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathIsland
-        control={control}
-        critical={critical}
+        control={aControl}
+        critical={aCritical}
         onSelect={setSelected}
         selected={selected}
         showCritical={showCritical}
@@ -105,7 +133,7 @@ const DatapathWorkspace = ({
               <ChevronLeft className='size-4' />
             </button>
           </div>
-          <AsmEditor initial={asmInitial} />
+          <AsmEditor initial={asmInitial} onAssembled={ins => setLiveIns(ins[0])} />
         </div>
       ) : (
         <button
@@ -121,14 +149,14 @@ const DatapathWorkspace = ({
           step {step} · {activeC.size} components / {activeP.size} paths active
         </div>
         <div>
-          RegDst={control.RegDst} ALUSrc={control.ALUSrc} MemToReg={control.MemToReg} RegWrite={control.RegWrite}
+          RegDst={aControl.RegDst} ALUSrc={aControl.ALUSrc} MemToReg={aControl.MemToReg} RegWrite={aControl.RegWrite}
         </div>
         <div>
-          MemRead={control.MemRead} MemWrite={control.MemWrite} Branch={control.Branch} ALUOp={control.ALUOp}
+          MemRead={aControl.MemRead} MemWrite={aControl.MemWrite} Branch={aControl.Branch} ALUOp={aControl.ALUOp}
         </div>
         {showCritical ? (
           <div className='text-[#f97316]'>
-            critical: {critical.length} components · {criticalDelayPs} ps
+            critical: {aCritical.length} components · {aDelay} ps
           </div>
         ) : undefined}
       </div>
@@ -145,14 +173,14 @@ const DatapathWorkspace = ({
             </button>
           </div>
           <p className='mt-2 text-sm'>{ROLE.get(selected) ?? 'datapath component'}</p>
-          {values[selected] === undefined ? undefined : (
-            <p className='mt-2 rounded bg-muted/50 px-2 py-1 font-mono text-sm text-[#22d3ee]'>{values[selected]}</p>
+          {aValues[selected] === undefined ? undefined : (
+            <p className='mt-2 rounded bg-muted/50 px-2 py-1 font-mono text-sm text-[#22d3ee]'>{aValues[selected]}</p>
           )}
           <ul className='mt-2 space-y-0.5 font-mono text-xs text-muted-foreground'>
             <li>
               active in {step}: {activeC.has(selected) ? 'yes' : 'no'}
             </li>
-            <li>on critical path: {critical.includes(selected) ? 'yes' : 'no'}</li>
+            <li>on critical path: {aCritical.includes(selected) ? 'yes' : 'no'}</li>
           </ul>
         </div>
       )}
@@ -218,7 +246,7 @@ const DatapathWorkspace = ({
       </div>
       <DatapathA11yProxies
         activeComponents={activeList}
-        control={control}
+        control={aControl}
         name={name}
         onSelect={setSelected}
         selected={selected}
