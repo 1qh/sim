@@ -42,9 +42,7 @@ const ToroidalKmap = ({ vars, truthTable }: { truthTable: readonly (0 | 1 | 'X')
     return out
   }, [major, minor, truthTable])
   return (
-    <div
-      className='h-[calc(100vh-9rem)] min-h-[420px] w-full overflow-hidden rounded-lg border'
-      data-testid='kmap-torus-canvas'>
+    <div className='size-full' data-testid='kmap-torus-canvas'>
       <Canvas camera={{ fov: 45, position: [0, 8, 18] }}>
         <color args={[SUBSTRATE]} attach='background' />
         <ambientLight intensity={0.6} />

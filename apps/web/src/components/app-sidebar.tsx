@@ -14,6 +14,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@a/ui/colla
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -30,6 +31,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import type { NavSection } from '@/lib/nav'
 import { NAV } from '@/lib/nav'
+import ThemeToggle from './theme-toggle'
 
 const onSection = (pathname: string, href: string): boolean =>
   href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -97,6 +99,13 @@ const AppSidebar = (): React.JSX.Element => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <ThemeToggle />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   )
 }
