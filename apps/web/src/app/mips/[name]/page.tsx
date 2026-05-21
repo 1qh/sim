@@ -14,7 +14,15 @@ import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
-import { controlFor } from '@/features/mips'
+import { datapathValues } from '@/features/datapath/values'
+import {
+  controlFor,
+  createInitialState,
+  decodeInstruction,
+  encodeInstruction,
+  executeStep,
+  writeRegister
+} from '@/features/mips'
 import { FUNCT, OPCODE } from '@/features/mips/encode'
 import { MIPS_NAMES } from '@/lib/nav'
 
@@ -49,6 +57,10 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
   const ctl = controlFor(ins)
   const critical = criticalComponents(ins, 'timing')
   const criticalDelayPs = criticalPath(ins, 'timing').delayPs
+  const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
+  const word = encodeInstruction(ins)
+  const stepRes = executeStep(seeded, word, decodeInstruction(word))
+  const values = datapathValues(seeded, stepRes.nextState, ins)
   return (
     <main aria-label={`mips-${name}`}>
       <DatapathWorkspace
@@ -57,6 +69,7 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
         critical={critical}
         criticalDelayPs={criticalDelayPs}
         name={name}
+        values={values}
       />
     </main>
   )

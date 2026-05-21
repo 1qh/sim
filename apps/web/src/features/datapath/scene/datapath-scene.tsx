@@ -166,7 +166,8 @@ const DatapathScene = ({
           const isCritical = showCritical && criticalSet.has(c.id)
           const isActive = activeC.has(c.id)
           const isSelected = selected === c.id
-          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : isActive ? ACCENT : palette.label
+          const lit = isSelected || isCritical || isActive
+          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : ACCENT
           return (
             <group key={c.id}>
               <Box
@@ -178,13 +179,17 @@ const DatapathScene = ({
                 selected={isSelected}
                 size={c.size}
               />
-              <Text
-                anchorX='center'
-                color={labelColor}
-                fontSize={0.42}
-                position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.4, c.pos[2]]}>
-                {c.id}
-              </Text>
+              {lit ? (
+                <Text
+                  anchorX='center'
+                  color={labelColor}
+                  fontSize={0.5}
+                  outlineColor={palette.substrate}
+                  outlineWidth={0.04}
+                  position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.4, c.pos[2]]}>
+                  {c.id}
+                </Text>
+              ) : undefined}
             </group>
           )
         })}
