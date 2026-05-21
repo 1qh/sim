@@ -13,8 +13,6 @@
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
-import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
-import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
 import { controlFor } from '@/features/mips'
 import { FUNCT, OPCODE } from '@/features/mips/encode'
@@ -60,7 +58,6 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
         criticalDelayPs={criticalDelayPs}
         name={name}
       />
-      <DatapathA11yProxies activeComponents={componentsForPaths(activePaths(ctl, 'EX'))} control={ctl} name={name} />
     </main>
   )
 }
