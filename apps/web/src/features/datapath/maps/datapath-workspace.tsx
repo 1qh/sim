@@ -12,25 +12,19 @@
 /* eslint-disable complexity */
 'use client'
 import { cn } from '@a/ui'
-import { ChevronLeft, Code2, Pause, Play, Route, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals, Instruction } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
+import { createProgram, current, stepForward } from '@/features/datapath/execution'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
 import { datapathValues } from '@/features/datapath/values'
-import {
-  controlFor,
-  createInitialState,
-  decodeInstruction,
-  encodeInstruction,
-  executeStep,
-  writeRegister
-} from '@/features/mips'
+import { controlFor, encodeInstruction } from '@/features/mips'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
@@ -73,7 +67,8 @@ const DatapathWorkspace = ({
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
   const [playing, setPlaying] = useState(false)
-  const [liveIns, setLiveIns] = useState<Instruction | undefined>(undefined)
+  const [liveProgram, setLiveProgram] = useState<readonly Instruction[]>([])
+  const [insIndex, setInsIndex] = useState(0)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
@@ -87,17 +82,24 @@ const DatapathWorkspace = ({
     return () => clearInterval(id)
   }, [playing])
   const live = useMemo(() => {
-    if (liveIns === undefined) return
-    const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
-    const word = encodeInstruction(liveIns)
-    const stepRes = executeStep(seeded, word, decodeInstruction(word))
+    if (liveProgram.length === 0) return
+    const idx = Math.min(insIndex, liveProgram.length - 1)
+    const ins = liveProgram[idx]
+    if (ins === undefined) return
+    const words = liveProgram.map(encodeInstruction)
+    let prog = createProgram(words)
+    for (let i = 0; i < idx; i += 1) prog = stepForward(prog)
+    const before = current(prog)
+    const after = current(stepForward(prog))
     return {
-      control: controlFor(liveIns),
-      critical: criticalComponents(liveIns, 'timing'),
-      criticalDelayPs: criticalPath(liveIns, 'timing').delayPs,
-      values: datapathValues(seeded, stepRes.nextState, liveIns)
+      control: controlFor(ins),
+      count: liveProgram.length,
+      critical: criticalComponents(ins, 'timing'),
+      criticalDelayPs: criticalPath(ins, 'timing').delayPs,
+      idx,
+      values: datapathValues(before, after, ins)
     }
-  }, [liveIns])
+  }, [liveProgram, insIndex])
   const aControl = live?.control ?? control
   const aCritical = live?.critical ?? critical
   const aDelay = live?.criticalDelayPs ?? criticalDelayPs
@@ -133,7 +135,13 @@ const DatapathWorkspace = ({
               <ChevronLeft className='size-4' />
             </button>
           </div>
-          <AsmEditor initial={asmInitial} onAssembled={ins => setLiveIns(ins[0])} />
+          <AsmEditor
+            initial={asmInitial}
+            onAssembled={ins => {
+              setLiveProgram(ins)
+              setInsIndex(0)
+            }}
+          />
         </div>
       ) : (
         <button
@@ -184,6 +192,33 @@ const DatapathWorkspace = ({
           </ul>
         </div>
       )}
+      {live !== undefined && live.count > 1 ? (
+        <div
+          className={cn(
+            '-translate-x-1/2 absolute bottom-32 left-1/2 flex items-center gap-2 px-2 py-1 font-mono text-xs',
+            PANEL
+          )}>
+          <button
+            aria-label='previous instruction'
+            className='rounded p-1 hover:bg-muted disabled:opacity-40'
+            disabled={live.idx === 0}
+            onClick={() => setInsIndex(i => Math.max(0, i - 1))}
+            type='button'>
+            <ChevronLeft className='size-4' />
+          </button>
+          <span>
+            instr {live.idx + 1}/{live.count} · {liveProgram[live.idx]?.name}
+          </span>
+          <button
+            aria-label='next instruction'
+            className='rounded p-1 hover:bg-muted disabled:opacity-40'
+            disabled={live.idx >= live.count - 1}
+            onClick={() => setInsIndex(i => Math.min(live.count - 1, i + 1))}
+            type='button'>
+            <ChevronRight className='size-4' />
+          </button>
+        </div>
+      ) : undefined}
       <div
         aria-label='datapath step'
         className={cn('-translate-x-1/2 absolute bottom-6 left-1/2 flex items-center gap-1 p-1.5', PANEL)}
