@@ -1,4 +1,0 @@
-[
-  { "name": "next-build-chunks", "path": ".next/static/chunks/*.js", "limit": "1.5 MB", "brotli": false },
-  { "name": "next-build-css", "path": ".next/static/chunks/*.css", "limit": "250 KB", "brotli": false }
-]
