@@ -20,9 +20,11 @@ import type { RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import { buildInstruction, decodeFields, formatOf } from '@/features/datapath/build-instruction'
+import DatapathCanvas from '@/features/datapath/datapath-canvas'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
-import DatapathIsland from '@/features/datapath/scene/datapath-island'
+import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
+import ViewToggle from '@/features/datapath/view-toggle'
 import {
   controlFor,
   createInitialState,
@@ -143,15 +145,19 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const has = (f: Field): boolean => fmt.fields.includes(f)
   const activeList = useMemo(() => [...activeC], [activeC])
+  const { view, setView, mounted } = useViewMode()
   return (
     <div className='absolute inset-0'>
-      <DatapathIsland
+      <DatapathCanvas
         control={model.control}
         critical={model.critical}
+        mounted={mounted}
         onSelect={setSelected}
         selected={selected}
         showCritical={showCritical}
         step={step}
+        values={model.values}
+        view={view}
       />
       <div className={cn('absolute top-4 left-4 flex items-center gap-3 px-3 py-1.5 font-mono text-sm', PANEL)}>
         <span>MIPS · {name}</span>
@@ -159,6 +165,9 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         <Link className='flex items-center gap-1 text-xs text-[#22d3ee] hover:underline' href='/mips/assembly'>
           assembly <ArrowRight className='size-3' />
         </Link>
+      </div>
+      <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
+        <ViewToggle setView={setView} view={view} />
       </div>
       <div className={cn('absolute top-16 left-4 flex w-60 flex-col gap-1.5 p-3 font-mono text-xs', PANEL)}>
         <div className='text-muted-foreground'>operands</div>
