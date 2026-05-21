@@ -16,7 +16,7 @@ import type { Mesh, MeshStandardMaterial } from 'three'
 import { OrbitControls, Text } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useTheme } from 'next-themes'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Vector3 } from 'three'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
@@ -34,6 +34,18 @@ interface Palette {
 }
 const DARK: Palette = { idle: '#9aa3ad', label: '#cbd5e1', substrate: '#0b0f14', wire: '#33414d' }
 const LIGHT: Palette = { idle: '#64748b', label: '#1e293b', substrate: '#eef2f7', wire: '#b4c0cc' }
+const usePrefersReducedMotion = (): boolean => {
+  const [reduced, setReduced] = useState(true)
+  useEffect(() => {
+    const m = window.matchMedia('(prefers-reduced-motion: reduce)')
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    setReduced(m.matches)
+    const onChange = (): void => setReduced(m.matches)
+    m.addEventListener('change', onChange)
+    return () => m.removeEventListener('change', onChange)
+  }, [])
+  return reduced
+}
 const Box = ({
   position,
   size,
@@ -41,6 +53,7 @@ const Box = ({
   critical,
   selected,
   palette,
+  reduced,
   onSelect
 }: {
   active: boolean
@@ -48,15 +61,20 @@ const Box = ({
   onSelect: () => void
   palette: Palette
   position: readonly [number, number, number]
+  reduced: boolean
   selected: boolean
   size: readonly [number, number, number]
 }): React.JSX.Element => {
   const matRef = useRef<MeshStandardMaterial>(null)
   const color = selected ? SELECTED : critical ? CRITICAL : active ? ACCENT : palette.idle
   const lit = selected || critical || active
+  const base = selected ? 2 : critical ? 1.8 : active ? 1.3 : 0
   useFrame(({ clock }) => {
     if (matRef.current === null) return
-    const base = selected ? 2 : critical ? 1.8 : active ? 1.3 : 0
+    if (reduced) {
+      matRef.current.emissiveIntensity = base
+      return
+    }
     const goal = lit ? base + Math.sin(clock.elapsedTime * 3) * 0.35 : 0
     matRef.current.emissiveIntensity += (goal - matRef.current.emissiveIntensity) * 0.12
   })
@@ -91,11 +109,13 @@ const Wire = ({
   from,
   to,
   active,
-  palette
+  palette,
+  reduced
 }: {
   active: boolean
   from: Vector3
   palette: Palette
+  reduced: boolean
   to: Vector3
 }): React.JSX.Element => {
   const points = useMemo(() => new Float32Array([from.x, from.y, from.z, to.x, to.y, to.z]), [from, to])
@@ -107,18 +127,18 @@ const Wire = ({
         </bufferGeometry>
         <lineBasicMaterial color={active ? ACCENT : palette.wire} />
       </line>
-      {active ? <Pulse from={from} to={to} /> : undefined}
+      {active && !reduced ? <Pulse from={from} to={to} /> : undefined}
     </>
   )
 }
-const Rig = ({ target }: { target: undefined | Vector3 }): React.JSX.Element => {
+const Rig = ({ target, reduced }: { reduced: boolean; target: undefined | Vector3 }): React.JSX.Element => {
   const desired = useMemo(() => target ?? new Vector3(0, 0, 0), [target])
   useFrame(({ camera, controls }) => {
     if (controls === null || target === undefined) return
     const c = controls as unknown as { target: Vector3; update: () => void }
-    c.target.lerp(desired, 0.08)
+    c.target.lerp(desired, reduced ? 1 : 0.08)
     const camGoal = desired.clone().add(new Vector3(0, 4, 9))
-    camera.position.lerp(camGoal, 0.06)
+    camera.position.lerp(camGoal, reduced ? 1 : 0.06)
     c.update()
   })
   return <OrbitControls enablePan makeDefault />
@@ -140,6 +160,7 @@ const DatapathScene = ({
 }): React.JSX.Element => {
   const { resolvedTheme } = useTheme()
   const palette = resolvedTheme === 'light' ? LIGHT : DARK
+  const reduced = usePrefersReducedMotion()
   const criticalSet = useMemo(() => new Set(critical), [critical])
   const center = useMemo(() => new Map(COMPONENTS.map(c => [c.id, new Vector3(...c.pos)])), [])
   const wires = useMemo(() => {
@@ -161,7 +182,7 @@ const DatapathScene = ({
         <ambientLight intensity={0.6} />
         <directionalLight intensity={1.1} position={[6, 10, 8]} />
         {wires.map(w => (
-          <Wire active={activeP.has(w.id)} from={w.from} key={w.id} palette={palette} to={w.to} />
+          <Wire active={activeP.has(w.id)} from={w.from} key={w.id} palette={palette} reduced={reduced} to={w.to} />
         ))}
         {COMPONENTS.map(c => {
           const isCritical = showCritical && criticalSet.has(c.id)
@@ -177,6 +198,7 @@ const DatapathScene = ({
                 onSelect={() => onSelect(c.id)}
                 palette={palette}
                 position={c.pos}
+                reduced={reduced}
                 selected={isSelected}
                 size={c.size}
               />
@@ -194,7 +216,7 @@ const DatapathScene = ({
             </group>
           )
         })}
-        <Rig target={target} />
+        <Rig reduced={reduced} target={target} />
       </Canvas>
     </div>
   )
