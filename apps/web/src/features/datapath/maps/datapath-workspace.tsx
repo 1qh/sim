@@ -20,11 +20,13 @@ import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
 import { assemble } from '@/features/datapath/asm-grammar'
+import DatapathCanvas from '@/features/datapath/datapath-canvas'
 import { createProgram, current, stepForward } from '@/features/datapath/execution'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
-import DatapathIsland from '@/features/datapath/scene/datapath-island'
+import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
+import ViewToggle from '@/features/datapath/view-toggle'
 import { controlFor, encodeInstruction } from '@/features/mips'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
@@ -200,6 +202,7 @@ const DatapathWorkspace = ({
   const activeP = useMemo(() => new Set(activePaths(aControl, step)), [aControl, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activeList = useMemo(() => [...activeC], [activeC])
+  const { view, setView, mounted } = useViewMode()
   const regView = useMemo(() => {
     if (live === undefined) return []
     const out: { changed: boolean; name: string; val: number }[] = []
@@ -223,15 +226,21 @@ const DatapathWorkspace = ({
   }, [live])
   return (
     <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
-      <DatapathIsland
+      <DatapathCanvas
         control={aControl}
         critical={aCritical}
+        mounted={mounted}
         onSelect={setSelected}
         selected={selected}
         showCritical={showCritical}
         step={step}
+        values={aValues}
+        view={view}
       />
       <h1 className={cn('absolute top-4 left-4 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
+      <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
+        <ViewToggle setView={setView} view={view} />
+      </div>
       {editorOpen ? (
         <div
           className={cn(
