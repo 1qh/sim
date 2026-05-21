@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity */
-/* eslint-disable complexity */
+/* eslint-disable complexity, @typescript-eslint/no-unnecessary-condition */
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-react'
@@ -29,6 +29,40 @@ import { controlFor, encodeInstruction } from '@/features/mips'
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
 const HINT_KEY = 'sim-datapath-hint-seen'
+const REG_NAMES = [
+  '$zero',
+  '$at',
+  '$v0',
+  '$v1',
+  '$a0',
+  '$a1',
+  '$a2',
+  '$a3',
+  '$t0',
+  '$t1',
+  '$t2',
+  '$t3',
+  '$t4',
+  '$t5',
+  '$t6',
+  '$t7',
+  '$s0',
+  '$s1',
+  '$s2',
+  '$s3',
+  '$s4',
+  '$s5',
+  '$s6',
+  '$s7',
+  '$t8',
+  '$t9',
+  '$k0',
+  '$k1',
+  '$gp',
+  '$sp',
+  '$fp',
+  '$ra'
+]
 const STEP_SET = new Set<string>(STEPS)
 const readParam = (key: string): string | undefined => {
   if (typeof window === 'undefined') return
@@ -92,6 +126,8 @@ const DatapathWorkspace = ({
     const before = current(prog)
     const after = current(stepForward(prog))
     return {
+      after,
+      before,
       control: controlFor(ins),
       count: liveProgram.length,
       critical: criticalComponents(ins, 'timing'),
@@ -112,6 +148,27 @@ const DatapathWorkspace = ({
   const activeP = useMemo(() => new Set(activePaths(aControl, step)), [aControl, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activeList = useMemo(() => [...activeC], [activeC])
+  const regView = useMemo(() => {
+    if (live === undefined) return []
+    const out: { changed: boolean; name: string; val: number }[] = []
+    for (let n = 0; n < 32; n += 1) {
+      const v = live.after.registers[n as keyof typeof live.after.registers] ?? 0
+      const pv = live.before.registers[n as keyof typeof live.before.registers] ?? 0
+      if (v !== 0 || v !== pv) out.push({ changed: v !== pv, name: REG_NAMES[n] ?? `$${n}`, val: v })
+    }
+    return out
+  }, [live])
+  const memView = useMemo(() => {
+    if (live === undefined) return []
+    const out: { addr: number; changed: boolean; val: number }[] = []
+    const keys = new Set([...Object.keys(live.after.dataMemory), ...Object.keys(live.before.dataMemory)])
+    for (const k of keys) {
+      const a = live.after.dataMemory[Number(k)] ?? 0
+      const b = live.before.dataMemory[Number(k)] ?? 0
+      if (a !== 0 || a !== b) out.push({ addr: Number(k), changed: a !== b, val: a })
+    }
+    return out
+  }, [live])
   return (
     <div className='fixed inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathIsland
@@ -192,6 +249,36 @@ const DatapathWorkspace = ({
           </ul>
         </div>
       )}
+      {live !== undefined && regView.length > 0 ? (
+        <div
+          className={cn(
+            'absolute bottom-6 left-4 max-h-[55vh] w-44 overflow-auto p-3 font-mono text-xs max-sm:hidden',
+            PANEL
+          )}>
+          <div className='mb-1 text-muted-foreground'>registers</div>
+          <ul className='space-y-0.5'>
+            {regView.map(r => (
+              <li className={cn('flex justify-between', r.changed && 'text-[#22d3ee]')} key={r.name}>
+                <span className='text-muted-foreground'>{r.name}</span>
+                <span>{r.val}</span>
+              </li>
+            ))}
+          </ul>
+          {memView.length > 0 ? (
+            <>
+              <div className='mt-2 mb-1 text-muted-foreground'>memory</div>
+              <ul className='space-y-0.5'>
+                {memView.map(mrow => (
+                  <li className={cn('flex justify-between', mrow.changed && 'text-[#22d3ee]')} key={mrow.addr}>
+                    <span className='text-muted-foreground'>0x{mrow.addr.toString(16)}</span>
+                    <span>{mrow.val}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : undefined}
+        </div>
+      ) : undefined}
       {live !== undefined && live.count > 1 ? (
         <div
           className={cn(
