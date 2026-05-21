@@ -56,7 +56,7 @@ const Page = async ({ params }: { params: Promise<{ program: string }> }) => {
   return (
     <main aria-label={`pipeline-${program}`}>
       <MapsSurface label={`Pipeline · ${program}`}>
-        <div className='size-full overflow-auto pt-20 pr-6 pb-8 pl-16'>
+        <div className='size-full overflow-auto px-6 pt-20 pb-8'>
           <PipelineIsland instructions={config.instructions} />
         </div>
       </MapsSurface>
