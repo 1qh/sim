@@ -67,6 +67,12 @@ const kindOf = (id: string): 'alu' | 'gate' | 'mem' | 'mux' => {
   if (RE_GATE.test(id)) return 'gate'
   return 'mem'
 }
+const frontZ = (kind: string, size: readonly [number, number, number]): number => {
+  if (kind === 'alu') return size[0] * 0.62
+  if (kind === 'mux') return size[0] * 0.6
+  if (kind === 'gate') return Math.min(...size) * 0.7
+  return size[2] / 2
+}
 const Geometry = ({ kind, size }: { kind: string; size: readonly [number, number, number] }): React.JSX.Element => {
   if (kind === 'mux') return <cylinderGeometry args={[size[0] * 0.32, size[0] * 0.6, size[1], 4]} />
   if (kind === 'alu') return <cylinderGeometry args={[size[0] * 0.62, size[0] * 0.62, size[2], 6]} />
@@ -296,7 +302,8 @@ const DatapathScene = ({
           const isSelected = selected === c.id
           const isHovered = hovered === c.id
           const lit = isSelected || isCritical || isActive
-          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[kindOf(c.id)] ?? palette.idle)
+          const k = kindOf(c.id)
+          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[k] ?? palette.idle)
           const labelColor = contrastOf(boxColor)
           return (
             <group key={c.id}>
@@ -322,7 +329,7 @@ const DatapathScene = ({
                   maxWidth={c.size[0] * 0.96}
                   outlineColor={boxColor}
                   outlineWidth={0.015}
-                  position={[c.pos[0], c.pos[1], c.pos[2] + c.size[2] / 2 + 0.04]}>
+                  position={[c.pos[0], c.pos[1], c.pos[2] + frontZ(k, c.size) + 0.04]}>
                   {c.id}
                 </Text>
               ) : undefined}
