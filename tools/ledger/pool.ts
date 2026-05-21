@@ -31,11 +31,15 @@ const runOne = async (g: Gate): Promise<boolean> => {
   return true
 }
 const LAST = 'infra.ledger.stale-empty'
+const RE_CHROME_HEAVY = /^visual\.|^a11y\.(?:axe|keyboard)|^perf\.(?:lighthouse|frame-budget|heap-leak|bundle-size)/u
+const isChromeHeavy = (name: string): boolean => RE_CHROME_HEAVY.test(name)
 const runPool = async (gates: Gate[]): Promise<number> => {
   let failed = 0
   const first = gates.find(g => g.name === 'format')
   const terminal = gates.find(g => g.name === LAST)
-  const rest = gates.filter(g => g.name !== 'format' && g.name !== LAST)
+  const middle = gates.filter(g => g.name !== 'format' && g.name !== LAST)
+  const chromeHeavy = middle.filter(g => isChromeHeavy(g.name))
+  const rest = middle.filter(g => !isChromeHeavy(g.name))
   if (first !== undefined && !(await runOne(first))) failed += 1
   let idx = 0
   const worker = async (): Promise<void> => {
@@ -47,6 +51,7 @@ const runPool = async (gates: Gate[]): Promise<number> => {
     }
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, rest.length) }, async () => worker()))
+  for (const g of chromeHeavy) if (!(await runOne(g))) failed += 1
   if (terminal !== undefined && !(await runOne(terminal))) failed += 1
   return failed
 }
