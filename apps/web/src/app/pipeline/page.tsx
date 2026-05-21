@@ -10,45 +10,22 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import Link from 'next/link'
-import type { Instruction, RegisterNumber } from '@/features/mips/types'
-import { analyzePipeline } from '@/features/pipeline'
 
-const program: Instruction[] = [
-  {
-    funct: 0x20,
-    name: 'add',
-    rd: 3 as RegisterNumber,
-    rs: 1 as RegisterNumber,
-    rt: 2 as RegisterNumber,
-    shamt: 0,
-    type: 'R'
-  },
-  {
-    funct: 0x20,
-    name: 'add',
-    rd: 5 as RegisterNumber,
-    rs: 3 as RegisterNumber,
-    rt: 4 as RegisterNumber,
-    shamt: 0,
-    type: 'R'
-  }
-]
-const Page = () => {
-  const report = analyzePipeline(program)
-  return (
-    <main className='flex min-h-screen flex-col gap-8 p-8'>
-      <h1 className='text-3xl font-bold'>Pipeline analyzer</h1>
-      <section aria-label='pipeline-summary' className='space-y-2 rounded-lg border p-4 font-mono text-sm'>
-        <div>cycles: {report.cycleCount}</div>
-        <div>stalls: {report.stalls}</div>
-        <div>CPI: {report.cpi.toFixed(2)}</div>
-        <div>hazards: {report.hazards.length}</div>
-        <div>forwarding arrows: {report.forwarding.length}</div>
-      </section>
-      <Link className='text-sm underline' href='/'>
-        back
-      </Link>
-    </main>
-  )
-}
+const PROGRAMS = ['raw', 'waw', 'war', 'control', 'forwarding', 'stall']
+const Page = (): React.JSX.Element => (
+  <main aria-label='pipeline index' className='mx-auto flex min-h-screen max-w-3xl flex-col gap-6 p-8'>
+    <h1 className='text-3xl font-bold'>Pipeline analyzer</h1>
+    <p className='text-muted-foreground'>Stage-time diagram + hazard detection. Pick a program.</p>
+    <ul className='grid grid-cols-2 gap-2 font-mono sm:grid-cols-3 [&>li>a]:block [&>li>a]:rounded-lg [&>li>a]:border [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:transition hover:[&>li>a]:bg-muted'>
+      {PROGRAMS.map(p => (
+        <li key={p}>
+          <Link href={`/pipeline/${p}`}>{p}</Link>
+        </li>
+      ))}
+    </ul>
+    <Link className='text-sm underline' href='/'>
+      back
+    </Link>
+  </main>
+)
 export default Page
