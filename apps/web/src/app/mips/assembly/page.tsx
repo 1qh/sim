@@ -1,0 +1,52 @@
+/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
+/** biome-ignore-all lint/nursery/useGlobalThis: noise */
+/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
+/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
+/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
+/** biome-ignore-all lint/nursery/noContinue: noise */
+/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
+/** biome-ignore-all lint/performance/noNamespaceImport: noise */
+/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
+/** biome-ignore-all lint/complexity/useMaxParams: noise */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
+import type { Instruction, RegisterNumber } from '@/features/mips/types'
+import { criticalComponents, criticalPath } from '@/features/critical-path'
+import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
+import { datapathValues } from '@/features/datapath/values'
+import {
+  controlFor,
+  createInitialState,
+  decodeInstruction,
+  encodeInstruction,
+  executeStep,
+  writeRegister
+} from '@/features/mips'
+import { FUNCT } from '@/features/mips/encode'
+
+const STARTER = 'addi $t0, $zero, 5\naddi $t1, $zero, 7\nadd $t2, $t0, $t1'
+const Page = (): React.JSX.Element => {
+  const ins: Instruction = {
+    funct: FUNCT.add,
+    name: 'add',
+    rd: 3 as RegisterNumber,
+    rs: 1 as RegisterNumber,
+    rt: 2 as RegisterNumber,
+    shamt: 0,
+    type: 'R'
+  }
+  const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
+  const stepRes = executeStep(seeded, encodeInstruction(ins), decodeInstruction(encodeInstruction(ins)))
+  return (
+    <main aria-label='mips-assembly'>
+      <DatapathWorkspace
+        asmInitial={STARTER}
+        control={controlFor(ins)}
+        critical={criticalComponents(ins, 'timing')}
+        criticalDelayPs={criticalPath(ins, 'timing').delayPs}
+        name='assembly'
+        values={datapathValues(seeded, stepRes.nextState, ins)}
+      />
+    </main>
+  )
+}
+export default Page
