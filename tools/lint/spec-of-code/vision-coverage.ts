@@ -100,11 +100,16 @@ add(
   goldenMissing.length === 0 ? '17/17 present' : `missing: ${goldenMissing.join(',')}`
 )
 const datapathPage = await read('apps/web/src/app/mips/[name]/page.tsx')
-const pageMissing = LOCKED_FLOOR_ISA.filter(m => !new RegExp(`'${m}'`, 'u').test(datapathPage))
+const navSrc = await read('apps/web/src/lib/nav.ts')
+const pageMissing = LOCKED_FLOOR_ISA.filter(m => !new RegExp(`'${m}'`, 'u').test(navSrc))
+const pageWired =
+  datapathPage.includes('MIPS_NAMES') &&
+  datapathPage.includes('DatapathWorkspace') &&
+  datapathPage.includes('generateStaticParams')
 add(
   'datapath page animates all 17 locked-floor instructions',
-  pageMissing.length === 0,
-  pageMissing.length === 0 ? '17/17 wired' : `missing: ${pageMissing.join(',')}`
+  pageMissing.length === 0 && pageWired,
+  pageMissing.length === 0 && pageWired ? '17/17 wired' : `missing: ${pageMissing.join(',')} wired:${pageWired}`
 )
 const asmGrammar = await read('apps/web/src/features/datapath/asm-grammar.ts')
 add(
