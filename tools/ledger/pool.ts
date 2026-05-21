@@ -31,7 +31,8 @@ const runOne = async (g: Gate): Promise<boolean> => {
   return true
 }
 const LAST = 'infra.ledger.stale-empty'
-const RE_CHROME_HEAVY = /^visual\.|^a11y\.(?:axe|keyboard)|^perf\.(?:lighthouse|frame-budget|heap-leak|bundle-size)/u
+const RE_CHROME_HEAVY =
+  /^visual\.|^a11y\.(?:axe|keyboard)|^perf\.(?:lighthouse|frame-budget|heap-leak|bundle-size)|^test\.e2e\./u
 const isChromeHeavy = (name: string): boolean => RE_CHROME_HEAVY.test(name)
 const runPool = async (gates: Gate[]): Promise<number> => {
   let failed = 0
