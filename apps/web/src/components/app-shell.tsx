@@ -9,28 +9,21 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-import type { Metadata } from 'next'
+'use client'
 import type { ReactNode } from 'react'
-import { cn } from '@a/ui'
-import AppShell from '@/components/app-shell'
-import CommandPalette from '@/features/command-palette/command-palette'
-import { mono, sans } from './fonts'
-import { Providers } from './providers'
-import './global.css'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@a/ui/sidebar'
+import AppSidebar from './app-sidebar'
 
-const metadata: Metadata = {
-  description: 'Interactive 3D MIPS datapath and Karnaugh map visualizer.',
-  title: 'MIPS datapath visualizer + Karnaugh map tool'
-}
-const Layout = ({ children }: { children: ReactNode }) => (
-  <html className={cn('font-sans tracking-[-0.02em]', sans.variable, mono.variable)} lang='en' suppressHydrationWarning>
-    <body className='min-h-screen antialiased'>
-      <Providers>
-        <AppShell>{children}</AppShell>
-        <CommandPalette />
-      </Providers>
-    </body>
-  </html>
+const AppShell = ({ children }: { children: ReactNode }): React.JSX.Element => (
+  <SidebarProvider>
+    <AppSidebar />
+    <SidebarInset>
+      <header className='flex h-12 items-center gap-2 border-b px-4'>
+        <SidebarTrigger />
+        <span className='font-mono text-sm text-muted-foreground'>sim · ⌘K to search</span>
+      </header>
+      {children}
+    </SidebarInset>
+  </SidebarProvider>
 )
-export default Layout
-export { metadata }
+export default AppShell
