@@ -19,6 +19,7 @@ interface Pane {
   critical: readonly string[]
   criticalDelayPs: number
   name: string
+  values: Record<string, string>
 }
 const noop = (): undefined => undefined
 const ComparePane = ({ pane, side }: { pane: Pane; side: 'left' | 'right' }): React.JSX.Element => (
@@ -36,6 +37,14 @@ const ComparePane = ({ pane, side }: { pane: Pane; side: 'left' | 'right' }): Re
         step='EX'
       />
     </div>
+    <dl className='flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-muted-foreground [&>dt]:text-foreground'>
+      {Object.entries(pane.values).map(([id, v]) => (
+        <div className='flex gap-1' key={id}>
+          <dt>{id}</dt>
+          <dd>{v}</dd>
+        </div>
+      ))}
+    </dl>
   </section>
 )
 const CompareIsland = ({

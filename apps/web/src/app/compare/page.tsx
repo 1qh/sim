@@ -13,7 +13,15 @@ import type { ControlSignals, Instruction, RegisterNumber } from '@/features/mip
 import MapsSurface from '@/components/maps-surface'
 import CompareIsland from '@/features/compare/compare-island'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
-import { controlFor } from '@/features/mips'
+import { datapathValues } from '@/features/datapath/values'
+import {
+  controlFor,
+  createInitialState,
+  decodeInstruction,
+  encodeInstruction,
+  executeStep,
+  writeRegister
+} from '@/features/mips'
 
 const build = (name: string): Instruction => {
   if (name === 'addi' || name === 'lw' || name === 'sw' || name === 'ori' || name === 'andi')
@@ -52,11 +60,15 @@ const diffControl = (a: ControlSignals, b: ControlSignals): string[] => {
 }
 const pane = (name: string) => {
   const ins = build(name)
+  const seeded = writeRegister(writeRegister(createInitialState(), 1, 10), 2, 3)
+  const word = encodeInstruction(ins)
+  const stepRes = executeStep(seeded, word, decodeInstruction(word))
   return {
     control: controlFor(ins),
     critical: criticalComponents(ins, 'timing'),
     criticalDelayPs: criticalPath(ins, 'timing').delayPs,
-    name
+    name,
+    values: datapathValues(seeded, stepRes.nextState, ins)
   }
 }
 const Page = async ({ searchParams }: { searchParams: Promise<{ l?: string; r?: string }> }) => {

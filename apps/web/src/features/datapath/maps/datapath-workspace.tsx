@@ -24,6 +24,23 @@ import DatapathIsland from '@/features/datapath/scene/datapath-island'
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
 const HINT_KEY = 'sim-datapath-hint-seen'
+const STEP_SET = new Set<string>(STEPS)
+const readParam = (key: string): string | undefined => {
+  if (typeof window === 'undefined') return
+  return new URLSearchParams(window.location.search).get(key) ?? undefined
+}
+const writeParams = (step: string, selected: string | undefined): void => {
+  if (typeof window === 'undefined') return
+  const params = new URLSearchParams(window.location.search)
+  params.set('step', step)
+  if (selected === undefined) params.delete('sel')
+  else params.set('sel', selected)
+  window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+}
+const initialStep = (): Step => {
+  const s = readParam('step')
+  return s !== undefined && STEP_SET.has(s) ? (s as Step) : 'EX'
+}
 const DatapathWorkspace = ({
   name,
   control,
@@ -39,9 +56,9 @@ const DatapathWorkspace = ({
   name: string
   values: Record<string, string>
 }): React.JSX.Element => {
-  const [step, setStep] = useState<Step>('EX')
+  const [step, setStep] = useState<Step>(initialStep)
   const [showCritical, setShowCritical] = useState(false)
-  const [selected, setSelected] = useState<string | undefined>(undefined)
+  const [selected, setSelected] = useState<string | undefined>(() => readParam('sel'))
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
   const [playing, setPlaying] = useState(false)
@@ -49,6 +66,9 @@ const DatapathWorkspace = ({
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
   }, [])
+  useEffect(() => {
+    writeParams(step, selected)
+  }, [step, selected])
   useEffect(() => {
     if (!playing) return
     const id = setInterval(() => setStep(s => STEPS[(STEPS.indexOf(s) + 1) % STEPS.length] ?? 'IF'), 1100)
