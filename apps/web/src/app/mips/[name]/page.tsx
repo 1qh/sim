@@ -10,7 +10,6 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable @typescript-eslint/require-await */
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
@@ -27,26 +26,9 @@ import {
   writeRegister
 } from '@/features/mips'
 import { FUNCT, OPCODE } from '@/features/mips/encode'
+import { MIPS_NAMES } from '@/lib/nav'
 
-const NAMES = [
-  'add',
-  'addi',
-  'and',
-  'beq',
-  'bne',
-  'lw',
-  'or',
-  'slt',
-  'sub',
-  'sw',
-  'andi',
-  'j',
-  'lui',
-  'nor',
-  'ori',
-  'sll',
-  'srl'
-] as const
+const NAMES = MIPS_NAMES
 const buildInstruction = (name: (typeof NAMES)[number]): Instruction => {
   const functMap = FUNCT as Record<string, number>
   const opcodeMap = OPCODE as Record<string, number>
@@ -101,9 +83,6 @@ const Page = async ({ params }: { params: Promise<{ name: string }> }) => {
       <AsmEditor initial={`${name} $t0, $t1, $t2`} />
       <DatapathIsland control={ctl} critical={critical} criticalDelayPs={criticalDelayPs} name={name} />
       <DatapathA11yProxies activeComponents={componentsForPaths(activePaths(ctl, 'EX'))} control={ctl} name={name} />
-      <Link className='text-sm underline' href='/mips'>
-        back
-      </Link>
     </main>
   )
 }
