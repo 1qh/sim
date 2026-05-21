@@ -24,6 +24,7 @@
     "@react-three/drei": "latest",
     "@react-three/fiber": "latest",
     "@react-three/offscreen": "latest",
+    "@react-three/postprocessing": "latest",
     "@react-three/uikit": "latest",
     "@react-three/xr": "latest",
     "@serwist/next": "latest",

@@ -13,8 +13,9 @@
 /* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
 'use client'
 import type { Mesh, MeshStandardMaterial } from 'three'
-import { ContactShadows, Line, OrbitControls, Text } from '@react-three/drei'
+import { ContactShadows, Environment, Lightformer, Line, OrbitControls, RoundedBox, Text } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { ACESFilmicToneMapping, Vector3 } from 'three'
@@ -31,6 +32,13 @@ const KIND_COLOR: Record<string, string> = {
   gate: '#eab308',
   mem: '#3b82f6',
   mux: '#22c55e'
+}
+const contrastOf = (hex: string): string => {
+  const h = hex.replace('#', '')
+  const r = Number.parseInt(h.slice(0, 2), 16)
+  const g = Number.parseInt(h.slice(2, 4), 16)
+  const b = Number.parseInt(h.slice(4, 6), 16)
+  return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#0b0f14' : '#f8fafc'
 }
 interface Palette {
   idle: string
@@ -92,37 +100,57 @@ const Box = ({
 }): React.JSX.Element => {
   const matRef = useRef<MeshStandardMaterial>(null)
   const typeColor = KIND_COLOR[kind] ?? palette.idle
-  const color = selected ? SELECTED : critical ? CRITICAL : active ? ACCENT : typeColor
+  const color = selected ? SELECTED : critical ? CRITICAL : typeColor
   const lit = selected || critical || active
-  const base = selected ? 2 : critical ? 1.8 : active ? 1.3 : 0
+  const base = selected ? 2.4 : critical ? 2.1 : active ? 1.5 : 0
   useFrame(({ clock }) => {
     if (matRef.current === null) return
     if (reduced) {
       matRef.current.emissiveIntensity = base
       return
     }
-    const goal = lit ? base + Math.sin(clock.elapsedTime * 3) * 0.35 : 0
+    const goal = lit ? base + Math.sin(clock.elapsedTime * 3) * 0.4 : 0
     matRef.current.emissiveIntensity += (goal - matRef.current.emissiveIntensity) * 0.12
   })
+  const material = (
+    <meshStandardMaterial
+      color={color}
+      emissive={lit ? color : palette.substrate}
+      envMapIntensity={1.4}
+      metalness={0.95}
+      ref={matRef}
+      roughness={0.22}
+    />
+  )
+  const onOver = (e: { stopPropagation: () => void }): void => {
+    e.stopPropagation()
+    onHover(id)
+  }
+  if (kind === 'mem')
+    return (
+      <RoundedBox
+        args={size as [number, number, number]}
+        castShadow
+        onPointerDown={onSelect}
+        onPointerOut={() => onHover(undefined)}
+        onPointerOver={onOver}
+        position={position}
+        radius={Math.min(...size) * 0.14}
+        receiveShadow
+        smoothness={4}>
+        {material}
+      </RoundedBox>
+    )
   return (
     <mesh
       castShadow
       onPointerDown={onSelect}
       onPointerOut={() => onHover(undefined)}
-      onPointerOver={e => {
-        e.stopPropagation()
-        onHover(id)
-      }}
+      onPointerOver={onOver}
       position={position}
       receiveShadow>
       <Geometry kind={kind} size={size} />
-      <meshStandardMaterial
-        color={color}
-        emissive={lit ? color : palette.substrate}
-        metalness={0.85}
-        ref={matRef}
-        roughness={0.42}
-      />
+      {material}
     </mesh>
   )
 }
@@ -232,6 +260,32 @@ const DatapathScene = ({
           <orthographicCamera args={[-18, 18, 18, -18, 0.1, 60]} attach='shadow-camera' />
         </directionalLight>
         <directionalLight intensity={0.4} position={[-10, 4, -6]} />
+        <Environment resolution={256}>
+          <Lightformer
+            color='#bcd4ff'
+            form='rect'
+            intensity={3}
+            position={[0, 6, -6]}
+            rotation={[0.3, 0, 0]}
+            scale={[14, 6, 1]}
+          />
+          <Lightformer
+            color='#ffffff'
+            form='rect'
+            intensity={2}
+            position={[-8, 4, 4]}
+            rotation={[0, 1, 0]}
+            scale={[8, 5, 1]}
+          />
+          <Lightformer
+            color='#ffd9a8'
+            form='rect'
+            intensity={1.4}
+            position={[8, 3, 6]}
+            rotation={[0, -1, 0]}
+            scale={[8, 4, 1]}
+          />
+        </Environment>
         <ContactShadows blur={2.6} far={20} opacity={0.55} position={[0, -3, 0]} resolution={1024} scale={48} />
         {wires.map(w => (
           <Wire active={activeP.has(w.id)} from={w.from} key={w.id} palette={palette} reduced={reduced} to={w.to} />
@@ -242,7 +296,8 @@ const DatapathScene = ({
           const isSelected = selected === c.id
           const isHovered = hovered === c.id
           const lit = isSelected || isCritical || isActive
-          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : isActive ? ACCENT : palette.label
+          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[kindOf(c.id)] ?? palette.idle)
+          const labelColor = contrastOf(boxColor)
           return (
             <group key={c.id}>
               <Box
@@ -265,10 +320,9 @@ const DatapathScene = ({
                   color={labelColor}
                   fontSize={Math.min(0.5, (c.size[0] * 1.5) / c.id.length)}
                   maxWidth={c.size[0] * 0.96}
-                  outlineColor={palette.substrate}
-                  outlineWidth={0.012}
-                  position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.03, c.pos[2]]}
-                  rotation={[-Math.PI / 2, 0, 0]}>
+                  outlineColor={boxColor}
+                  outlineWidth={0.015}
+                  position={[c.pos[0], c.pos[1], c.pos[2] + c.size[2] / 2 + 0.04]}>
                   {c.id}
                 </Text>
               ) : undefined}
@@ -276,6 +330,9 @@ const DatapathScene = ({
           )
         })}
         <Rig reduced={reduced} target={target} />
+        <EffectComposer>
+          <Bloom intensity={0.7} luminanceSmoothing={0.3} luminanceThreshold={0.55} mipmapBlur />
+        </EffectComposer>
       </Canvas>
     </div>
   )
