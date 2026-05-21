@@ -10,6 +10,7 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 'use client'
+import { useState } from 'react'
 import type { ControlSignals } from '@/features/mips/types'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
 
@@ -40,27 +41,39 @@ const CompareIsland = ({
   controlDiff: readonly string[]
   left: Pane
   right: Pane
-}): React.JSX.Element => (
-  <div className='flex flex-col gap-6'>
-    <div className='flex flex-col gap-6 lg:flex-row'>
-      <ComparePane pane={left} side='left' />
-      <ComparePane pane={right} side='right' />
-    </div>
-    <section aria-label='control-signal diff' className='rounded-lg border p-4 font-mono text-sm'>
-      <h2 className='mb-2 font-bold'>
-        {left.name} vs {right.name}
-      </h2>
-      {controlDiff.length === 0 ? (
-        <p className='text-muted-foreground'>identical control signals</p>
+}): React.JSX.Element => {
+  const [mounted, setMounted] = useState(false)
+  return (
+    <div className='flex flex-col gap-6'>
+      {mounted ? (
+        <div className='flex flex-col gap-6 lg:flex-row'>
+          <ComparePane pane={left} side='left' />
+          <ComparePane pane={right} side='right' />
+        </div>
       ) : (
-        <ul className='[&>li]:py-0.5'>
-          {controlDiff.map(d => (
-            <li key={d}>{d}</li>
-          ))}
-        </ul>
+        <button
+          className='self-start rounded-lg border px-4 py-2 text-sm hover:bg-muted'
+          onClick={() => setMounted(true)}
+          type='button'>
+          Render 3D comparison ({left.name} vs {right.name})
+        </button>
       )}
-    </section>
-  </div>
-)
+      <section aria-label='control-signal diff' className='rounded-lg border p-4 font-mono text-sm'>
+        <h2 className='mb-2 font-bold'>
+          {left.name} vs {right.name}
+        </h2>
+        {controlDiff.length === 0 ? (
+          <p className='text-muted-foreground'>identical control signals</p>
+        ) : (
+          <ul className='[&>li]:py-0.5'>
+            {controlDiff.map(d => (
+              <li key={d}>{d}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  )
+}
 export default CompareIsland
 export type { Pane }
