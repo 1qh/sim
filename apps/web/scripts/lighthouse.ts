@@ -37,9 +37,16 @@ const readCache = async (path: string): Promise<Score | undefined> => {
 const audit = async (): Promise<void> => {
   mkdirSync(cacheDir, { recursive: true })
   const server = spawn(['bun', 'run', 'start', '--', '-p', '3000'], { stderr: 'pipe', stdout: 'pipe' })
-  await new Promise(r => {
-    setTimeout(r, 3000)
-  })
+  for (let i = 0; i < 60; i += 1) {
+    const ok = await fetch('http://127.0.0.1:3000/')
+      .then(r => r.ok)
+      .catch(() => false)
+    if (ok) break
+    await new Promise(r => {
+      setTimeout(r, 1000)
+    })
+  }
+  for (const path of ROUTES) await fetch(`http://127.0.0.1:3000${path}`).catch(() => undefined)
   for (const path of ROUTES) {
     const tmp = `/tmp/lh-${slug(path)}.json`
     let best = { a11y: 0, perf: 0 }
