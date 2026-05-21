@@ -111,7 +111,7 @@ const DatapathScene = ({
         </button>
       </div>
       <div className='h-[420px] w-full overflow-hidden rounded-lg border' data-testid='datapath-canvas'>
-        <Canvas camera={{ fov: 42, position: [0, 6, 18] }} frameloop='demand'>
+        <Canvas camera={{ fov: 42, position: [0, 6, 18] }}>
           <color args={[SUBSTRATE]} attach='background' />
           <ambientLight intensity={0.6} />
           <directionalLight intensity={1.1} position={[6, 10, 8]} />
