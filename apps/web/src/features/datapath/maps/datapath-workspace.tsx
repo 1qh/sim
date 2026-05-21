@@ -19,6 +19,7 @@ import type { ControlSignals, Instruction } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
+import { assemble } from '@/features/datapath/asm-grammar'
 import { createProgram, current, stepForward } from '@/features/datapath/execution'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
@@ -71,6 +72,7 @@ const EXAMPLES = [
 ]
 const STEP_SET = new Set<string>(STEPS)
 const RE_FORM = /^(?:INPUT|TEXTAREA)$/u
+const SEED: Record<number, number> = { 10: 3, 9: 10 }
 const readParam = (key: string): string | undefined => {
   if (typeof window === 'undefined') return
   return new URLSearchParams(window.location.search).get(key) ?? undefined
@@ -116,6 +118,11 @@ const DatapathWorkspace = ({
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
   }, [])
+  useEffect(() => {
+    const r = assemble(asmInitial)
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    if (r.diagnostics.length === 0 && r.instructions.length > 0) setLiveProgram(r.instructions)
+  }, [asmInitial])
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (e.metaKey || e.ctrlKey || e.altKey) return
@@ -166,7 +173,7 @@ const DatapathWorkspace = ({
     const ins = liveProgram[idx]
     if (ins === undefined) return
     const words = liveProgram.map(encodeInstruction)
-    let prog = createProgram(words)
+    let prog = createProgram(words, 1, SEED)
     for (let i = 0; i < idx; i += 1) prog = stepForward(prog)
     const before = current(prog)
     const after = current(stepForward(prog))
@@ -215,7 +222,7 @@ const DatapathWorkspace = ({
     return out
   }, [live])
   return (
-    <div className='fixed inset-0' onPointerDown={hint ? dismissHint : undefined}>
+    <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathIsland
         control={aControl}
         critical={aCritical}
@@ -224,7 +231,7 @@ const DatapathWorkspace = ({
         showCritical={showCritical}
         step={step}
       />
-      <h1 className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
+      <h1 className={cn('absolute top-4 left-4 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
       {editorOpen ? (
         <div
           className={cn(

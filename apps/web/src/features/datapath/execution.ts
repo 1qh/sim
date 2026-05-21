@@ -11,7 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable no-bitwise */
 import type { MachineState, RegisterNumber } from '@/features/mips/types'
-import { createInitialState, executeStep, readRegister } from '@/features/mips'
+import { createInitialState, executeStep, readRegister, writeRegister } from '@/features/mips'
 import { decodeInstruction } from '@/features/mips/decode'
 
 interface Breakpoint {
@@ -41,14 +41,12 @@ interface Watchpoint {
   target: number
 }
 const SYSCALL_WORD = 0xc
-const createProgram = (words: readonly number[], speed = 1): ProgramState => ({
-  halted: false,
-  history: [createInitialState()],
-  output: [],
-  speed,
-  trace: [],
-  words: [...words]
-})
+const createProgram = (words: readonly number[], speed = 1, seed?: Record<number, number>): ProgramState => {
+  let init = createInitialState()
+  if (seed !== undefined)
+    for (const [k, v] of Object.entries(seed)) init = writeRegister(init, Number(k) as RegisterNumber, v)
+  return { halted: false, history: [init], output: [], speed, trace: [], words: [...words] }
+}
 const current = (p: ProgramState): MachineState => p.history.at(-1) ?? createInitialState()
 const pcIndex = (p: ProgramState): number => current(p).pc >>> 2
 const runSyscall = (state: MachineState): SyscallEvent => {
