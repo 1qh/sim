@@ -68,11 +68,15 @@ const Box = ({
   palette,
   reduced,
   kind,
+  id,
+  onHover,
   onSelect
 }: {
   active: boolean
   critical: boolean
+  id: string
   kind: string
+  onHover: (id: string | undefined) => void
   onSelect: () => void
   palette: Palette
   position: readonly [number, number, number]
@@ -94,7 +98,14 @@ const Box = ({
     matRef.current.emissiveIntensity += (goal - matRef.current.emissiveIntensity) * 0.12
   })
   return (
-    <mesh onPointerDown={onSelect} position={position}>
+    <mesh
+      onPointerDown={onSelect}
+      onPointerOut={() => onHover(undefined)}
+      onPointerOver={e => {
+        e.stopPropagation()
+        onHover(id)
+      }}
+      position={position}>
       <Geometry kind={kind} size={size} />
       <meshStandardMaterial
         color={color}
@@ -176,6 +187,7 @@ const DatapathScene = ({
   const { resolvedTheme } = useTheme()
   const palette = resolvedTheme === 'light' ? LIGHT : DARK
   const reduced = usePrefersReducedMotion()
+  const [hovered, setHovered] = useState<string | undefined>(undefined)
   const criticalSet = useMemo(() => new Set(critical), [critical])
   const center = useMemo(() => new Map(COMPONENTS.map(c => [c.id, new Vector3(...c.pos)])), [])
   const wires = useMemo(() => {
@@ -203,14 +215,17 @@ const DatapathScene = ({
           const isCritical = showCritical && criticalSet.has(c.id)
           const isActive = activeC.has(c.id)
           const isSelected = selected === c.id
+          const isHovered = hovered === c.id
           const lit = isSelected || isCritical || isActive
-          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : ACCENT
+          const labelColor = isSelected ? SELECTED : isCritical ? CRITICAL : isActive ? ACCENT : palette.label
           return (
             <group key={c.id}>
               <Box
                 active={isActive}
                 critical={isCritical}
+                id={c.id}
                 kind={kindOf(c.id)}
+                onHover={setHovered}
                 onSelect={() => onSelect(c.id)}
                 palette={palette}
                 position={c.pos}
@@ -218,7 +233,7 @@ const DatapathScene = ({
                 selected={isSelected}
                 size={c.size}
               />
-              {lit ? (
+              {lit || isHovered ? (
                 <Text
                   anchorX='center'
                   color={labelColor}
