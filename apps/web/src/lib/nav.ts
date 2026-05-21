@@ -49,7 +49,7 @@ const NAV: NavSection[] = [
   {
     href: '/mips',
     icon: Cpu,
-    items: MIPS_NAMES.map(n => ({ href: `/mips/${n}`, title: n })),
+    items: [{ href: '/mips/assembly', title: 'assembly' }, ...MIPS_NAMES.map(n => ({ href: `/mips/${n}`, title: n }))],
     title: 'MIPS datapath'
   },
   {
