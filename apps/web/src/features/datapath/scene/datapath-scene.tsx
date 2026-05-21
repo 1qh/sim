@@ -13,11 +13,11 @@
 /* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
 'use client'
 import type { Mesh, MeshStandardMaterial } from 'three'
-import { OrbitControls, Text } from '@react-three/drei'
+import { ContactShadows, OrbitControls, Text } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Vector3 } from 'three'
+import { ACESFilmicToneMapping, Vector3 } from 'three'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
@@ -26,6 +26,12 @@ import { COMPONENTS, PATHS } from '@/features/datapath/generated/topology'
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
 const SELECTED = '#a855f7'
+const KIND_COLOR: Record<string, string> = {
+  alu: '#ef4444',
+  gate: '#eab308',
+  mem: '#3b82f6',
+  mux: '#22c55e'
+}
 interface Palette {
   idle: string
   label: string
@@ -85,7 +91,8 @@ const Box = ({
   size: readonly [number, number, number]
 }): React.JSX.Element => {
   const matRef = useRef<MeshStandardMaterial>(null)
-  const color = selected ? SELECTED : critical ? CRITICAL : active ? ACCENT : palette.idle
+  const typeColor = KIND_COLOR[kind] ?? palette.idle
+  const color = selected ? SELECTED : critical ? CRITICAL : active ? ACCENT : typeColor
   const lit = selected || critical || active
   const base = selected ? 2 : critical ? 1.8 : active ? 1.3 : 0
   useFrame(({ clock }) => {
@@ -99,13 +106,15 @@ const Box = ({
   })
   return (
     <mesh
+      castShadow
       onPointerDown={onSelect}
       onPointerOut={() => onHover(undefined)}
       onPointerOver={e => {
         e.stopPropagation()
         onHover(id)
       }}
-      position={position}>
+      position={position}
+      receiveShadow>
       <Geometry kind={kind} size={size} />
       <meshStandardMaterial
         color={color}
@@ -204,10 +213,25 @@ const DatapathScene = ({
   const target = selected === undefined ? undefined : center.get(selected)
   return (
     <div className='size-full' data-testid='datapath-canvas'>
-      <Canvas camera={{ fov: 42, position: [0, 6, 18] }}>
+      <Canvas
+        camera={{ fov: 42, position: [0, 6, 18] }}
+        dpr={[1, 2]}
+        gl={{ antialias: true, toneMapping: ACESFilmicToneMapping, toneMappingExposure: 1.1 }}
+        shadows>
         <color args={[palette.substrate]} attach='background' />
-        <ambientLight intensity={0.6} />
-        <directionalLight intensity={1.1} position={[6, 10, 8]} />
+        <fog args={[palette.substrate, 22, 48]} attach='fog' />
+        <hemisphereLight groundColor={palette.substrate} intensity={0.35} />
+        <ambientLight intensity={0.25} />
+        <directionalLight
+          castShadow
+          intensity={1.6}
+          position={[8, 14, 8]}
+          shadow-bias={-0.0004}
+          shadow-mapSize={[2048, 2048]}>
+          <orthographicCamera args={[-18, 18, 18, -18, 0.1, 60]} attach='shadow-camera' />
+        </directionalLight>
+        <directionalLight intensity={0.4} position={[-10, 4, -6]} />
+        <ContactShadows blur={2.6} far={20} opacity={0.55} position={[0, -3, 0]} resolution={1024} scale={48} />
         {wires.map(w => (
           <Wire active={activeP.has(w.id)} from={w.from} key={w.id} palette={palette} reduced={reduced} to={w.to} />
         ))}
