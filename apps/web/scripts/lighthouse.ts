@@ -42,7 +42,7 @@ const audit = async (): Promise<void> => {
   })
   for (const path of ROUTES) {
     const tmp = `/tmp/lh-${slug(path)}.json`
-    await $`bunx lighthouse http://127.0.0.1:3000${path} --quiet --chrome-flags=--headless --output=json --output-path=${tmp}`
+    await $`bunx lighthouse http://127.0.0.1:3000${path} --quiet --chrome-flags=--headless --throttling-method=devtools --output=json --output-path=${tmp}`
       .nothrow()
       .quiet()
     const j = (await file(tmp).json()) as {

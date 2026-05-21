@@ -11,6 +11,6 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import { Inter, JetBrains_Mono } from 'next/font/google'
 
-const sans = Inter({ subsets: ['vietnamese'], variable: '--font-sans' })
-const mono = JetBrains_Mono({ variable: '--font-mono' })
+const sans = Inter({ display: 'optional', preload: true, subsets: ['latin'], variable: '--font-sans' })
+const mono = JetBrains_Mono({ display: 'optional', preload: true, subsets: ['latin'], variable: '--font-mono' })
 export { mono, sans }
