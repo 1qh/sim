@@ -12,14 +12,18 @@
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, Code2, Route, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
+import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
+import { COMPONENTS } from '@/features/datapath/generated/topology'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
+const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
+const HINT_KEY = 'sim-datapath-hint-seen'
 const DatapathWorkspace = ({
   name,
   control,
@@ -37,10 +41,20 @@ const DatapathWorkspace = ({
   const [showCritical, setShowCritical] = useState(false)
   const [selected, setSelected] = useState<string | undefined>(undefined)
   const [editorOpen, setEditorOpen] = useState(false)
+  const [hint, setHint] = useState(false)
+  useEffect(() => {
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    if (localStorage.getItem(HINT_KEY) === null) setHint(true)
+  }, [])
+  const dismissHint = (): void => {
+    setHint(false)
+    localStorage.setItem(HINT_KEY, '1')
+  }
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
+  const activeList = useMemo(() => [...activeC], [activeC])
   return (
-    <div className='fixed inset-0'>
+    <div className='fixed inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathIsland
         control={control}
         critical={critical}
@@ -51,7 +65,11 @@ const DatapathWorkspace = ({
       />
       <div className={cn('absolute top-4 left-16 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</div>
       {editorOpen ? (
-        <div className={cn('absolute top-16 left-4 flex w-80 flex-col gap-2 p-3', PANEL)}>
+        <div
+          className={cn(
+            'absolute top-16 left-4 flex w-80 flex-col gap-2 p-3 max-sm:inset-x-2 max-sm:top-auto max-sm:bottom-24 max-sm:w-auto',
+            PANEL
+          )}>
           <div className='flex items-center justify-between'>
             <span className='font-mono text-xs text-muted-foreground'>assembly</span>
             <button onClick={() => setEditorOpen(false)} type='button'>
@@ -68,7 +86,8 @@ const DatapathWorkspace = ({
           <Code2 className='size-4' /> Editor
         </button>
       )}
-      <div className={cn('absolute top-4 right-4 flex max-w-72 flex-col gap-1 p-3 font-mono text-xs', PANEL)}>
+      <div
+        className={cn('absolute top-4 right-4 flex max-w-72 flex-col gap-1 p-3 font-mono text-xs max-sm:hidden', PANEL)}>
         <div className='text-muted-foreground'>
           step {step} · {activeC.size} components / {activeP.size} paths active
         </div>
@@ -85,15 +104,22 @@ const DatapathWorkspace = ({
         ) : undefined}
       </div>
       {selected === undefined ? undefined : (
-        <div className={cn('absolute top-1/2 right-4 w-64 -translate-y-1/2 p-4', PANEL)}>
+        <div
+          className={cn(
+            'absolute top-1/2 right-4 w-72 -translate-y-1/2 p-4 max-sm:inset-x-2 max-sm:top-auto max-sm:bottom-24 max-sm:w-auto max-sm:translate-y-0',
+            PANEL
+          )}>
           <div className='flex items-center justify-between'>
             <span className='font-mono font-bold text-[#a855f7]'>{selected}</span>
             <button onClick={() => setSelected(undefined)} type='button'>
               <X className='size-4' />
             </button>
           </div>
-          <ul className='mt-2 space-y-1 font-mono text-xs text-muted-foreground'>
-            <li>active this step: {activeC.has(selected) ? 'yes' : 'no'}</li>
+          <p className='mt-2 text-sm'>{ROLE.get(selected) ?? 'datapath component'}</p>
+          <ul className='mt-2 space-y-0.5 font-mono text-xs text-muted-foreground'>
+            <li>
+              active in {step}: {activeC.has(selected) ? 'yes' : 'no'}
+            </li>
             <li>on critical path: {critical.includes(selected) ? 'yes' : 'no'}</li>
           </ul>
         </div>
@@ -127,6 +153,22 @@ const DatapathWorkspace = ({
           <Route className='size-4' /> critical
         </button>
       </div>
+      {hint ? (
+        <div
+          className={cn(
+            '-translate-x-1/2 absolute bottom-24 left-1/2 px-4 py-2 text-center text-sm text-muted-foreground',
+            PANEL
+          )}>
+          drag to orbit · scroll to zoom · click a component to inspect
+        </div>
+      ) : undefined}
+      <DatapathA11yProxies
+        activeComponents={activeList}
+        control={control}
+        name={name}
+        onSelect={setSelected}
+        selected={selected}
+      />
     </div>
   )
 }
