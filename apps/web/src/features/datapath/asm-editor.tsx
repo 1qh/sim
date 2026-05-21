@@ -12,10 +12,22 @@
 'use client'
 import { toMonacoMarkers } from '@sim/editor'
 import { useEffect, useRef, useState } from 'react'
+import type { Instruction } from '@/features/mips/types'
 import { assemble } from './asm-grammar'
 
-const AsmEditor = ({ initial }: { initial: string }): React.JSX.Element => {
+const noop = (): undefined => undefined
+const AsmEditor = ({
+  initial,
+  onAssembled = noop
+}: {
+  initial: string
+  onAssembled?: (instructions: readonly Instruction[]) => void
+}): React.JSX.Element => {
   const ref = useRef<HTMLDivElement | null>(null)
+  const onAssembledRef = useRef(onAssembled)
+  useEffect(() => {
+    onAssembledRef.current = onAssembled
+  }, [onAssembled])
   const [diagCount, setDiagCount] = useState(0)
   const [wordCount, setWordCount] = useState(0)
   useEffect(() => {
@@ -37,6 +49,7 @@ const AsmEditor = ({ initial }: { initial: string }): React.JSX.Element => {
         const r = assemble(model.getValue())
         setDiagCount(r.diagnostics.length)
         setWordCount(r.words.length)
+        if (r.diagnostics.length === 0 && r.instructions.length > 0) onAssembledRef.current(r.instructions)
         monaco.editor.setModelMarkers(
           model,
           'mips',
