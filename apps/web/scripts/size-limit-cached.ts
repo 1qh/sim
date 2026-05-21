@@ -11,7 +11,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable promise/param-names */
-/* eslint-disable no-promise-executor-return, @typescript-eslint/strict-void-return, no-await-in-loop, no-console */
+/* eslint-disable no-await-in-loop, no-console */
 import { $, file, gzipSync, write } from 'bun'
 import { existsSync, mkdirSync } from 'node:fs'
 import process from 'node:process'
@@ -56,7 +56,10 @@ try {
   mkdirSync(lockDir)
   acquired = true
 } catch {
-  while (existsSync(lockDir) && !existsSync(resultFile)) await new Promise(res => setTimeout(res, 1000))
+  while (existsSync(lockDir) && !existsSync(resultFile))
+    await new Promise(res => {
+      setTimeout(res, 1000)
+    })
   const c = await cachedCode()
   if (c !== undefined) process.exit(c)
 }

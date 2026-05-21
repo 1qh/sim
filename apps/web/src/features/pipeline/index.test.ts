@@ -59,7 +59,7 @@ describe('pipeline WAW hazard', () => {
     const program = [r(3, 1, 2), r(3, 4, 5)]
     const hazards = detectWaw(program)
     expect(hazards.length).toBe(1)
-    expect((hazards[0] as { register: number }).register).toBe(3 as RegisterNumber)
+    expect((hazards[0] as { register: number }).register).toBe(3)
   })
 })
 describe('pipeline WAR hazard', () => {

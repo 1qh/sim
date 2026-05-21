@@ -10,7 +10,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-void-return, max-classes-per-file */
+/* eslint-disable max-classes-per-file */
 import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'
@@ -37,9 +37,21 @@ class BoolParser extends CstParser {
   })
   public atomExpr = this.RULE('atomExpr', () => {
     this.OR([
-      { ALT: () => this.CONSUME(Identifier) },
-      { ALT: () => this.CONSUME(True) },
-      { ALT: () => this.CONSUME(False) },
+      {
+        ALT: () => {
+          this.CONSUME(Identifier)
+        }
+      },
+      {
+        ALT: () => {
+          this.CONSUME(True)
+        }
+      },
+      {
+        ALT: () => {
+          this.CONSUME(False)
+        }
+      },
       {
         ALT: () => {
           this.CONSUME(LParen)
@@ -49,7 +61,9 @@ class BoolParser extends CstParser {
       }
     ])
   })
-  public expr = this.RULE('expr', () => this.SUBRULE(this.orExpr))
+  public expr = this.RULE('expr', () => {
+    this.SUBRULE(this.orExpr)
+  })
   public notExpr = this.RULE('notExpr', () => {
     this.MANY(() => this.CONSUME(NotOp))
     this.SUBRULE(this.atomExpr)
@@ -96,35 +110,36 @@ class BoolVisitor extends BaseVisitor {
     this.validateVisitor()
   }
   public andExpr(ctx: CstChildren): Expr {
-    const operands = ((ctx.notExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
+    const operands = (ctx.notExpr ?? []).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => and(acc, cur))
   }
   public atomExpr(ctx: CstChildren): Expr {
     if (ctx.Identifier) {
-      const ident = (ctx.Identifier as { image: string }[])[0]
+      const ident = ctx.Identifier[0]
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
       if (ident === undefined) throw new Error('atom: empty Identifier')
       return v(ident.image)
     }
     if (ctx.True) return c(1)
     if (ctx.False) return c(0)
-    return this.visit(ctx.expr as never) as Expr
+    return this.visit(ctx.expr) as Expr
   }
   public expr(ctx: CstChildren): Expr {
-    return this.visit(ctx.orExpr as never) as Expr
+    return this.visit(ctx.orExpr) as Expr
   }
   public notExpr(ctx: CstChildren): Expr {
-    const inner = this.visit(ctx.atomExpr as never) as Expr
+    const inner = this.visit(ctx.atomExpr) as Expr
     const negations = ctx.NotOp?.length ?? 0
     let out = inner
     for (let i = 0; i < negations; i += 1) out = not(out)
     return out
   }
   public orExpr(ctx: CstChildren): Expr {
-    const operands = ((ctx.xorExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
+    const operands = (ctx.xorExpr ?? []).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => or(acc, cur))
   }
   public xorExpr(ctx: CstChildren): Expr {
-    const operands = ((ctx.andExpr ?? []) as never[]).map(n => this.visit(n) as Expr)
+    const operands = (ctx.andExpr ?? []).map(n => this.visit(n) as Expr)
     return operands.reduce((acc, cur) => xor(acc, cur))
   }
 }

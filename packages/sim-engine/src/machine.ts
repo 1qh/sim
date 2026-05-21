@@ -9,7 +9,7 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
-/* eslint-disable @typescript-eslint/no-unnecessary-condition, no-continue */
+/* eslint-disable no-continue */
 import type { Patch } from './codec'
 import { applyDiff, diff, encode, hashValue } from './codec'
 
@@ -47,6 +47,7 @@ const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
   for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i]) !== trace.hashes[i]) return false
   for (let i = 0; i < trace.patches.length; i += 1) {
     const patch = trace.patches[i]
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (patch === undefined) continue
     const rebuilt = applyDiff(trace.states[i], patch)
     if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false

@@ -39,7 +39,7 @@ describe('diffRegisters', () => {
     const b = writeRegister(a, 5, 42)
     const d = diffRegisters(a, b)
     expect(d).toHaveLength(1)
-    expect((d[0] as { index: number }).index).toBe(5 as RegisterNumber)
+    expect((d[0] as { index: number }).index).toBe(5)
     expect((d[0] as { before: number }).before).toBe(0)
     expect((d[0] as { after: number }).after).toBe(42)
   })
