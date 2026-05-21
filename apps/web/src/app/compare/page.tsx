@@ -10,7 +10,6 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 import type { ControlSignals, Instruction, RegisterNumber } from '@/features/mips/types'
-import MapsSurface from '@/components/maps-surface'
 import CompareIsland from '@/features/compare/compare-island'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import { datapathValues } from '@/features/datapath/values'
@@ -76,12 +75,11 @@ const Page = async ({ searchParams }: { searchParams: Promise<{ l?: string; r?: 
   const left = pane(sp.l ?? 'add')
   const right = pane(sp.r ?? 'addi')
   return (
-    <main aria-label='compare'>
-      <MapsSurface label={`Compare · ${left.name} vs ${right.name}`}>
-        <div className='size-full overflow-auto pt-20 pr-6 pb-8 pl-16'>
-          <CompareIsland controlDiff={diffControl(left.control, right.control)} left={left} right={right} />
-        </div>
-      </MapsSurface>
+    <main aria-label='compare' className='mx-auto flex min-h-screen max-w-6xl flex-col gap-6 p-8 pt-20'>
+      <h1 className='text-3xl font-bold tracking-tight'>
+        Compare · {left.name} vs {right.name}
+      </h1>
+      <CompareIsland controlDiff={diffControl(left.control, right.control)} left={left} right={right} />
     </main>
   )
 }
