@@ -11,7 +11,7 @@
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 'use client'
 import { cn } from '@a/ui'
-import { ChevronLeft, Code2, Route, X } from 'lucide-react'
+import { ChevronLeft, Code2, Pause, Play, Route, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
@@ -29,23 +29,32 @@ const DatapathWorkspace = ({
   control,
   critical,
   criticalDelayPs,
-  asmInitial
+  asmInitial,
+  values
 }: {
   asmInitial: string
   control: ControlSignals
   critical: readonly string[]
   criticalDelayPs: number
   name: string
+  values: Record<string, string>
 }): React.JSX.Element => {
   const [step, setStep] = useState<Step>('EX')
   const [showCritical, setShowCritical] = useState(false)
   const [selected, setSelected] = useState<string | undefined>(undefined)
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
+  const [playing, setPlaying] = useState(false)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
   }, [])
+  useEffect(() => {
+    if (!playing) return
+    const id = setInterval(() => setStep(s => STEPS[(STEPS.indexOf(s) + 1) % STEPS.length] ?? 'IF'), 1100)
+    return () => clearInterval(id)
+  }, [playing])
+  const valueEntries = useMemo(() => Object.entries(values), [values])
   const dismissHint = (): void => {
     setHint(false)
     localStorage.setItem(HINT_KEY, '1')
@@ -116,6 +125,9 @@ const DatapathWorkspace = ({
             </button>
           </div>
           <p className='mt-2 text-sm'>{ROLE.get(selected) ?? 'datapath component'}</p>
+          {values[selected] === undefined ? undefined : (
+            <p className='mt-2 rounded bg-muted/50 px-2 py-1 font-mono text-sm text-[#22d3ee]'>{values[selected]}</p>
+          )}
           <ul className='mt-2 space-y-0.5 font-mono text-xs text-muted-foreground'>
             <li>
               active in {step}: {activeC.has(selected) ? 'yes' : 'no'}
@@ -128,6 +140,13 @@ const DatapathWorkspace = ({
         aria-label='datapath step'
         className={cn('-translate-x-1/2 absolute bottom-6 left-1/2 flex items-center gap-1 p-1.5', PANEL)}
         role='tablist'>
+        <button
+          aria-label={playing ? 'pause' : 'play'}
+          className='mr-1 rounded-lg p-1.5 hover:bg-muted'
+          onClick={() => setPlaying(v => !v)}
+          type='button'>
+          {playing ? <Pause className='size-4' /> : <Play className='size-4' />}
+        </button>
         {STEPS.map(s => (
           <button
             aria-selected={s === step}
@@ -162,6 +181,21 @@ const DatapathWorkspace = ({
           drag to orbit · scroll to zoom · click a component to inspect
         </div>
       ) : undefined}
+      <div
+        className={cn(
+          '-translate-x-1/2 absolute bottom-20 left-1/2 flex max-w-[90vw] flex-wrap justify-center gap-x-3 gap-y-0.5 px-3 py-1.5 font-mono text-xs max-sm:hidden',
+          PANEL
+        )}>
+        {valueEntries.map(([id, v]) => (
+          <button
+            className={cn('hover:text-foreground', selected === id ? 'text-[#a855f7]' : 'text-muted-foreground')}
+            key={id}
+            onClick={() => setSelected(id)}
+            type='button'>
+            <span className='text-foreground'>{id}</span> {v}
+          </button>
+        ))}
+      </div>
       <DatapathA11yProxies
         activeComponents={activeList}
         control={control}
