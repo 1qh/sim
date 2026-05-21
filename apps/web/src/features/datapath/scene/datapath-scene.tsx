@@ -13,7 +13,7 @@
 /* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
 'use client'
 import type { Mesh, MeshStandardMaterial } from 'three'
-import { ContactShadows, OrbitControls, Text } from '@react-three/drei'
+import { ContactShadows, Line, OrbitControls, Text } from '@react-three/drei'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -38,8 +38,8 @@ interface Palette {
   substrate: string
   wire: string
 }
-const DARK: Palette = { idle: '#9aa3ad', label: '#cbd5e1', substrate: '#0b0f14', wire: '#33414d' }
-const LIGHT: Palette = { idle: '#64748b', label: '#1e293b', substrate: '#eef2f7', wire: '#b4c0cc' }
+const DARK: Palette = { idle: '#9aa3ad', label: '#cbd5e1', substrate: '#0b0f14', wire: '#6b7c8d' }
+const LIGHT: Palette = { idle: '#64748b', label: '#1e293b', substrate: '#eef2f7', wire: '#94a3b8' }
 const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
@@ -153,15 +153,16 @@ const Wire = ({
   reduced: boolean
   to: Vector3
 }): React.JSX.Element => {
-  const points = useMemo(() => new Float32Array([from.x, from.y, from.z, to.x, to.y, to.z]), [from, to])
+  const points = useMemo<[number, number, number][]>(
+    () => [
+      [from.x, from.y, from.z],
+      [to.x, to.y, to.z]
+    ],
+    [from, to]
+  )
   return (
     <>
-      <line>
-        <bufferGeometry>
-          <bufferAttribute args={[points, 3]} attach='attributes-position' />
-        </bufferGeometry>
-        <lineBasicMaterial color={active ? ACCENT : palette.wire} />
-      </line>
+      <Line color={active ? ACCENT : palette.wire} lineWidth={active ? 3 : 1.6} points={points} transparent />
       {active && !reduced ? <Pulse from={from} to={to} /> : undefined}
     </>
   )
@@ -260,11 +261,14 @@ const DatapathScene = ({
               {lit || isHovered ? (
                 <Text
                   anchorX='center'
+                  anchorY='middle'
                   color={labelColor}
-                  fontSize={0.5}
+                  fontSize={Math.min(0.5, (c.size[0] * 1.5) / c.id.length)}
+                  maxWidth={c.size[0] * 0.96}
                   outlineColor={palette.substrate}
-                  outlineWidth={0.04}
-                  position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.4, c.pos[2]]}>
+                  outlineWidth={0.012}
+                  position={[c.pos[0], c.pos[1] + c.size[1] / 2 + 0.03, c.pos[2]]}
+                  rotation={[-Math.PI / 2, 0, 0]}>
                   {c.id}
                 </Text>
               ) : undefined}
