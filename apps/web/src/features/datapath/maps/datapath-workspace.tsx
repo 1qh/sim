@@ -70,6 +70,7 @@ const EXAMPLES = [
   { name: 'branch', src: 'addi $t0, $zero, 4\naddi $t1, $zero, 4\nbeq $t0, $t1, 2' }
 ]
 const STEP_SET = new Set<string>(STEPS)
+const RE_FORM = /^(?:INPUT|TEXTAREA)$/u
 const readParam = (key: string): string | undefined => {
   if (typeof window === 'undefined') return
   return new URLSearchParams(window.location.search).get(key) ?? undefined
@@ -110,10 +111,36 @@ const DatapathWorkspace = ({
   const [liveProgram, setLiveProgram] = useState<readonly Instruction[]>([])
   const [insIndex, setInsIndex] = useState(0)
   const [presetSrc, setPresetSrc] = useState<string | undefined>(undefined)
+  const [showHelp, setShowHelp] = useState(false)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
   }, [])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const t = e.target as HTMLElement | null
+      if (t && (t.isContentEditable || RE_FORM.test(t.tagName) || t.closest('.monaco-editor') !== null)) return
+      const stepBy = (d: number): void =>
+        setStep(s => STEPS[Math.min(STEPS.length - 1, Math.max(0, STEPS.indexOf(s) + d))] ?? 'IF')
+      const insBy = (d: number): void => setInsIndex(i => Math.min(liveProgram.length - 1, Math.max(0, i + d)))
+      const k = e.key
+      if (k === 'Escape') setSelected(undefined)
+      else if (k === ' ') {
+        e.preventDefault()
+        setPlaying(v => !v)
+      } else if (k === 'ArrowRight') stepBy(1)
+      else if (k === 'ArrowLeft') stepBy(-1)
+      else if (k === '.') insBy(1)
+      else if (k === ',') insBy(-1)
+      else if (k >= '1' && k <= '5') setStep(STEPS[Number(k) - 1] ?? 'IF')
+      else if (k === 'e' || k === 'E') setEditorOpen(v => !v)
+      else if (k === 'c' || k === 'C') setShowCritical(v => !v)
+      else if (k === '?') setShowHelp(v => !v)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [liveProgram.length])
   useEffect(() => {
     writeParams(step, selected)
   }, [step, selected])
@@ -378,7 +405,7 @@ const DatapathWorkspace = ({
             '-translate-x-1/2 absolute bottom-24 left-1/2 px-4 py-2 text-center text-sm text-muted-foreground',
             PANEL
           )}>
-          drag to orbit · scroll to zoom · click a component to inspect
+          drag to orbit · scroll to zoom · click a component · press ? for keyboard shortcuts
         </div>
       ) : undefined}
       <div
@@ -396,6 +423,52 @@ const DatapathWorkspace = ({
           </button>
         ))}
       </div>
+      <button
+        aria-label='keyboard shortcuts'
+        className={cn('absolute right-4 bottom-6 size-8 text-sm', PANEL)}
+        onClick={() => setShowHelp(v => !v)}
+        type='button'>
+        ?
+      </button>
+      {showHelp ? (
+        <div
+          className={cn('-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-72 p-4 font-mono text-xs', PANEL)}
+          onPointerDown={() => setShowHelp(false)}>
+          <div className='mb-2 font-bold'>keyboard</div>
+          <ul className='space-y-1 [&>li]:flex [&>li]:justify-between [&>li>kbd]:rounded [&>li>kbd]:bg-muted [&>li>kbd]:px-1.5'>
+            <li>
+              play / pause <kbd>Space</kbd>
+            </li>
+            <li>
+              step phase <kbd>← →</kbd>
+            </li>
+            <li>
+              prev / next instr <kbd>, .</kbd>
+            </li>
+            <li>
+              jump phase <kbd>1–5</kbd>
+            </li>
+            <li>
+              editor <kbd>E</kbd>
+            </li>
+            <li>
+              critical path <kbd>C</kbd>
+            </li>
+            <li>
+              deselect <kbd>Esc</kbd>
+            </li>
+            <li>
+              cycle components <kbd>Tab</kbd>
+            </li>
+            <li>
+              search <kbd>⌘K</kbd>
+            </li>
+            <li>
+              this help <kbd>?</kbd>
+            </li>
+          </ul>
+        </div>
+      ) : undefined}
       <DatapathA11yProxies
         activeComponents={activeList}
         control={aControl}
