@@ -46,6 +46,19 @@ const usePrefersReducedMotion = (): boolean => {
   }, [])
   return reduced
 }
+const RE_GATE = /And$|Gate$|^Zero$/u
+const kindOf = (id: string): 'alu' | 'gate' | 'mem' | 'mux' => {
+  if (id.endsWith('Mux')) return 'mux'
+  if (id === 'ALU') return 'alu'
+  if (RE_GATE.test(id)) return 'gate'
+  return 'mem'
+}
+const Geometry = ({ kind, size }: { kind: string; size: readonly [number, number, number] }): React.JSX.Element => {
+  if (kind === 'mux') return <cylinderGeometry args={[size[0] * 0.32, size[0] * 0.6, size[1], 4]} />
+  if (kind === 'alu') return <cylinderGeometry args={[size[0] * 0.62, size[0] * 0.62, size[2], 6]} />
+  if (kind === 'gate') return <octahedronGeometry args={[Math.min(...size) * 0.7]} />
+  return <boxGeometry args={size} />
+}
 const Box = ({
   position,
   size,
@@ -54,10 +67,12 @@ const Box = ({
   selected,
   palette,
   reduced,
+  kind,
   onSelect
 }: {
   active: boolean
   critical: boolean
+  kind: string
   onSelect: () => void
   palette: Palette
   position: readonly [number, number, number]
@@ -80,7 +95,7 @@ const Box = ({
   })
   return (
     <mesh onPointerDown={onSelect} position={position}>
-      <boxGeometry args={size} />
+      <Geometry kind={kind} size={size} />
       <meshStandardMaterial
         color={color}
         emissive={lit ? color : palette.substrate}
@@ -195,6 +210,7 @@ const DatapathScene = ({
               <Box
                 active={isActive}
                 critical={isCritical}
+                kind={kindOf(c.id)}
                 onSelect={() => onSelect(c.id)}
                 palette={palette}
                 position={c.pos}
