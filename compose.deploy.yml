@@ -45,9 +45,7 @@ services:
       timeout: 5s
       retries: 12
   next-app:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile
+    image: ghcr.io/1qh/sim-web:latest
     restart: unless-stopped
     depends_on:
       convex-backend:
