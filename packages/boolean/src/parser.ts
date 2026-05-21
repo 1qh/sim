@@ -11,6 +11,7 @@
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name */
 /* eslint-disable max-classes-per-file */
+import type { CstNode } from 'chevrotain'
 import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'
@@ -110,7 +111,7 @@ class BoolVisitor extends BaseVisitor {
     this.validateVisitor()
   }
   public andExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.notExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = (ctx.notExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
     return operands.reduce((acc, cur) => and(acc, cur))
   }
   public atomExpr(ctx: CstChildren): Expr {
@@ -122,24 +123,24 @@ class BoolVisitor extends BaseVisitor {
     }
     if (ctx.True) return c(1)
     if (ctx.False) return c(0)
-    return this.visit(ctx.expr) as Expr
+    return this.visit(ctx.expr as CstNode[]) as Expr
   }
   public expr(ctx: CstChildren): Expr {
-    return this.visit(ctx.orExpr) as Expr
+    return this.visit(ctx.orExpr as CstNode[]) as Expr
   }
   public notExpr(ctx: CstChildren): Expr {
-    const inner = this.visit(ctx.atomExpr) as Expr
+    const inner = this.visit(ctx.atomExpr as CstNode[]) as Expr
     const negations = ctx.NotOp?.length ?? 0
     let out = inner
     for (let i = 0; i < negations; i += 1) out = not(out)
     return out
   }
   public orExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.xorExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = (ctx.xorExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
     return operands.reduce((acc, cur) => or(acc, cur))
   }
   public xorExpr(ctx: CstChildren): Expr {
-    const operands = (ctx.andExpr ?? []).map(n => this.visit(n) as Expr)
+    const operands = (ctx.andExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
     return operands.reduce((acc, cur) => xor(acc, cur))
   }
 }
