@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/* eslint-disable complexity, @typescript-eslint/no-unnecessary-condition */
+/* eslint-disable complexity */
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-react'
@@ -12,52 +12,19 @@ import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
 import { assemble } from '@/features/datapath/asm-grammar'
 import DatapathCanvas from '@/features/datapath/datapath-canvas'
+import DatapathPanel from '@/features/datapath/datapath-panel'
 import { createProgram, current, stepForward } from '@/features/datapath/execution'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
 import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
 import ViewToggle from '@/features/datapath/view-toggle'
-import { controlFor, encodeInstruction } from '@/features/mips'
+import { controlFor, createInitialState, encodeInstruction } from '@/features/mips'
 import { DATAPATH_INSTRUCTIONS } from '@/lib/nav'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
 const HINT_KEY = 'sim-datapath-hint-seen'
-const REG_NAMES = [
-  '$zero',
-  '$at',
-  '$v0',
-  '$v1',
-  '$a0',
-  '$a1',
-  '$a2',
-  '$a3',
-  '$t0',
-  '$t1',
-  '$t2',
-  '$t3',
-  '$t4',
-  '$t5',
-  '$t6',
-  '$t7',
-  '$s0',
-  '$s1',
-  '$s2',
-  '$s3',
-  '$s4',
-  '$s5',
-  '$s6',
-  '$s7',
-  '$t8',
-  '$t9',
-  '$k0',
-  '$k1',
-  '$gp',
-  '$sp',
-  '$fp',
-  '$ra'
-]
 const EXAMPLES = [
   { name: 'sum', src: 'addi $t0, $zero, 5\naddi $t1, $zero, 7\nadd $t2, $t0, $t1' },
   { name: 'shift', src: 'addi $t0, $zero, 3\nsll $t1, $t0, 4\nsrl $t2, $t1, 2' },
@@ -197,27 +164,8 @@ const DatapathWorkspace = ({
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activeList = useMemo(() => [...activeC], [activeC])
   const { view, setView, mounted } = useViewMode()
-  const regView = useMemo(() => {
-    if (live === undefined) return []
-    const out: { changed: boolean; name: string; val: number }[] = []
-    for (let n = 0; n < 32; n += 1) {
-      const v = live.after.registers[n as keyof typeof live.after.registers] ?? 0
-      const pv = live.before.registers[n as keyof typeof live.before.registers] ?? 0
-      if (v !== 0 || v !== pv) out.push({ changed: v !== pv, name: REG_NAMES[n] ?? `$${n}`, val: v })
-    }
-    return out
-  }, [live])
-  const memView = useMemo(() => {
-    if (live === undefined) return []
-    const out: { addr: number; changed: boolean; val: number }[] = []
-    const keys = new Set([...Object.keys(live.after.dataMemory), ...Object.keys(live.before.dataMemory)])
-    for (const k of keys) {
-      const a = live.after.dataMemory[Number(k)] ?? 0
-      const b = live.before.dataMemory[Number(k)] ?? 0
-      if (a !== 0 || a !== b) out.push({ addr: Number(k), changed: a !== b, val: a })
-    }
-    return out
-  }, [live])
+  const aAfter = live?.after ?? createInitialState()
+  const aBefore = live?.before ?? createInitialState()
   return (
     <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathCanvas
@@ -333,36 +281,14 @@ const DatapathWorkspace = ({
           </ul>
         </div>
       )}
-      {live !== undefined && regView.length > 0 ? (
-        <div
-          className={cn(
-            'absolute bottom-6 left-4 max-h-[55vh] w-44 overflow-auto p-3 font-mono text-xs max-sm:hidden',
-            PANEL
-          )}>
-          <div className='mb-1 text-muted-foreground'>registers</div>
-          <ul className='space-y-0.5'>
-            {regView.map(r => (
-              <li className={cn('flex justify-between', r.changed && 'text-[#22d3ee]')} key={r.name}>
-                <span className='text-muted-foreground'>{r.name}</span>
-                <span>{r.val}</span>
-              </li>
-            ))}
-          </ul>
-          {memView.length > 0 ? (
-            <>
-              <div className='mt-2 mb-1 text-muted-foreground'>memory</div>
-              <ul className='space-y-0.5'>
-                {memView.map(mrow => (
-                  <li className={cn('flex justify-between', mrow.changed && 'text-[#22d3ee]')} key={mrow.addr}>
-                    <span className='text-muted-foreground'>0x{mrow.addr.toString(16)}</span>
-                    <span>{mrow.val}</span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : undefined}
-        </div>
-      ) : undefined}
+      <DatapathPanel
+        activeComponents={activeList}
+        after={aAfter}
+        before={aBefore}
+        control={aControl}
+        step={step}
+        values={aValues}
+      />
       {live !== undefined && live.count > 1 ? (
         <div
           className={cn(
