@@ -1,6 +1,3 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/* oxlint-disable import/no-duplicates */
 import type { FC } from 'react'
 import L16 from '@content/learn/cross-link-derive-control-in-kmap.mdx'
 import L6 from '@content/learn/datapath-branch-resolution.mdx'

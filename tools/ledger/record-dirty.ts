@@ -1,15 +1,6 @@
 #!/usr/bin/env bun
 /** biome-ignore-all lint/style/noProcessEnv: passes tree/commit to child gate procs */
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
 /** biome-ignore-all lint/nursery/noContinue: noise */
-/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* eslint-disable no-console, no-continue */
 import { argv, file } from 'bun'
 import process from 'node:process'

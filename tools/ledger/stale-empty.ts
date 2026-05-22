@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
 /** biome-ignore-all lint/nursery/noContinue: ledger line scan */
-/* oxlint-disable unicorn/no-process-exit */
 /* eslint-disable no-console, no-continue */
 import { file } from 'bun'
 import process from 'node:process'
