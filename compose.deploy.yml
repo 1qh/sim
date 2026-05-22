@@ -73,8 +73,8 @@ services:
       - sh
       - -c
       - >-
-        bunx convex env set JWT_PRIVATE_KEY "$$JWT_PRIVATE_KEY" &&
-        bunx convex env set JWKS "$$JWKS"
+        bunx convex env set "JWT_PRIVATE_KEY=$$JWT_PRIVATE_KEY" &&
+        bunx convex env set "JWKS=$$JWKS"
     networks: [sim]
   cloudflared:
     image: cloudflare/cloudflared:latest
