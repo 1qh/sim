@@ -12,7 +12,8 @@
 /** biome-ignore-all lint/performance/useTopLevelRegex: hoisted */
 /** biome-ignore-all lint/a11y/useSemanticElements: svg g, real a11y via DatapathA11yProxies */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: svg g, real a11y via DatapathA11yProxies */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity, jsx-a11y/prefer-tag-over-role */
+/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity, jsx-a11y/prefer-tag-over-role, eslint/no-bitwise */
+/* eslint-disable complexity, no-bitwise */
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
@@ -55,9 +56,9 @@ const PORTS: Record<string, { frac: number; name: string; side: 'l' | 'r' }[]> =
     { frac: 0.58, name: 'result', side: 'r' }
   ],
   DM: [
-    { frac: 0.32, name: 'Addr', side: 'l' },
-    { frac: 0.78, name: 'WrData', side: 'l' },
-    { frac: 0.45, name: 'RdData', side: 'r' }
+    { frac: 0.28, name: 'Addr', side: 'l' },
+    { frac: 0.8, name: 'WrData', side: 'l' },
+    { frac: 0.28, name: 'RdData', side: 'r' }
   ],
   IM: [
     { frac: 0.74, name: 'Addr', side: 'l' },
@@ -71,6 +72,25 @@ const PORTS: Record<string, { frac: number; name: string; side: 'l' | 'r' }[]> =
     { frac: 0.36, name: 'RD1', side: 'r' },
     { frac: 0.66, name: 'RD2', side: 'r' }
   ]
+}
+const TAP_LABEL: Record<string, string> = {
+  IR_IMM_TO_SIGN_EXTEND: 'Inst[15:0]',
+  IR_RD_TO_REGDST_MUX1: 'Inst[15:11]',
+  IR_RS_TO_RF_RR1: 'Inst[25:21]',
+  IR_RT_TO_REGDST_MUX0: 'Inst[20:16]',
+  IR_RT_TO_RF_RR2: 'Inst[20:16]'
+}
+const RULER = [
+  { hi: 31, lo: 26, name: 'opcode' },
+  { hi: 25, lo: 21, name: 'rs' },
+  { hi: 20, lo: 16, name: 'rt' },
+  { hi: 15, lo: 11, name: 'rd' },
+  { hi: 10, lo: 6, name: 'shamt' },
+  { hi: 5, lo: 0, name: 'funct' }
+]
+const bitsOf = (word: number, hi: number, lo: number): string => {
+  const n = hi - lo + 1
+  return ((word >>> lo) & ((1 << n) - 1)).toString(2).padStart(n, '0')
 }
 const RE_IMM = /IMM|SIGN/u
 const RE_REG = /_RS_|_RT_|_RD_|REGDST/u
@@ -109,10 +129,21 @@ const wireD = (pts: { x: number; y: number }[]): string => {
   }
   return d
 }
+const OVAL = new Set(['LS2', 'SE'])
+const ADDER = new Set(['Add4', 'BranchAdder'])
 const shape = (n: Node, fill: string, lit: boolean): React.JSX.Element => {
   const { x, y, w, h } = n
   const common = { fill, fillOpacity: lit ? 1 : 0.5, stroke: lit ? fill : 'transparent', strokeWidth: 2 }
   const glow = lit ? { style: { filter: `drop-shadow(0 0 5px ${fill})` } } : {}
+  if (OVAL.has(n.id)) return <ellipse cx={x} cy={y} rx={w / 2} ry={h / 2} {...common} {...glow} />
+  if (ADDER.has(n.id))
+    return (
+      <polygon
+        points={`${x - w / 2},${y - h / 2} ${x + w / 2},${y - h / 4} ${x + w / 2},${y + h / 4} ${x - w / 2},${y + h / 2} ${x - w / 2},${y + h / 6} ${x - w / 2 + 10},${y} ${x - w / 2},${y - h / 6}`}
+        {...common}
+        {...glow}
+      />
+    )
   if (n.kind === 'mux')
     return (
       <polygon
@@ -139,6 +170,7 @@ const Datapath2D = ({
   showCritical,
   selected,
   values,
+  word,
   onSelect
 }: {
   control: ControlSignals
@@ -148,6 +180,7 @@ const Datapath2D = ({
   showCritical: boolean
   step: Step
   values: Record<string, string>
+  word: number
 }): React.JSX.Element => {
   const reduced = usePrefersReducedMotion()
   const criticalSet = useMemo(() => new Set(critical), [critical])
@@ -170,16 +203,44 @@ const Datapath2D = ({
             <path className='fill-muted-foreground' d='M0,0 L5,2.5 L0,5 Z' />
           </marker>
         </defs>
+        <text className='fill-muted-foreground' fontSize='8' x={170} y={376}>
+          instruction
+        </text>
+        {RULER.map((f, i) => (
+          <g key={f.name}>
+            <rect
+              className='fill-transparent stroke-muted-foreground/40'
+              height={36}
+              rx={3}
+              width={120}
+              x={166}
+              y={384 + i * 40}
+            />
+            <text className='fill-muted-foreground' fontSize='8' x={172} y={398 + i * 40}>
+              {f.name} [{f.hi}:{f.lo}]
+            </text>
+            <text className='fill-foreground font-mono' fontSize='11' x={172} y={413 + i * 40}>
+              {bitsOf(word, f.hi, f.lo)}
+            </text>
+          </g>
+        ))}
         {PATHS.map(p => {
           const pts = pathPoints(p.id)
           if (pts.length === 0) return null
           const on = activeP.has(p.id)
           const ctrl = isControlPath(p.id)
           const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
+          const start = pts[0]
           const stroke = on ? ACTIVE : ctrl ? CONTROL_WIRE : 'currentColor'
           const sig = SIGNAL_LABEL[p.id]
+          const tap = TAP_LABEL[p.id]
           return (
             <g key={p.id}>
+              {tap !== undefined && start !== undefined ? (
+                <text className='fill-muted-foreground' fontSize='7.5' x={start.x + 4} y={start.y - 4}>
+                  {tap}
+                </text>
+              ) : undefined}
               <path
                 d={wireD(pts)}
                 fill='none'

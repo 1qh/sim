@@ -25,6 +25,7 @@ const DatapathCanvas = ({
   showCritical,
   selected,
   values,
+  word,
   onSelect
 }: {
   control: ControlSignals
@@ -36,6 +37,7 @@ const DatapathCanvas = ({
   step: Step
   values: Record<string, string>
   view: View
+  word: number
 }): React.JSX.Element => {
   if (!mounted) return <div className='size-full' data-testid='datapath-canvas' />
   if (view === '2d')
@@ -48,6 +50,7 @@ const DatapathCanvas = ({
         showCritical={showCritical}
         step={step}
         values={values}
+        word={word}
       />
     )
   return (

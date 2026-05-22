@@ -158,6 +158,7 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         step={step}
         values={model.values}
         view={view}
+        word={model.word}
       />
       <div className={cn('absolute top-4 left-4 flex items-center gap-3 px-3 py-1.5 font-mono text-sm', PANEL)}>
         <h1>MIPS · {name}</h1>
