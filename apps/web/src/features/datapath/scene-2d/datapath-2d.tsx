@@ -23,7 +23,6 @@ import {
 
 const ACCENT = '#22d3ee'
 const ACTIVE = '#ef4444'
-const CRITICAL = '#f59e0b'
 const SELECTED = '#a855f7'
 const CONTROL_WIRE = '#3b82f6'
 const SIGNAL_LABEL: Record<string, string> = {
@@ -160,25 +159,20 @@ const shape = (n: Node, fill: string, lit: boolean): React.JSX.Element => {
 }
 const Datapath2D = ({
   control,
-  critical,
   step,
-  showCritical,
   selected,
   values,
   word,
   onSelect
 }: {
   control: ControlSignals
-  critical: readonly string[]
   onSelect: (id: string) => void
   selected: string | undefined
-  showCritical: boolean
   step: Step
   values: Record<string, string>
   word: number
 }): React.JSX.Element => {
   const reduced = usePrefersReducedMotion()
-  const criticalSet = useMemo(() => new Set(critical), [critical])
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activePts = useMemo(() => {
@@ -272,11 +266,10 @@ const Datapath2D = ({
           />
         ))}
         {NODES.map(n => {
-          const isCritical = showCritical && criticalSet.has(n.id)
           const isActive = activeC.has(n.id)
           const isSelected = selected === n.id
-          const fill = isSelected ? SELECTED : isCritical ? CRITICAL : (NODE_COLOR[n.id] ?? '#9aa3ad')
-          const lit = isSelected || isCritical || isActive
+          const fill = isSelected ? SELECTED : (NODE_COLOR[n.id] ?? '#9aa3ad')
+          const lit = isSelected || isActive
           const lines = n.label.split('\n')
           return (
             <g aria-label={n.id} className='cursor-pointer [outline:none]' key={n.id} onClick={() => onSelect(n.id)}>

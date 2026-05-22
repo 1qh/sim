@@ -1,7 +1,6 @@
 /* oxlint-disable unicorn/number-literal-case */
 import type { ControlSignals, Instruction, RegisterNumber } from '@/features/mips/types'
 import CompareIsland from '@/features/compare/compare-island'
-import { criticalComponents, criticalPath } from '@/features/critical-path'
 import { datapathValues } from '@/features/datapath/values'
 import {
   controlFor,
@@ -54,8 +53,6 @@ const pane = (name: string) => {
   const stepRes = executeStep(seeded, word, decodeInstruction(word))
   return {
     control: controlFor(ins),
-    critical: criticalComponents(ins, 'timing'),
-    criticalDelayPs: criticalPath(ins, 'timing').delayPs,
     name,
     values: datapathValues(seeded, stepRes.nextState, ins)
   }

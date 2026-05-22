@@ -10,20 +10,16 @@ const DatapathCanvas = ({
   view,
   mounted,
   control,
-  critical,
   step,
-  showCritical,
   selected,
   values,
   word,
   onSelect
 }: {
   control: ControlSignals
-  critical: readonly string[]
   mounted: boolean
   onSelect: (id: string) => void
   selected: string | undefined
-  showCritical: boolean
   step: Step
   values: Record<string, string>
   view: View
@@ -32,27 +28,7 @@ const DatapathCanvas = ({
   if (!mounted) return <div className='size-full' data-testid='datapath-canvas' />
   if (view === 'ref') return <RefDatapath2D control={control} step={step} word={word} />
   if (view === '2d')
-    return (
-      <Datapath2D
-        control={control}
-        critical={critical}
-        onSelect={onSelect}
-        selected={selected}
-        showCritical={showCritical}
-        step={step}
-        values={values}
-        word={word}
-      />
-    )
-  return (
-    <DatapathIsland
-      control={control}
-      critical={critical}
-      onSelect={onSelect}
-      selected={selected}
-      showCritical={showCritical}
-      step={step}
-    />
-  )
+    return <Datapath2D control={control} onSelect={onSelect} selected={selected} step={step} values={values} word={word} />
+  return <DatapathIsland control={control} onSelect={onSelect} selected={selected} step={step} />
 }
 export default DatapathCanvas

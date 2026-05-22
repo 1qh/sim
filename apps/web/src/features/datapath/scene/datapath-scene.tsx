@@ -17,7 +17,6 @@ import { PATHS } from '@/features/datapath/generated/topology'
 import { isControlPath, NODE_3D, NODE_COLOR, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACCENT = '#ef4444'
-const CRITICAL = '#f59e0b'
 const SELECTED = '#a855f7'
 const CONTROL_WIRE = '#3b82f6'
 const contrastOf = (hex: string): string => {
@@ -63,7 +62,6 @@ const Box = ({
   position,
   size,
   active,
-  critical,
   selected,
   palette,
   reduced,
@@ -73,7 +71,6 @@ const Box = ({
   onSelect
 }: {
   active: boolean
-  critical: boolean
   id: string
   kind: string
   onHover: (id: string | undefined) => void
@@ -86,9 +83,9 @@ const Box = ({
 }): React.JSX.Element => {
   const matRef = useRef<MeshStandardMaterial>(null)
   const typeColor = NODE_COLOR[id] ?? palette.idle
-  const color = selected ? SELECTED : critical ? CRITICAL : typeColor
-  const lit = selected || critical || active
-  const base = selected ? 2.4 : critical ? 2.1 : active ? 1.5 : 0
+  const color = selected ? SELECTED : typeColor
+  const lit = selected || active
+  const base = selected ? 2.4 : active ? 1.5 : 0
   useFrame(({ clock }) => {
     if (matRef.current === null) return
     if (reduced) {
@@ -193,24 +190,19 @@ const Rig = ({ target, reduced }: { reduced: boolean; target: undefined | Vector
 }
 const DatapathScene = ({
   control,
-  critical,
   step,
-  showCritical,
   selected,
   onSelect
 }: {
   control: ControlSignals
-  critical: readonly string[]
   onSelect: (id: string) => void
   selected: string | undefined
-  showCritical: boolean
   step: Step
 }): React.JSX.Element => {
   const { resolvedTheme } = useTheme()
   const palette = resolvedTheme === 'light' ? LIGHT : DARK
   const reduced = usePrefersReducedMotion()
   const [hovered, setHovered] = useState<string | undefined>(undefined)
-  const criticalSet = useMemo(() => new Set(critical), [critical])
   const center = useMemo(() => new Map(NODES.map(n => [n.id, new Vector3(...(NODE_3D[n.id]?.p ?? [0, 0, 0]))])), [])
   const wires = useMemo(() => PATHS.map(p => ({ id: p.id, pts: pathPoints3D(p.id).map(c => new Vector3(...c)) })), [])
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
@@ -274,13 +266,12 @@ const DatapathScene = ({
           />
         ))}
         {NODES.map(c => {
-          const isCritical = showCritical && criticalSet.has(c.id)
           const isActive = activeC.has(c.id)
           const isSelected = selected === c.id
           const isHovered = hovered === c.id
-          const lit = isSelected || isCritical || isActive
+          const lit = isSelected || isActive
           const k = c.kind
-          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (NODE_COLOR[c.id] ?? palette.idle)
+          const boxColor = isSelected ? SELECTED : (NODE_COLOR[c.id] ?? palette.idle)
           const labelColor = contrastOf(boxColor)
           const n3 = NODE_3D[c.id] ?? {
             p: [0, 0, 0] as [number, number, number],
@@ -290,7 +281,6 @@ const DatapathScene = ({
             <group key={c.id}>
               <Box
                 active={isActive}
-                critical={isCritical}
                 id={c.id}
                 kind={k}
                 onHover={setHovered}

@@ -2,13 +2,12 @@
 /* eslint-disable complexity */
 'use client'
 import { cn } from '@a/ui'
-import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Code2, Pause, Play, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { View } from '@/features/datapath/use-view-mode'
 import type { ControlSignals, Instruction } from '@/features/mips/types'
-import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import AsmEditor from '@/features/datapath/asm-editor'
 import { assemble } from '@/features/datapath/asm-grammar'
@@ -52,21 +51,18 @@ const DatapathWorkspace = ({
   base,
   views,
   control,
-  critical,
   asmInitial,
   values
 }: {
   asmInitial: string
   base: string
   control: ControlSignals
-  critical: readonly string[]
   name: string
   values: Record<string, string>
   views: readonly View[]
 }): React.JSX.Element => {
   const router = useRouter()
   const [step, setStep] = useState<Step>('EX')
-  const [showCritical, setShowCritical] = useState(false)
   const [selected, setSelected] = useState<string | undefined>(undefined)
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
@@ -114,7 +110,6 @@ const DatapathWorkspace = ({
       else if (k === ',') insBy(-1)
       else if (k >= '1' && k <= '5') setStep(STEPS[Number(k) - 1] ?? 'IF')
       else if (k === 'e' || k === 'E') setEditorOpen(v => !v)
-      else if (k === 'c' || k === 'C') setShowCritical(v => !v)
       else if (k === '?') setShowHelp(v => !v)
     }
     window.addEventListener('keydown', onKey)
@@ -154,15 +149,12 @@ const DatapathWorkspace = ({
       before,
       control: controlFor(ins),
       count: liveProgram.length,
-      critical: criticalComponents(ins, 'timing'),
-      criticalDelayPs: criticalPath(ins, 'timing').delayPs,
       idx,
       values: datapathValues(before, after, ins),
       word: words[idx] ?? 0
     }
   }, [liveProgram, insIndex, initRegs, initPc, initMem])
   const aControl = live?.control ?? control
-  const aCritical = live?.critical ?? critical
   const aValues = live?.values ?? values
   const valueEntries = useMemo(() => Object.entries(aValues), [aValues])
   const dismissHint = (): void => {
@@ -196,11 +188,9 @@ const DatapathWorkspace = ({
     <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathCanvas
         control={aControl}
-        critical={aCritical}
         mounted={mounted}
         onSelect={setSelected}
         selected={selected}
-        showCritical={showCritical}
         step={step}
         values={aValues}
         view={view}
@@ -288,7 +278,6 @@ const DatapathWorkspace = ({
             <li>
               active in {step}: {activeC.has(selected) ? 'yes' : 'no'}
             </li>
-            <li>on critical path: {aCritical.includes(selected) ? 'yes' : 'no'}</li>
           </ul>
         </div>
       )}
@@ -354,16 +343,6 @@ const DatapathWorkspace = ({
             {s}
           </button>
         ))}
-        <button
-          aria-pressed={showCritical}
-          className={cn(
-            'ml-1 flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition',
-            showCritical ? 'bg-[#f97316] text-white' : 'hover:bg-muted'
-          )}
-          onClick={() => setShowCritical(v => !v)}
-          type='button'>
-          <Route className='size-4' /> critical
-        </button>
       </div>
       {hint ? (
         <div
@@ -417,9 +396,6 @@ const DatapathWorkspace = ({
             </li>
             <li>
               editor <kbd>E</kbd>
-            </li>
-            <li>
-              critical path <kbd>C</kbd>
             </li>
             <li>
               deselect <kbd>Esc</kbd>

@@ -9,26 +9,13 @@ const DatapathScene = dynamic(async () => import('./datapath-scene'), {
 })
 const DatapathIsland = ({
   control,
-  critical,
   step,
-  showCritical,
   selected,
   onSelect
 }: {
   control: ControlSignals
-  critical: readonly string[]
   onSelect: (id: string) => void
   selected: string | undefined
-  showCritical: boolean
   step: Step
-}) => (
-  <DatapathScene
-    control={control}
-    critical={critical}
-    onSelect={onSelect}
-    selected={selected}
-    showCritical={showCritical}
-    step={step}
-  />
-)
+}) => <DatapathScene control={control} onSelect={onSelect} selected={selected} step={step} />
 export default DatapathIsland

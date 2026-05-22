@@ -5,8 +5,6 @@ import DatapathIsland from '@/features/datapath/scene/datapath-island'
 
 interface Pane {
   control: ControlSignals
-  critical: readonly string[]
-  criticalDelayPs: number
   name: string
   values: Record<string, string>
 }
@@ -17,14 +15,7 @@ const ComparePane = ({ pane, side }: { pane: Pane; side: 'left' | 'right' }): Re
       {side} · {pane.name}
     </h2>
     <div className='h-[60vh] overflow-hidden rounded-lg border'>
-      <DatapathIsland
-        control={pane.control}
-        critical={pane.critical}
-        onSelect={noop}
-        selected={undefined}
-        showCritical={false}
-        step='EX'
-      />
+      <DatapathIsland control={pane.control} onSelect={noop} selected={undefined} step='EX' />
     </div>
     <dl className='flex flex-wrap gap-x-3 gap-y-0.5 font-mono text-xs text-muted-foreground [&>dt]:text-foreground'>
       {Object.entries(pane.values).map(([id, v]) => (
