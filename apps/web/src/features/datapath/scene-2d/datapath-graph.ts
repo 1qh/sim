@@ -24,7 +24,7 @@ interface Node {
 const VW = 1100
 const VH = 640
 const NODES: Node[] = [
-  { h: 90, id: 'PCSrcMux', kind: 'mux', label: 'PCSrc', w: 26, x: 48, y: 300 },
+  { h: 90, id: 'PCSrcMux', kind: 'mux', label: 'MUX', w: 26, x: 48, y: 300 },
   { h: 64, id: 'PC', kind: 'mem', label: 'PC', w: 40, x: 120, y: 300 },
   { h: 88, id: 'IM', kind: 'mem', label: 'Instr\nMem', w: 86, x: 250, y: 300 },
   { h: 120, id: 'IR', kind: 'mem', label: 'IR', w: 40, x: 372, y: 300 },
@@ -32,11 +32,11 @@ const NODES: Node[] = [
   { h: 26, id: 'CONST4', kind: 'const', label: '4', w: 24, x: 168, y: 150 },
   { h: 66, id: 'Control', kind: 'mem', label: 'Control', w: 92, x: 452, y: 90 },
   { h: 124, id: 'RF', kind: 'mem', label: 'Registers', w: 96, x: 512, y: 300 },
-  { h: 76, id: 'RegDstMux', kind: 'mux', label: 'RegDst', w: 26, x: 452, y: 440 },
+  { h: 76, id: 'RegDstMux', kind: 'mux', label: 'MUX', w: 26, x: 452, y: 440 },
   { h: 64, id: 'SE', kind: 'mem', label: 'Sign\nExtend', w: 62, x: 512, y: 488 },
   { h: 36, id: 'LS2', kind: 'mem', label: '<<2', w: 50, x: 446, y: 186 },
   { h: 58, id: 'BranchAdder', kind: 'mem', label: 'Add', w: 58, x: 656, y: 132 },
-  { h: 88, id: 'ALUSrcMux', kind: 'mux', label: 'ALUSrc', w: 26, x: 624, y: 320 },
+  { h: 88, id: 'ALUSrcMux', kind: 'mux', label: 'MUX', w: 26, x: 624, y: 320 },
   { h: 100, id: 'ALU', kind: 'alu', label: 'ALU', w: 74, x: 716, y: 300 },
   { h: 48, id: 'ALUControl', kind: 'mem', label: 'ALU\nCtrl', w: 76, x: 686, y: 470 },
   { h: 28, id: 'Zero', kind: 'gate', label: 'Zero', w: 38, x: 812, y: 150 },
@@ -45,7 +45,7 @@ const NODES: Node[] = [
   { h: 34, id: 'BneAnd', kind: 'gate', label: 'AND', w: 38, x: 888, y: 96 },
   { h: 34, id: 'OrGate', kind: 'gate', label: 'OR', w: 36, x: 958, y: 134 },
   { h: 86, id: 'DM', kind: 'mem', label: 'Data\nMem', w: 84, x: 852, y: 336 },
-  { h: 88, id: 'MemToRegMux', kind: 'mux', label: 'MemToReg', w: 26, x: 956, y: 336 },
+  { h: 88, id: 'MemToRegMux', kind: 'mux', label: 'MUX', w: 26, x: 956, y: 336 },
   { h: 60, id: 'WB', kind: 'mem', label: 'WB', w: 30, x: 1036, y: 336 }
 ]
 const JUNCTIONS: Record<string, { x: number; y: number }> = {

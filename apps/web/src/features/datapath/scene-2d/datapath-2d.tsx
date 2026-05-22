@@ -49,6 +49,29 @@ const SIGNAL_LABEL: Record<string, string> = {
   IR_FUNCT_TO_ALU_CONTROL: 'funct',
   IR_OPCODE_TO_CONTROL: 'opcode'
 }
+const PORTS: Record<string, { frac: number; name: string; side: 'l' | 'r' }[]> = {
+  ALU: [
+    { frac: 0.22, name: 'is0?', side: 'r' },
+    { frac: 0.58, name: 'result', side: 'r' }
+  ],
+  DM: [
+    { frac: 0.32, name: 'Addr', side: 'l' },
+    { frac: 0.78, name: 'WrData', side: 'l' },
+    { frac: 0.45, name: 'RdData', side: 'r' }
+  ],
+  IM: [
+    { frac: 0.74, name: 'Addr', side: 'l' },
+    { frac: 0.5, name: 'Instr', side: 'r' }
+  ],
+  RF: [
+    { frac: 0.24, name: 'RR1', side: 'l' },
+    { frac: 0.42, name: 'RR2', side: 'l' },
+    { frac: 0.62, name: 'WR', side: 'l' },
+    { frac: 0.82, name: 'WD', side: 'l' },
+    { frac: 0.36, name: 'RD1', side: 'r' },
+    { frac: 0.66, name: 'RD2', side: 'r' }
+  ]
+}
 const RE_IMM = /IMM|SIGN/u
 const RE_REG = /_RS_|_RT_|_RD_|REGDST/u
 const widthOf = (id: string): number => {
@@ -176,7 +199,7 @@ const Datapath2D = ({
                 </text>
               ) : on && mid !== undefined ? (
                 <text className='fill-muted-foreground' fontSize='9' x={mid.x + 3} y={mid.y - 4}>
-                  {widthOf(p.id)}
+                  /{widthOf(p.id)}
                 </text>
               ) : undefined}
             </g>
@@ -211,6 +234,19 @@ const Datapath2D = ({
               role='button'
               tabIndex={0}>
               {shape(n, fill, lit)}
+              {(PORTS[n.id] ?? []).map(pt => (
+                <text
+                  dominantBaseline='middle'
+                  fill={contrastOf(fill)}
+                  fillOpacity={0.75}
+                  fontSize='7'
+                  key={pt.name}
+                  textAnchor={pt.side === 'l' ? 'start' : 'end'}
+                  x={pt.side === 'l' ? n.x - n.w / 2 + 4 : n.x + n.w / 2 - 4}
+                  y={n.y - n.h / 2 + pt.frac * n.h}>
+                  {pt.name}
+                </text>
+              ))}
               <text
                 dominantBaseline='middle'
                 fill={lit ? contrastOf(fill) : 'currentColor'}
