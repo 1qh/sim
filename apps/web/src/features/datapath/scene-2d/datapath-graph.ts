@@ -138,6 +138,33 @@ const JUNCTION_3D: Record<string, [number, number, number]> = {
   SE_JUMP2: [-4.6, -2.7, 0],
   SE_JUNCTION: [-2.6, -1.5, 0]
 }
+const MEMCOLOR = '#caa84a'
+const WHITE = '#dfe6ef'
+const NODE_COLOR: Record<string, string> = {
+  ALU: WHITE,
+  ALUControl: WHITE,
+  ALUSrcMux: WHITE,
+  Add4: WHITE,
+  BeqAnd: '#eab308',
+  BneAnd: '#eab308',
+  BranchAdder: WHITE,
+  CONST4: '#9aa3ad',
+  Control: WHITE,
+  DM: '#2fae6a',
+  IM: MEMCOLOR,
+  IR: WHITE,
+  LS2: WHITE,
+  MemToRegMux: WHITE,
+  NotGate: '#eab308',
+  OrGate: '#eab308',
+  PC: '#9aa3ad',
+  PCSrcMux: WHITE,
+  RF: MEMCOLOR,
+  RegDstMux: WHITE,
+  SE: WHITE,
+  WB: WHITE,
+  Zero: '#eab308'
+}
 const NODE_POS = new Map(NODES.map(n => [n.id, { x: n.x, y: n.y }]))
 const PATH_FT = new Map(PATHS.map(p => [p.id, { from: p.from, to: p.to }]))
 const RE_CONTROL = /^CONTROL_|_TO_CONTROL$|^ALUOP_|_TO_ALU_CONTROL$|^IR_OPCODE_/u
@@ -186,5 +213,5 @@ const nodeSeq = (id: string): string[] => {
 }
 const pathPoints = (id: string): { x: number; y: number }[] => nodeSeq(id).map(posOf)
 const pathPoints3D = (id: string): [number, number, number][] => nodeSeq(id).map(posOf3)
-export { isControlPath, JUNCTION_3D, JUNCTIONS, NODE_3D, NODES, pathPoints, pathPoints3D, VH, VW }
+export { isControlPath, JUNCTION_3D, JUNCTIONS, NODE_3D, NODE_COLOR, NODES, pathPoints, pathPoints3D, VH, VW }
 export type { Node }

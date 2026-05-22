@@ -20,19 +20,21 @@ import type { Node } from '@/features/datapath/scene-2d/datapath-graph'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import { PATHS } from '@/features/datapath/generated/topology'
-import { isControlPath, JUNCTIONS, NODES, pathPoints, VH, VW } from '@/features/datapath/scene-2d/datapath-graph'
+import {
+  isControlPath,
+  JUNCTIONS,
+  NODE_COLOR,
+  NODES,
+  pathPoints,
+  VH,
+  VW
+} from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACCENT = '#22d3ee'
-const CRITICAL = '#f97316'
+const ACTIVE = '#ef4444'
+const CRITICAL = '#f59e0b'
 const SELECTED = '#a855f7'
-const KIND_COLOR: Record<string, string> = {
-  alu: '#ef4444',
-  const: '#64748b',
-  gate: '#eab308',
-  mem: '#3b82f6',
-  mux: '#22c55e'
-}
-const CONTROL_WIRE = '#8b5cf6'
+const CONTROL_WIRE = '#3b82f6'
 const SIGNAL_LABEL: Record<string, string> = {
   ALUOP_TO_ALU_CONTROL: 'ALUOp',
   ALU_CONTROL_TO_ALU: 'ALUctl',
@@ -139,7 +141,7 @@ const Datapath2D = ({
         <title>MIPS single-cycle datapath</title>
         <defs>
           <marker id='ah' markerHeight='6' markerWidth='6' orient='auto' refX='5' refY='3'>
-            <path d='M0,0 L6,3 L0,6 Z' fill={ACCENT} />
+            <path d='M0,0 L6,3 L0,6 Z' fill={ACTIVE} />
           </marker>
           <marker id='ahd' markerHeight='5' markerWidth='5' orient='auto' refX='4' refY='2.5'>
             <path className='fill-muted-foreground' d='M0,0 L5,2.5 L0,5 Z' />
@@ -151,7 +153,7 @@ const Datapath2D = ({
           const on = activeP.has(p.id)
           const ctrl = isControlPath(p.id)
           const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
-          const stroke = on ? ACCENT : ctrl ? CONTROL_WIRE : 'currentColor'
+          const stroke = on ? ACTIVE : ctrl ? CONTROL_WIRE : 'currentColor'
           const sig = SIGNAL_LABEL[p.id]
           return (
             <g key={p.id}>
@@ -184,7 +186,7 @@ const Datapath2D = ({
           <circle
             cx={j.x}
             cy={j.y}
-            fill={activePts.has(`${j.x},${j.y}`) ? ACCENT : 'currentColor'}
+            fill={activePts.has(`${j.x},${j.y}`) ? ACTIVE : 'currentColor'}
             key={id}
             r={3}
             {...(activePts.has(`${j.x},${j.y}`) ? {} : { className: 'text-muted-foreground/50' })}
@@ -194,7 +196,7 @@ const Datapath2D = ({
           const isCritical = showCritical && criticalSet.has(n.id)
           const isActive = activeC.has(n.id)
           const isSelected = selected === n.id
-          const fill = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[n.kind] ?? '#64748b')
+          const fill = isSelected ? SELECTED : isCritical ? CRITICAL : (NODE_COLOR[n.id] ?? '#9aa3ad')
           const lit = isSelected || isCritical || isActive
           const lines = n.label.split('\n')
           return (

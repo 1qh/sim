@@ -23,18 +23,12 @@ import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import { PATHS } from '@/features/datapath/generated/topology'
-import { isControlPath, NODE_3D, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
+import { isControlPath, NODE_3D, NODE_COLOR, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
 
-const ACCENT = '#22d3ee'
-const CRITICAL = '#f97316'
+const ACCENT = '#ef4444'
+const CRITICAL = '#f59e0b'
 const SELECTED = '#a855f7'
-const CONTROL_WIRE = '#8b5cf6'
-const KIND_COLOR: Record<string, string> = {
-  alu: '#ef4444',
-  gate: '#eab308',
-  mem: '#3b82f6',
-  mux: '#22c55e'
-}
+const CONTROL_WIRE = '#3b82f6'
 const contrastOf = (hex: string): string => {
   const h = hex.replace('#', '')
   const r = Number.parseInt(h.slice(0, 2), 16)
@@ -100,7 +94,7 @@ const Box = ({
   size: readonly [number, number, number]
 }): React.JSX.Element => {
   const matRef = useRef<MeshStandardMaterial>(null)
-  const typeColor = KIND_COLOR[kind] ?? palette.idle
+  const typeColor = NODE_COLOR[id] ?? palette.idle
   const color = selected ? SELECTED : critical ? CRITICAL : typeColor
   const lit = selected || critical || active
   const base = selected ? 2.4 : critical ? 2.1 : active ? 1.5 : 0
@@ -295,7 +289,7 @@ const DatapathScene = ({
           const isHovered = hovered === c.id
           const lit = isSelected || isCritical || isActive
           const k = c.kind
-          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[k] ?? palette.idle)
+          const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (NODE_COLOR[c.id] ?? palette.idle)
           const labelColor = contrastOf(boxColor)
           const n3 = NODE_3D[c.id] ?? {
             p: [0, 0, 0] as [number, number, number],
