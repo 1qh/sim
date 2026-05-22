@@ -27,7 +27,7 @@ function InspectPathHitBox({
   y?: number
   width?: number
   height?: number
-  onInspect: (id: DatapathInspectID) => void
+  onInspect: (id: DatapathInspectID, el?: SVGGraphicsElement | null) => void
 }) {
   if (d !== undefined) {
     return (
@@ -37,7 +37,7 @@ function InspectPathHitBox({
         className='cursor-pointer [outline:none]'
         role='button'
         tabIndex={0}
-        onClick={() => onInspect(id)}
+        onClick={e => onInspect(id, e.currentTarget)}
         onKeyDown={event => {
           if (event.key === 'Enter' || event.key === ' ') {
             onInspect(id)
@@ -56,7 +56,7 @@ function InspectPathHitBox({
       className='cursor-pointer'
       role='button'
       tabIndex={0}
-      onClick={() => onInspect(id)}
+      onClick={e => onInspect(id, e.currentTarget)}
       onKeyDown={event => {
         if (event.key === 'Enter' || event.key === ' ') {
           onInspect(id)
@@ -83,10 +83,12 @@ export default function StaticDatapathSvg({
   muxFill,
   valueFill,
   selectedInspectId,
+  viewBox = '0 0 900 600',
   onInspect
 }: {
   bits: EncodedInstruction
   signals: RuntimeControlSignals
+  viewBox?: string
   wireStroke: (id: DatapathSegment) => string
   wireStrokeWidth: (id: DatapathSegment) => number
   wireFill: (id: DatapathSegment) => string
@@ -95,16 +97,16 @@ export default function StaticDatapathSvg({
   muxFill: (signal: ControlSignalId) => string
   valueFill: (id: DatapathValueId) => string
   selectedInspectId: DatapathInspectID | null
-  onInspect: (id: DatapathInspectID | null) => void
+  onInspect: (id: DatapathInspectID, el?: SVGGraphicsElement | null) => void
 }) {
   return (
     <svg
-      width={789}
-      height={526}
-      viewBox='0 0 900 600'
+      width='100%'
+      height='100%'
+      viewBox={viewBox}
       fill='none'
       xmlns='http://www.w3.org/2000/svg'
-      className='rounded border bg-white'>
+      className='size-full bg-white'>
       <defs>
         <marker
           id='arrow-yellow'
