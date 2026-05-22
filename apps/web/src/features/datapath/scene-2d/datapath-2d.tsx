@@ -32,6 +32,21 @@ const KIND_COLOR: Record<string, string> = {
   mem: '#3b82f6',
   mux: '#22c55e'
 }
+const CONTROL_WIRE = '#8b5cf6'
+const SIGNAL_LABEL: Record<string, string> = {
+  ALUOP_TO_ALU_CONTROL: 'ALUOp',
+  ALU_CONTROL_TO_ALU: 'ALUctl',
+  BRANCHNE_TO_BNE_AND_GATE: 'BranchNE',
+  BRANCH_TO_BEQ_AND_GATE: 'Branch',
+  CONTROL_TO_ALUSRC_MUX: 'ALUSrc',
+  CONTROL_TO_MEMREAD: 'MemRead',
+  CONTROL_TO_MEMTOREG_MUX: 'MemToReg',
+  CONTROL_TO_MEMWRITE: 'MemWrite',
+  CONTROL_TO_REGDST_MUX: 'RegDst',
+  CONTROL_TO_REGWRITE: 'RegWrite',
+  IR_FUNCT_TO_ALU_CONTROL: 'funct',
+  IR_OPCODE_TO_CONTROL: 'opcode'
+}
 const RE_IMM = /IMM|SIGN/u
 const RE_REG = /_RS_|_RT_|_RD_|REGDST/u
 const widthOf = (id: string): number => {
@@ -136,21 +151,28 @@ const Datapath2D = ({
           const on = activeP.has(p.id)
           const ctrl = isControlPath(p.id)
           const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
+          const stroke = on ? ACCENT : ctrl ? CONTROL_WIRE : 'currentColor'
+          const sig = SIGNAL_LABEL[p.id]
           return (
             <g key={p.id}>
               <path
                 d={wireD(pts)}
                 fill='none'
                 markerEnd={on ? 'url(#ah)' : 'url(#ahd)'}
-                stroke={on ? ACCENT : 'currentColor'}
+                stroke={stroke}
                 strokeDasharray={on ? '7 5' : ctrl ? '3 3' : undefined}
+                strokeOpacity={ctrl && !on ? 0.7 : 1}
                 strokeWidth={on ? 2.4 : 1}
-                {...(on ? {} : { className: ctrl ? 'text-muted-foreground/60' : 'text-muted-foreground/35' })}>
+                {...(on || ctrl ? {} : { className: 'text-muted-foreground/35' })}>
                 {on && !reduced ? (
                   <animate attributeName='stroke-dashoffset' dur='0.6s' from='12' repeatCount='indefinite' to='0' />
                 ) : undefined}
               </path>
-              {on && mid !== undefined ? (
+              {ctrl && sig !== undefined && mid !== undefined ? (
+                <text fill={CONTROL_WIRE} fontSize='8' x={mid.x + 3} y={mid.y - 3}>
+                  {sig}
+                </text>
+              ) : on && mid !== undefined ? (
                 <text className='fill-muted-foreground' fontSize='9' x={mid.x + 3} y={mid.y - 4}>
                   {widthOf(p.id)}
                 </text>
