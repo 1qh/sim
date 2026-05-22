@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
 /** biome-ignore-all lint/correctness/useUniqueElementIds: static svg marker ids */
-/** biome-ignore-all lint/a11y/useSemanticElements: svg g, real a11y via DatapathA11yProxies */
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: svg node click, a11y via DatapathA11yProxies */
 /* oxlint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable complexity, no-bitwise */
 'use client'
@@ -279,16 +279,7 @@ const Datapath2D = ({
           const lit = isSelected || isCritical || isActive
           const lines = n.label.split('\n')
           return (
-            <g
-              aria-label={n.id}
-              className='cursor-pointer'
-              key={n.id}
-              onClick={() => onSelect(n.id)}
-              onKeyDown={e => {
-                if (e.key === 'Enter') onSelect(n.id)
-              }}
-              role='button'
-              tabIndex={0}>
+            <g aria-label={n.id} className='cursor-pointer [outline:none]' key={n.id} onClick={() => onSelect(n.id)}>
               {shape(n, fill, lit)}
               {(PORTS[n.id] ?? []).map(pt => (
                 <text

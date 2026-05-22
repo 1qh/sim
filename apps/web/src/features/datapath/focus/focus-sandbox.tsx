@@ -2,6 +2,7 @@
 import { cn } from '@a/ui'
 import { ArrowRight, X } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import type { Field } from '@/features/datapath/build-instruction'
 import type { Step } from '@/features/datapath/generated/stepTraces'
@@ -103,7 +104,9 @@ const NumInput = ({
     />
   </label>
 )
+const DATAPATH_INSTRUCTIONS = ['add', 'addi', 'and', 'beq', 'bne', 'lw', 'or', 'slt', 'sub', 'sw']
 const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
+  const router = useRouter()
   const fmt = useMemo(() => formatOf(name), [name])
   const [rd, setRd] = useState<RegisterNumber>(8 as RegisterNumber)
   const [rs, setRs] = useState<RegisterNumber>(9 as RegisterNumber)
@@ -150,7 +153,21 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         word={model.word}
       />
       <div className={cn('absolute top-4 left-4 flex items-center gap-3 px-3 py-1.5 font-mono text-sm', PANEL)}>
-        <h1>MIPS · {name}</h1>
+        <h1 className='sr-only'>MIPS · {name}</h1>
+        <label className='flex items-center gap-1.5'>
+          <span className='text-muted-foreground'>instr</span>
+          <select
+            aria-label='instruction'
+            className='rounded border bg-background px-2 py-1'
+            onChange={e => router.push(`/mips/${e.target.value}`)}
+            value={name}>
+            {DATAPATH_INSTRUCTIONS.map(m => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </label>
         <span className='rounded bg-muted px-1.5 text-xs text-muted-foreground'>{fmt.kind}-type</span>
         <Link className='flex items-center gap-1 text-xs text-[#22d3ee] hover:underline' href='/mips/assembly'>
           assembly <ArrowRight className='size-3' />
