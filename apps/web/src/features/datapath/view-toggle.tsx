@@ -27,6 +27,12 @@ const ViewToggle = ({ view, setView }: { setView: (v: View) => void; view: View 
       type='button'>
       3D
     </button>
+    <button
+      className={cn(view === 'ref' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted')}
+      onClick={() => setView('ref')}
+      type='button'>
+      REF 2D
+    </button>
   </div>
 )
 export default ViewToggle
