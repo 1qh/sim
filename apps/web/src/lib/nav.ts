@@ -43,6 +43,15 @@ const NAV: NavSection[] = [
     title: 'MIPS datapath'
   },
   {
+    href: '/mips-beta',
+    icon: Cpu,
+    items: [
+      { href: '/mips-beta/assembly', title: 'assembly' },
+      ...MIPS_NAMES.map(n => ({ href: `/mips-beta/${n}`, title: n }))
+    ],
+    title: 'MIPS datapath (beta)'
+  },
+  {
     href: '/kmap',
     icon: Grid3x3,
     items: KMAP_CASES.map(c => ({ href: `/kmap/${c}`, title: c })),
