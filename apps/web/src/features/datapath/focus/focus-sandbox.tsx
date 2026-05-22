@@ -11,6 +11,7 @@ import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import { buildInstruction, decodeFields, formatOf } from '@/features/datapath/build-instruction'
 import DatapathCanvas from '@/features/datapath/datapath-canvas'
+import DatapathPanel from '@/features/datapath/datapath-panel'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
@@ -125,6 +126,7 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
     const after = executeStep(seeded, word, decodeInstruction(word)).nextState
     return {
       after,
+      before: seeded,
       control: controlFor(ins),
       critical: criticalComponents(ins, 'timing'),
       criticalDelayPs: criticalPath(ins, 'timing').delayPs,
@@ -187,21 +189,9 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         {has('rs') ? <NumInput label={REG_NAMES[rs] ?? 'rs'} set={setRsVal} value={rsVal} /> : undefined}
         {has('rt') ? <NumInput label={REG_NAMES[rt] ?? 'rt'} set={setRtVal} value={rtVal} /> : undefined}
       </div>
-      <div className={cn('absolute top-4 right-4 flex max-w-72 flex-col gap-1 p-3 font-mono text-xs', PANEL)}>
-        <div className='text-muted-foreground'>
-          step {step} · {activeC.size} components / {activeP.size} paths
-        </div>
-        <div>
-          RegDst={model.control.RegDst} ALUSrc={model.control.ALUSrc} MemToReg={model.control.MemToReg} RegWrite=
-          {model.control.RegWrite}
-        </div>
-        <div>
-          MemRead={model.control.MemRead} MemWrite={model.control.MemWrite} Branch={model.control.Branch} ALUOp=
-          {model.control.ALUOp}
-        </div>
-      </div>
+      <DatapathPanel after={model.after} before={model.before} control={model.control} values={model.values} />
       {selected === undefined ? undefined : (
-        <div className={cn('-translate-y-1/2 absolute top-1/2 right-4 w-64 p-4', PANEL)}>
+        <div className={cn('absolute bottom-32 left-4 w-64 p-4', PANEL)}>
           <div className='flex items-center justify-between'>
             <span className='font-mono font-bold text-[#a855f7]'>{selected}</span>
             <button onClick={() => setSelected(undefined)} type='button'>

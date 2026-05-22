@@ -18,7 +18,7 @@ const DatapathA11yProxies = ({
 }) => {
   const activeSet = new Set(activeComponents)
   return (
-    <section aria-label={`MIPS datapath for ${name}`}>
+    <section aria-label={`MIPS datapath for ${name}`} className='sr-only'>
       <p aria-atomic='true' aria-live='polite'>
         {`Datapath for ${name}. ${activeComponents.length} components active.`}
       </p>
