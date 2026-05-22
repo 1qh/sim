@@ -45,29 +45,23 @@ const writeParams = (step: string, selected: string | undefined): void => {
   else params.set('sel', selected)
   window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
 }
-const initialStep = (): Step => {
-  const s = readParam('step')
-  return s !== undefined && STEP_SET.has(s) ? (s as Step) : 'EX'
-}
 const DatapathWorkspace = ({
   name,
   control,
   critical,
-  criticalDelayPs,
   asmInitial,
   values
 }: {
   asmInitial: string
   control: ControlSignals
   critical: readonly string[]
-  criticalDelayPs: number
   name: string
   values: Record<string, string>
 }): React.JSX.Element => {
   const router = useRouter()
-  const [step, setStep] = useState<Step>(initialStep)
+  const [step, setStep] = useState<Step>('EX')
   const [showCritical, setShowCritical] = useState(false)
-  const [selected, setSelected] = useState<string | undefined>(() => readParam('sel'))
+  const [selected, setSelected] = useState<string | undefined>(undefined)
   const [editorOpen, setEditorOpen] = useState(false)
   const [hint, setHint] = useState(false)
   const [playing, setPlaying] = useState(false)
@@ -82,6 +76,12 @@ const DatapathWorkspace = ({
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
+    const s = readParam('step')
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    if (s !== undefined && STEP_SET.has(s)) setStep(s as Step)
+    const sel = readParam('sel')
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    if (sel !== undefined) setSelected(sel)
   }, [])
   useEffect(() => {
     const r = assemble(asmInitial)
@@ -156,7 +156,6 @@ const DatapathWorkspace = ({
   }, [liveProgram, insIndex, initRegs, initPc, initMem])
   const aControl = live?.control ?? control
   const aCritical = live?.critical ?? critical
-  const aDelay = live?.criticalDelayPs ?? criticalDelayPs
   const aValues = live?.values ?? values
   const valueEntries = useMemo(() => Object.entries(aValues), [aValues])
   const dismissHint = (): void => {
@@ -256,23 +255,6 @@ const DatapathWorkspace = ({
           <Code2 className='size-4' /> Editor
         </button>
       )}
-      <div
-        className={cn('absolute top-4 right-4 flex max-w-72 flex-col gap-1 p-3 font-mono text-xs max-sm:hidden', PANEL)}>
-        <div className='text-muted-foreground'>
-          step {step} · {activeC.size} components / {activeP.size} paths active
-        </div>
-        <div>
-          RegDst={aControl.RegDst} ALUSrc={aControl.ALUSrc} MemToReg={aControl.MemToReg} RegWrite={aControl.RegWrite}
-        </div>
-        <div>
-          MemRead={aControl.MemRead} MemWrite={aControl.MemWrite} Branch={aControl.Branch} ALUOp={aControl.ALUOp}
-        </div>
-        {showCritical ? (
-          <div className='text-[#f97316]'>
-            critical: {aCritical.length} components · {aDelay} ps
-          </div>
-        ) : undefined}
-      </div>
       {selected === undefined ? undefined : (
         <div
           className={cn(

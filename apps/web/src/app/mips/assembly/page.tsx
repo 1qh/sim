@@ -1,5 +1,5 @@
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
-import { criticalComponents, criticalPath } from '@/features/critical-path'
+import { criticalComponents } from '@/features/critical-path'
 import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
 import { datapathValues } from '@/features/datapath/values'
 import {
@@ -31,7 +31,6 @@ const Page = (): React.JSX.Element => {
         asmInitial={STARTER}
         control={controlFor(ins)}
         critical={criticalComponents(ins, 'timing')}
-        criticalDelayPs={criticalPath(ins, 'timing').delayPs}
         name='assembly'
         values={datapathValues(seeded, stepRes.nextState, ins)}
       />
