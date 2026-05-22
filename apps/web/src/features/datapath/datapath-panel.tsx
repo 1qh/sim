@@ -1,5 +1,4 @@
 /* oxlint-disable react/jsx-handler-names */
-
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, PanelRight } from 'lucide-react'
