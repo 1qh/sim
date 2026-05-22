@@ -30,7 +30,7 @@ const DatapathCanvas = ({
   word: number
 }): React.JSX.Element => {
   if (!mounted) return <div className='size-full' data-testid='datapath-canvas' />
-  if (view === 'ref') return <RefDatapath2D />
+  if (view === 'ref') return <RefDatapath2D control={control} step={step} word={word} />
   if (view === '2d')
     return (
       <Datapath2D
