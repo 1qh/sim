@@ -13,6 +13,7 @@ import { buildInstruction, decodeFields, formatOf } from '@/features/datapath/bu
 import DatapathCanvas from '@/features/datapath/datapath-canvas'
 import DatapathPanel from '@/features/datapath/datapath-panel'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
+import { glossaryFor } from '@/features/datapath/glossary'
 import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
 import ViewToggle from '@/features/datapath/view-toggle'
@@ -244,6 +245,7 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
             key={s}
             onClick={() => setStep(s)}
             role='tab'
+            title={glossaryFor(s)}
             type='button'>
             {s}
           </button>

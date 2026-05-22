@@ -16,6 +16,7 @@ import DatapathPanel from '@/features/datapath/datapath-panel'
 import { createProgram, current, stepForward } from '@/features/datapath/execution'
 import { activePaths, componentsForPaths, STEPS } from '@/features/datapath/generated/stepTraces'
 import { COMPONENTS } from '@/features/datapath/generated/topology'
+import { glossaryFor } from '@/features/datapath/glossary'
 import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
 import ViewToggle from '@/features/datapath/view-toggle'
@@ -341,6 +342,7 @@ const DatapathWorkspace = ({
             key={s}
             onClick={() => setStep(s)}
             role='tab'
+            title={glossaryFor(s)}
             type='button'>
             {s}
           </button>
@@ -375,6 +377,7 @@ const DatapathWorkspace = ({
             className={cn('hover:text-foreground', selected === id ? 'text-[#a855f7]' : 'text-muted-foreground')}
             key={id}
             onClick={() => setSelected(id)}
+            title={glossaryFor(id)}
             type='button'>
             <span className='text-foreground'>{id}</span> {v}
           </button>
