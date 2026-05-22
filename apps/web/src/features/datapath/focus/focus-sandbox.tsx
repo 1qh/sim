@@ -189,7 +189,14 @@ const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
         {has('rs') ? <NumInput label={REG_NAMES[rs] ?? 'rs'} set={setRsVal} value={rsVal} /> : undefined}
         {has('rt') ? <NumInput label={REG_NAMES[rt] ?? 'rt'} set={setRtVal} value={rtVal} /> : undefined}
       </div>
-      <DatapathPanel after={model.after} before={model.before} control={model.control} values={model.values} />
+      <DatapathPanel
+        activeComponents={activeList}
+        after={model.after}
+        before={model.before}
+        control={model.control}
+        step={step}
+        values={model.values}
+      />
       {selected === undefined ? undefined : (
         <div className={cn('absolute bottom-32 left-4 w-64 p-4', PANEL)}>
           <div className='flex items-center justify-between'>
