@@ -1,6 +1,5 @@
 import type { View } from '@/features/datapath/use-view-mode'
 import type { Instruction, RegisterNumber } from '@/features/mips/types'
-import { criticalComponents } from '@/features/critical-path'
 import DatapathWorkspace from '@/features/datapath/maps/datapath-workspace'
 import { datapathValues } from '@/features/datapath/values'
 import {
@@ -32,7 +31,6 @@ const AssemblyView = ({ base, views }: { base: string; views: readonly View[] })
         asmInitial={STARTER}
         base={base}
         control={controlFor(ins)}
-        critical={criticalComponents(ins, 'timing')}
         name='assembly'
         values={datapathValues(seeded, stepRes.nextState, ins)}
         views={views}

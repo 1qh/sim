@@ -8,7 +8,6 @@ import type { Field } from '@/features/datapath/build-instruction'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { View } from '@/features/datapath/use-view-mode'
 import type { RegisterNumber } from '@/features/mips/types'
-import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
 import { buildInstruction, decodeFields, formatOf } from '@/features/datapath/build-instruction'
 import DatapathCanvas from '@/features/datapath/datapath-canvas'
@@ -127,7 +126,6 @@ const FocusSandbox = ({
   const [rsVal, setRsVal] = useState(10)
   const [rtVal, setRtVal] = useState(3)
   const [step, setStep] = useState<Step>('EX')
-  const [showCritical, setShowCritical] = useState(false)
   const [selected, setSelected] = useState<string | undefined>(undefined)
   const model = useMemo(() => {
     const ins = buildInstruction(name, { imm, rd, rs, rt, shamt, target: 0x1_00 })
@@ -138,8 +136,6 @@ const FocusSandbox = ({
       after,
       before: seeded,
       control: controlFor(ins),
-      critical: criticalComponents(ins, 'timing'),
-      criticalDelayPs: criticalPath(ins, 'timing').delayPs,
       fields: decodeFields(word, fmt.kind),
       values: datapathValues(seeded, after, ins),
       word
@@ -154,11 +150,9 @@ const FocusSandbox = ({
     <div className='absolute inset-0'>
       <DatapathCanvas
         control={model.control}
-        critical={model.critical}
         mounted={mounted}
         onSelect={setSelected}
         selected={selected}
-        showCritical={showCritical}
         step={step}
         values={model.values}
         view={view}
@@ -261,16 +255,6 @@ const FocusSandbox = ({
             {s}
           </button>
         ))}
-        <button
-          aria-pressed={showCritical}
-          className={cn(
-            'ml-1 rounded-lg px-3 py-1.5 text-sm transition',
-            showCritical ? 'bg-[#f97316] text-white' : 'hover:bg-muted'
-          )}
-          onClick={() => setShowCritical(v => !v)}
-          type='button'>
-          critical
-        </button>
       </div>
       <DatapathA11yProxies
         activeComponents={activeList}
