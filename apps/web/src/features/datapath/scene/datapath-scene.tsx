@@ -22,7 +22,8 @@ import { ACESFilmicToneMapping, Vector3 } from 'three'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
-import { COMPONENTS, PATHS } from '@/features/datapath/generated/topology'
+import { PATHS } from '@/features/datapath/generated/topology'
+import { NODE_3D, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
@@ -59,13 +60,6 @@ const usePrefersReducedMotion = (): boolean => {
     return () => m.removeEventListener('change', onChange)
   }, [])
   return reduced
-}
-const RE_GATE = /And$|Gate$|^Zero$/u
-const kindOf = (id: string): 'alu' | 'gate' | 'mem' | 'mux' => {
-  if (id.endsWith('Mux')) return 'mux'
-  if (id === 'ALU') return 'alu'
-  if (RE_GATE.test(id)) return 'gate'
-  return 'mem'
 }
 const frontZ = (kind: string, size: readonly [number, number, number]): number => {
   if (kind === 'alu') return size[0] * 0.62
@@ -175,29 +169,23 @@ const Pulse = ({ from, to }: { from: Vector3; to: Vector3 }): React.JSX.Element 
   )
 }
 const Wire = ({
-  from,
-  to,
+  pts,
   active,
   palette,
   reduced
 }: {
   active: boolean
-  from: Vector3
   palette: Palette
+  pts: Vector3[]
   reduced: boolean
-  to: Vector3
 }): React.JSX.Element => {
-  const points = useMemo<[number, number, number][]>(
-    () => [
-      [from.x, from.y, from.z],
-      [to.x, to.y, to.z]
-    ],
-    [from, to]
-  )
+  const points = useMemo<[number, number, number][]>(() => pts.map(p => [p.x, p.y, p.z]), [pts])
+  const first = pts[0]
+  const last = pts.at(-1)
   return (
     <>
       <Line color={active ? ACCENT : palette.wire} lineWidth={active ? 3 : 1.6} points={points} transparent />
-      {active && !reduced ? <Pulse from={from} to={to} /> : undefined}
+      {active && !reduced && first !== undefined && last !== undefined ? <Pulse from={first} to={last} /> : undefined}
     </>
   )
 }
@@ -233,16 +221,8 @@ const DatapathScene = ({
   const reduced = usePrefersReducedMotion()
   const [hovered, setHovered] = useState<string | undefined>(undefined)
   const criticalSet = useMemo(() => new Set(critical), [critical])
-  const center = useMemo(() => new Map(COMPONENTS.map(c => [c.id, new Vector3(...c.pos)])), [])
-  const wires = useMemo(() => {
-    const list: { from: Vector3; id: string; to: Vector3 }[] = []
-    for (const p of PATHS) {
-      const a = center.get(p.from)
-      const b = center.get(p.to)
-      if (a !== undefined && b !== undefined) list.push({ from: a, id: p.id, to: b })
-    }
-    return list
-  }, [center])
+  const center = useMemo(() => new Map(NODES.map(n => [n.id, new Vector3(...(NODE_3D[n.id]?.p ?? [0, 0, 0]))])), [])
+  const wires = useMemo(() => PATHS.map(p => ({ id: p.id, pts: pathPoints3D(p.id).map(c => new Vector3(...c)) })), [])
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const target = selected === undefined ? undefined : center.get(selected)
@@ -294,43 +274,47 @@ const DatapathScene = ({
         </Environment>
         <ContactShadows blur={2.6} far={20} opacity={0.55} position={[0, -3, 0]} resolution={1024} scale={48} />
         {wires.map(w => (
-          <Wire active={activeP.has(w.id)} from={w.from} key={w.id} palette={palette} reduced={reduced} to={w.to} />
+          <Wire active={activeP.has(w.id)} key={w.id} palette={palette} pts={w.pts} reduced={reduced} />
         ))}
-        {COMPONENTS.map(c => {
+        {NODES.map(c => {
           const isCritical = showCritical && criticalSet.has(c.id)
           const isActive = activeC.has(c.id)
           const isSelected = selected === c.id
           const isHovered = hovered === c.id
           const lit = isSelected || isCritical || isActive
-          const k = kindOf(c.id)
+          const k = c.kind
           const boxColor = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[k] ?? palette.idle)
           const labelColor = contrastOf(boxColor)
+          const n3 = NODE_3D[c.id] ?? {
+            p: [0, 0, 0] as [number, number, number],
+            s: [1, 1, 1] as [number, number, number]
+          }
           return (
             <group key={c.id}>
               <Box
                 active={isActive}
                 critical={isCritical}
                 id={c.id}
-                kind={kindOf(c.id)}
+                kind={k}
                 onHover={setHovered}
                 onSelect={() => onSelect(c.id)}
                 palette={palette}
-                position={c.pos}
+                position={n3.p}
                 reduced={reduced}
                 selected={isSelected}
-                size={c.size}
+                size={n3.s}
               />
               {lit || isHovered ? (
                 <Text
                   anchorX='center'
                   anchorY='middle'
                   color={labelColor}
-                  fontSize={Math.min(0.5, (c.size[0] * 1.5) / c.id.length)}
-                  maxWidth={c.size[0] * 0.96}
+                  fontSize={Math.min(0.42, (n3.s[0] * 1.4) / c.label.length)}
+                  maxWidth={n3.s[0] * 0.96}
                   outlineColor={boxColor}
                   outlineWidth={0.015}
-                  position={[c.pos[0], c.pos[1], c.pos[2] + frontZ(k, c.size) + 0.04]}>
-                  {c.id}
+                  position={[n3.p[0], n3.p[1], n3.p[2] + frontZ(k, n3.s) + 0.04]}>
+                  {c.label}
                 </Text>
               ) : undefined}
             </group>
