@@ -58,6 +58,24 @@ services:
       CONVEX_SELF_HOSTED_URL: http://convex-backend:3210
       CONVEX_SELF_HOSTED_ADMIN_KEY: ${CONVEX_SELF_HOSTED_ADMIN_KEY}
     networks: [sim]
+  convex-setup:
+    image: oven/bun:1
+    restart: 'no'
+    depends_on:
+      convex-backend:
+        condition: service_healthy
+    environment:
+      CONVEX_SELF_HOSTED_URL: http://convex-backend:3210
+      CONVEX_SELF_HOSTED_ADMIN_KEY: ${CONVEX_SELF_HOSTED_ADMIN_KEY}
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWKS: ${JWKS}
+    command:
+      - sh
+      - -c
+      - >-
+        bunx convex env set JWT_PRIVATE_KEY "$$JWT_PRIVATE_KEY" &&
+        bunx convex env set JWKS "$$JWKS"
+    networks: [sim]
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
