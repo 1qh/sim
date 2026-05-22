@@ -9,29 +9,31 @@
 /** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /** biome-ignore-all lint/correctness/useUniqueElementIds: static svg marker ids */
+/** biome-ignore-all lint/performance/useTopLevelRegex: hoisted */
 /** biome-ignore-all lint/a11y/useSemanticElements: svg g, real a11y via DatapathA11yProxies */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: svg g, real a11y via DatapathA11yProxies */
 /* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity, jsx-a11y/prefer-tag-over-role */
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
+import type { Node } from '@/features/datapath/scene-2d/datapath-graph'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
-import { COMPONENTS, PATHS } from '@/features/datapath/generated/topology'
+import { PATHS } from '@/features/datapath/generated/topology'
+import { isControlPath, JUNCTIONS, NODES, pathPoints, VH, VW } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
 const SELECTED = '#a855f7'
-const KIND_COLOR: Record<string, string> = { alu: '#ef4444', gate: '#eab308', mem: '#3b82f6', mux: '#22c55e' }
-const RE_GATE = /And$|Gate$|^Zero$/u
-const kindOf = (id: string): 'alu' | 'gate' | 'mem' | 'mux' => {
-  if (id.endsWith('Mux')) return 'mux'
-  if (id === 'ALU') return 'alu'
-  if (RE_GATE.test(id)) return 'gate'
-  return 'mem'
+const KIND_COLOR: Record<string, string> = {
+  alu: '#ef4444',
+  const: '#64748b',
+  gate: '#eab308',
+  mem: '#3b82f6',
+  mux: '#22c55e'
 }
-const RE_IMM = /IMM|SIGN|imm/u
-const RE_REG = /_RS_|_RT_|_RD_|SHAMT/u
+const RE_IMM = /IMM|SIGN/u
+const RE_REG = /_RS_|_RT_|_RD_|REGDST/u
 const widthOf = (id: string): number => {
   if (RE_IMM.test(id)) return 16
   if (RE_REG.test(id)) return 5
@@ -44,19 +46,6 @@ const contrastOf = (hex: string): string => {
   const b = Number.parseInt(h.slice(4, 6), 16)
   return 0.299 * r + 0.587 * g + 0.114 * b > 150 ? '#0b0f14' : '#f8fafc'
 }
-const S = 36
-const PAD = 60
-const xs = COMPONENTS.flatMap(c => [c.pos[0] - c.size[0] / 2, c.pos[0] + c.size[0] / 2])
-const ys = COMPONENTS.flatMap(c => [c.pos[1] - c.size[1] / 2, c.pos[1] + c.size[1] / 2])
-const MINX = Math.min(...xs)
-const MAXX = Math.max(...xs)
-const MINY = Math.min(...ys)
-const MAXY = Math.max(...ys)
-const VW = (MAXX - MINX) * S + PAD * 2
-const VH = (MAXY - MINY) * S + PAD * 2
-const px = (x: number): number => (x - MINX) * S + PAD
-const py = (y: number): number => (MAXY - y) * S + PAD
-const CENTER = new Map(COMPONENTS.map(c => [c.id, { x: px(c.pos[0]), y: py(c.pos[1]) }]))
 const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
@@ -68,6 +57,40 @@ const usePrefersReducedMotion = (): boolean => {
     return () => m.removeEventListener('change', onChange)
   }, [])
   return reduced
+}
+const wireD = (pts: { x: number; y: number }[]): string => {
+  const first = pts[0]
+  if (first === undefined) return ''
+  let d = `M ${first.x} ${first.y}`
+  for (let i = 1; i < pts.length; i += 1) {
+    const p = pts[i - 1]
+    const q = pts[i]
+    if (p !== undefined && q !== undefined) d += ` L ${q.x} ${p.y} L ${q.x} ${q.y}`
+  }
+  return d
+}
+const shape = (n: Node, fill: string, lit: boolean): React.JSX.Element => {
+  const { x, y, w, h } = n
+  const common = { fill, fillOpacity: lit ? 1 : 0.5, stroke: lit ? fill : 'transparent', strokeWidth: 2 }
+  const glow = lit ? { style: { filter: `drop-shadow(0 0 5px ${fill})` } } : {}
+  if (n.kind === 'mux')
+    return (
+      <polygon
+        points={`${x - w / 2},${y - h / 2} ${x + w / 2},${y - h / 2 + 12} ${x + w / 2},${y + h / 2 - 12} ${x - w / 2},${y + h / 2}`}
+        {...common}
+        {...glow}
+      />
+    )
+  if (n.kind === 'alu')
+    return (
+      <polygon
+        points={`${x - w / 2},${y - h / 2} ${x + w / 2},${y - h / 4} ${x + w / 2},${y + h / 4} ${x - w / 2},${y + h / 2} ${x - w / 2},${y + h / 6} ${x - w / 2 + 12},${y} ${x - w / 2},${y - h / 6}`}
+        {...common}
+        {...glow}
+      />
+    )
+  if (n.kind === 'gate' || n.kind === 'const') return <ellipse cx={x} cy={y} rx={w / 2} ry={h / 2} {...common} {...glow} />
+  return <rect height={h} rx={6} width={w} x={x - w / 2} y={y - h / 2} {...common} {...glow} />
 }
 const Datapath2D = ({
   control,
@@ -90,6 +113,11 @@ const Datapath2D = ({
   const criticalSet = useMemo(() => new Set(critical), [critical])
   const activeP = useMemo(() => new Set(activePaths(control, step)), [control, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
+  const activePts = useMemo(() => {
+    const s = new Set<string>()
+    for (const p of PATHS) if (activeP.has(p.id)) for (const pt of pathPoints(p.id)) s.add(`${pt.x},${pt.y}`)
+    return s
+  }, [activeP])
   return (
     <div className='size-full overflow-hidden' data-testid='datapath-canvas'>
       <svg className='size-full' role='img' viewBox={`0 0 ${VW} ${VH}`}>
@@ -103,81 +131,79 @@ const Datapath2D = ({
           </marker>
         </defs>
         {PATHS.map(p => {
-          const a = CENTER.get(p.from)
-          const b = CENTER.get(p.to)
-          if (a === undefined || b === undefined) return null
+          const pts = pathPoints(p.id)
+          if (pts.length === 0) return null
           const on = activeP.has(p.id)
-          const midX = (a.x + b.x) / 2
-          const d = `M ${a.x} ${a.y} L ${midX} ${a.y} L ${midX} ${b.y} L ${b.x} ${b.y}`
+          const ctrl = isControlPath(p.id)
+          const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
           return (
             <g key={p.id}>
               <path
-                d={d}
+                d={wireD(pts)}
                 fill='none'
                 markerEnd={on ? 'url(#ah)' : 'url(#ahd)'}
                 stroke={on ? ACCENT : 'currentColor'}
-                strokeDasharray={on ? '8 5' : undefined}
+                strokeDasharray={on ? '7 5' : ctrl ? '3 3' : undefined}
                 strokeWidth={on ? 2.4 : 1}
-                {...(on ? {} : { className: 'text-muted-foreground/40' })}>
+                {...(on ? {} : { className: ctrl ? 'text-muted-foreground/60' : 'text-muted-foreground/35' })}>
                 {on && !reduced ? (
-                  <animate attributeName='stroke-dashoffset' dur='0.6s' from='13' repeatCount='indefinite' to='0' />
+                  <animate attributeName='stroke-dashoffset' dur='0.6s' from='12' repeatCount='indefinite' to='0' />
                 ) : undefined}
               </path>
-              {on ? (
-                <text className='fill-muted-foreground' fontSize='9' x={midX + 3} y={(a.y + b.y) / 2 - 3}>
+              {on && mid !== undefined ? (
+                <text className='fill-muted-foreground' fontSize='9' x={mid.x + 3} y={mid.y - 4}>
                   {widthOf(p.id)}
                 </text>
               ) : undefined}
             </g>
           )
         })}
-        {COMPONENTS.map(c => {
-          const cx = px(c.pos[0])
-          const cy = py(c.pos[1])
-          const w = c.size[0] * S
-          const h = c.size[1] * S
-          const isCritical = showCritical && criticalSet.has(c.id)
-          const isActive = activeC.has(c.id)
-          const isSelected = selected === c.id
-          const fill = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[kindOf(c.id)] ?? '#64748b')
+        {Object.entries(JUNCTIONS).map(([id, j]) => (
+          <circle
+            cx={j.x}
+            cy={j.y}
+            fill={activePts.has(`${j.x},${j.y}`) ? ACCENT : 'currentColor'}
+            key={id}
+            r={3}
+            {...(activePts.has(`${j.x},${j.y}`) ? {} : { className: 'text-muted-foreground/50' })}
+          />
+        ))}
+        {NODES.map(n => {
+          const isCritical = showCritical && criticalSet.has(n.id)
+          const isActive = activeC.has(n.id)
+          const isSelected = selected === n.id
+          const fill = isSelected ? SELECTED : isCritical ? CRITICAL : (KIND_COLOR[n.kind] ?? '#64748b')
           const lit = isSelected || isCritical || isActive
-          const label = contrastOf(fill)
+          const lines = n.label.split('\n')
           return (
             <g
-              aria-label={c.id}
+              aria-label={n.id}
               className='cursor-pointer'
-              key={c.id}
-              onClick={() => onSelect(c.id)}
+              key={n.id}
+              onClick={() => onSelect(n.id)}
               onKeyDown={e => {
-                if (e.key === 'Enter') onSelect(c.id)
+                if (e.key === 'Enter') onSelect(n.id)
               }}
               role='button'
               tabIndex={0}>
-              <rect
-                fill={fill}
-                fillOpacity={lit ? 1 : 0.45}
-                height={h}
-                rx={Math.min(w, h) * 0.18}
-                stroke={lit ? fill : 'transparent'}
-                strokeWidth={2}
-                width={w}
-                x={cx - w / 2}
-                y={cy - h / 2}
-                {...(lit ? { style: { filter: `drop-shadow(0 0 6px ${fill})` } } : {})}
-              />
+              {shape(n, fill, lit)}
               <text
                 dominantBaseline='middle'
-                fill={lit ? label : 'currentColor'}
-                fontSize='11'
+                fill={lit ? contrastOf(fill) : 'currentColor'}
+                fontSize={n.w < 34 ? 8 : 10}
                 textAnchor='middle'
-                x={cx}
-                y={cy}
+                x={n.x}
+                y={n.y - (lines.length - 1) * 5}
                 {...(lit ? {} : { className: 'fill-muted-foreground' })}>
-                {c.id}
+                {lines.map((ln, i) => (
+                  <tspan key={ln} x={n.x} {...(i === 0 ? {} : { dy: 10 })}>
+                    {ln}
+                  </tspan>
+                ))}
               </text>
-              {isActive && values[c.id] !== undefined ? (
-                <text fill={ACCENT} fontSize='10' textAnchor='middle' x={cx} y={cy + h / 2 + 12}>
-                  {values[c.id]}
+              {isActive && values[n.id] !== undefined ? (
+                <text fill={ACCENT} fontSize='9' textAnchor='middle' x={n.x} y={n.y + n.h / 2 + 11}>
+                  {values[n.id]}
                 </text>
               ) : undefined}
             </g>
