@@ -47,9 +47,13 @@ const FORMATS = ['dec', 'hex', 'bin'] as const
 type Fmt = (typeof FORMATS)[number]
 const fmtNum = (n: number, f: Fmt): string => {
   const u = Math.trunc(n)
-  if (f === 'hex') return `0x${u.toString(16).toUpperCase().padStart(8, '0')}`
-  if (f === 'bin') return `0b${u.toString(2).padStart(32, '0')}`
+  if (f === 'hex') return `0x${(u < 0 ? Math.trunc(u) : u).toString(16).toUpperCase()}`
+  if (f === 'bin') return `0b${(u < 0 ? Math.trunc(u) : u).toString(2)}`
   return String(n)
+}
+const parseNum = (s: string): number => {
+  const n = Number(s.trim())
+  return Number.isNaN(n) ? 0 : Math.trunc(n)
 }
 const hexAddr = (a: number): string => `0x${Math.trunc(a).toString(16).toUpperCase().padStart(8, '0')}`
 const HINT: Record<Tab, string> = {
@@ -107,15 +111,25 @@ const Row = ({ k, v, hot }: { hot?: boolean; k: string; v: string }): React.JSX.
     <span className='text-foreground'>{v}</span>
   </div>
 )
-const EditRow = ({ k, v, onChange }: { k: string; onChange: (n: number) => void; v: number }): React.JSX.Element => (
+const EditRow = ({
+  k,
+  v,
+  fmt,
+  onChange
+}: {
+  fmt: Fmt
+  k: string
+  onChange: (n: number) => void
+  v: number
+}): React.JSX.Element => (
   <label className='flex items-center justify-between gap-3 px-3 py-1'>
     <span className='text-muted-foreground'>{k}</span>
     <input
       aria-label={k}
-      className='w-20 rounded border bg-background px-1 text-right'
-      onChange={e => onChange(Number(e.target.value) || 0)}
-      type='number'
-      value={v}
+      className='w-28 rounded border bg-background px-1 text-right'
+      onChange={e => onChange(parseNum(e.target.value))}
+      type='text'
+      value={fmtNum(v, fmt)}
     />
   </label>
 )
@@ -158,7 +172,7 @@ const DatapathPanel = ({
         {open ? undefined : <span className='[writing-mode:vertical-rl]'>DETAILS</span>}
       </button>
       {open ? (
-        <div className={cn('flex w-72 flex-col overflow-hidden font-mono text-xs', PANEL)}>
+        <div className={cn('flex w-[27rem] flex-col overflow-hidden font-mono text-xs', PANEL)}>
           <div className='flex border-b [&>button]:flex-1 [&>button]:py-2'>
             {TABS.map(t => (
               <button
@@ -199,9 +213,9 @@ const DatapathPanel = ({
                     />
                   ))
                 : [
-                    <EditRow k='PC (start)' key='pc' onChange={edit.setPc} v={edit.pc} />,
+                    <EditRow fmt={fmt} k='PC (start)' key='pc' onChange={edit.setPc} v={edit.pc} />,
                     ...REG_NAMES.map((nm, n) => (
-                      <EditRow k={nm} key={nm} onChange={v => edit.setReg(n, v)} v={edit.regs[n] ?? 0} />
+                      <EditRow fmt={fmt} k={nm} key={nm} onChange={v => edit.setReg(n, v)} v={edit.regs[n] ?? 0} />
                     ))
                   ]
               : undefined}
@@ -278,10 +292,10 @@ const DatapathPanel = ({
                           <td className='text-right'>
                             <input
                               aria-label={`mem ${addr}`}
-                              className='w-16 rounded border bg-background px-1 text-right'
-                              onChange={e => edit.setMem(addr, Number(e.target.value) || 0)}
-                              type='number'
-                              value={edit.mem[addr] ?? 0}
+                              className='w-24 rounded border bg-background px-1 text-right'
+                              onChange={e => edit.setMem(addr, parseNum(e.target.value))}
+                              type='text'
+                              value={fmtNum(edit.mem[addr] ?? 0, fmt)}
                             />
                           </td>
                         </tr>
