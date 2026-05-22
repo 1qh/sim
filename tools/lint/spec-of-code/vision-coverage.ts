@@ -90,7 +90,7 @@ add(
   goldenMissing.length === 0 ? '17/17 present' : `missing: ${goldenMissing.join(',')}`
 )
 const datapathPage = await read('apps/web/src/app/mips/[name]/page.tsx')
-const assemblyPage = await read('apps/web/src/app/mips/assembly/page.tsx')
+const assemblyPage = await read('apps/web/src/features/datapath/assembly-view.tsx')
 const navSrc = await read('apps/web/src/lib/nav.ts')
 const pageMissing = LOCKED_FLOOR_ISA.filter(m => !new RegExp(`'${m}'`, 'u').test(navSrc))
 const pageWired =
