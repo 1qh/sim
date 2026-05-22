@@ -13,6 +13,7 @@
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { View } from '@/features/datapath/use-view-mode'
 import type { ControlSignals } from '@/features/mips/types'
+import RefDatapath2D from '@/features/datapath/ref-demo/ref-datapath-2d'
 import Datapath2D from '@/features/datapath/scene-2d/datapath-2d'
 import DatapathIsland from '@/features/datapath/scene/datapath-island'
 
@@ -40,6 +41,7 @@ const DatapathCanvas = ({
   word: number
 }): React.JSX.Element => {
   if (!mounted) return <div className='size-full' data-testid='datapath-canvas' />
+  if (view === 'ref') return <RefDatapath2D />
   if (view === '2d')
     return (
       <Datapath2D
