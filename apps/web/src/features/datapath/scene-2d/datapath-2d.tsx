@@ -77,7 +77,6 @@ const TAP_LABEL: Record<string, string> = {
   IR_IMM_TO_SIGN_EXTEND: 'Inst[15:0]',
   IR_RD_TO_REGDST_MUX1: 'Inst[15:11]',
   IR_RS_TO_RF_RR1: 'Inst[25:21]',
-  IR_RT_TO_REGDST_MUX0: 'Inst[20:16]',
   IR_RT_TO_RF_RR2: 'Inst[20:16]'
 }
 const RULER = [
@@ -243,7 +242,7 @@ const Datapath2D = ({
           return (
             <g key={p.id}>
               {tap !== undefined && start !== undefined ? (
-                <text className='fill-muted-foreground' fontSize='7.5' x={start.x + 4} y={start.y - 4}>
+                <text className='fill-muted-foreground' fontSize='7.5' x={start.x + 16} y={start.y - 5}>
                   {tap}
                 </text>
               ) : undefined}
@@ -320,7 +319,7 @@ const Datapath2D = ({
                 fontSize={n.w < 34 ? 8 : 10}
                 textAnchor='middle'
                 x={n.x}
-                y={n.y - (lines.length - 1) * 5}
+                y={PORTS[n.id] === undefined ? n.y - (lines.length - 1) * 5 : n.y - n.h / 2 + 11}
                 {...(lit ? {} : { className: 'fill-muted-foreground' })}>
                 {lines.map((ln, i) => (
                   <tspan key={ln} x={n.x} {...(i === 0 ? {} : { dy: 10 })}>
