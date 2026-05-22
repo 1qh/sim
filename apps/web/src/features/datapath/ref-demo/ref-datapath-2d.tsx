@@ -89,6 +89,7 @@ const RefDatapath2D = ({
   const [view, setView] = useState(BASE)
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<null | { ox: number; oy: number; vx: number; vy: number }>(null)
+  const rafRef = useRef(0)
   const bits = useMemo(() => buildBits(word), [word])
   const signals = useMemo(() => toRefSignals(control), [control])
   const activeSegs = useMemo(() => {
@@ -97,18 +98,35 @@ const RefDatapath2D = ({
     return s
   }, [control, step])
   const highlight = useMemo(() => getDatapathHighlightState(step, signals, signals, {}), [step, signals])
+  const animateTo = (target: typeof BASE): void => {
+    cancelAnimationFrame(rafRef.current)
+    const from = view
+    const t0 = performance.now()
+    const tick = (t: number): void => {
+      const k = Math.min(1, (t - t0) / 260)
+      const e = 1 - (1 - k) ** 3
+      setView({
+        h: from.h + (target.h - from.h) * e,
+        w: from.w + (target.w - from.w) * e,
+        x: from.x + (target.x - from.x) * e,
+        y: from.y + (target.y - from.y) * e
+      })
+      if (k < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+  }
   const onInspect = (id: DatapathInspectID, el?: null | SVGGraphicsElement): void => {
     if (focused === id) {
       setFocused(null)
-      setView(BASE)
+      animateTo(BASE)
       return
     }
     setFocused(id)
     if (el) {
       const b = el.getBBox()
-      const w = Math.max(b.width, b.height * 1.5) * 2.6
-      const h = w / 1.5
-      setView({ h, w, x: b.x + b.width / 2 - w / 2, y: b.y + b.height / 2 - h / 2 })
+      const w = BASE.w / 1.8
+      const h = BASE.h / 1.8
+      animateTo({ h, w, x: b.x + b.width / 2 - w / 2, y: b.y + b.height / 2 - h / 2 })
     }
   }
   const onWheel = (e: React.WheelEvent): void => {
