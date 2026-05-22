@@ -23,6 +23,7 @@ import {
   executeStep,
   writeRegister
 } from '@/features/mips'
+import { DATAPATH_INSTRUCTIONS } from '@/lib/nav'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const REG_NAMES = [
@@ -104,7 +105,6 @@ const NumInput = ({
     />
   </label>
 )
-const DATAPATH_INSTRUCTIONS = ['add', 'addi', 'and', 'beq', 'bne', 'lw', 'or', 'slt', 'sub', 'sw']
 const FocusSandbox = ({ name }: { name: string }): React.JSX.Element => {
   const router = useRouter()
   const fmt = useMemo(() => formatOf(name), [name])
