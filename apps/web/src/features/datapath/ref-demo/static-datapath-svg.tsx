@@ -34,7 +34,7 @@ function InspectPathHitBox({
       <path
         d={d}
         fill='transparent'
-        className='cursor-pointer'
+        className='cursor-pointer [outline:none]'
         role='button'
         tabIndex={0}
         onClick={() => onInspect(id)}

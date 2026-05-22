@@ -1,5 +1,11 @@
 'use client'
-import type { EncodedField, EncodedInstruction, RuntimeControlSignals } from '@/features/datapath/ref-demo/ref-types'
+import { useState } from 'react'
+import type {
+  DatapathInspectID,
+  EncodedField,
+  EncodedInstruction,
+  RuntimeControlSignals
+} from '@/features/datapath/ref-demo/ref-types'
 import StaticDatapathSvg from '@/features/datapath/ref-demo/static-datapath-svg'
 
 const field = (bin: string): EncodedField => ({
@@ -33,22 +39,24 @@ const black = (): string => 'black'
 const oneFive = (): number => 1.5
 const arrow = (): string => 'url(#arrow-black)'
 const blue = (): string => '#2C1AF4'
-const noop = (): void => undefined
-const RefDatapath2D = (): React.JSX.Element => (
-  <div className='flex size-full items-center justify-center overflow-auto p-4' data-testid='datapath-canvas'>
-    <StaticDatapathSvg
-      bits={BITS}
-      muxFill={black}
-      onInspect={noop}
-      selectedInspectId={null}
-      signalFill={blue}
-      signals={SIGNALS}
-      valueFill={black}
-      wireArrow={arrow}
-      wireFill={black}
-      wireStroke={black}
-      wireStrokeWidth={oneFive}
-    />
-  </div>
-)
+const RefDatapath2D = (): React.JSX.Element => {
+  const [selected, setSelected] = useState<DatapathInspectID | null>(null)
+  return (
+    <div className='flex size-full items-center justify-center overflow-auto p-4' data-testid='datapath-canvas'>
+      <StaticDatapathSvg
+        bits={BITS}
+        muxFill={black}
+        onInspect={id => setSelected(prev => (prev === id ? null : id))}
+        selectedInspectId={selected}
+        signalFill={blue}
+        signals={SIGNALS}
+        valueFill={black}
+        wireArrow={arrow}
+        wireFill={black}
+        wireStroke={black}
+        wireStrokeWidth={oneFive}
+      />
+    </div>
+  )
+}
 export default RefDatapath2D
