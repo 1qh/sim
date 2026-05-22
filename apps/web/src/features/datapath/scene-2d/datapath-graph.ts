@@ -100,6 +100,44 @@ const PATH_SEGMENTS: Record<string, string[]> = {
     'SE_JUMP2_TO_LEFT_SHIFT_2'
   ]
 }
+const NODE_3D: Record<string, { p: [number, number, number]; s: [number, number, number] }> = {
+  ALU: { p: [1, 0, 0], s: [1.6, 1.8, 1.4] },
+  ALUControl: { p: [0, -2.6, 0], s: [1.2, 0.9, 1] },
+  ALUSrcMux: { p: [-0.5, -0.4, 0], s: [0.7, 1, 0.7] },
+  Add4: { p: [-9, 3, 0], s: [1.2, 1, 1] },
+  BeqAnd: { p: [3.6, 2.2, 0], s: [0.6, 0.6, 0.6] },
+  BneAnd: { p: [4.6, 1.6, 0], s: [0.6, 0.6, 0.6] },
+  BranchAdder: { p: [-2, 3.4, 0], s: [1.2, 1, 1] },
+  CONST4: { p: [-9.9, 1.8, 0], s: [0.5, 0.5, 0.5] },
+  Control: { p: [-3, 3.6, 0], s: [1.8, 1, 1.2] },
+  DM: { p: [4.5, 0, 0], s: [1.8, 2, 1.4] },
+  IM: { p: [-8.5, 0, 0], s: [1.8, 2, 1.4] },
+  IR: { p: [-6, 0, 0], s: [1, 2.4, 1] },
+  LS2: { p: [-4, 3, 0], s: [0.9, 0.9, 0.9] },
+  MemToRegMux: { p: [7, 0, 0], s: [0.7, 1, 0.7] },
+  NotGate: { p: [3.6, 1, 0], s: [0.5, 0.5, 0.5] },
+  OrGate: { p: [5.6, 2.2, 0], s: [0.6, 0.6, 0.6] },
+  PC: { p: [-11, 0, 0], s: [1.2, 1.6, 1.2] },
+  PCSrcMux: { p: [-12.5, 1.4, 0], s: [0.7, 1, 0.7] },
+  RF: { p: [-3, 0, 0], s: [1.8, 2.4, 1.4] },
+  RegDstMux: { p: [-1.5, 1.4, 0], s: [0.7, 1, 0.7] },
+  SE: { p: [-4, -1.5, 0], s: [0.9, 0.9, 0.9] },
+  WB: { p: [9, 0, 0], s: [0.8, 1.2, 0.8] },
+  Zero: { p: [2.6, 1, 0], s: [0.6, 0.6, 0.6] }
+}
+const JUNCTION_3D: Record<string, [number, number, number]> = {
+  ADD4_JUNCTION: [-7.4, 3, 0],
+  ALU_JUMP: [2.3, -1, 0],
+  ALU_JUNCTION: [2.3, 0, 0],
+  MEMTOREG_MUX_JUMP: [8, 0, 0],
+  PC_JUNCTION: [-10, 0, 0],
+  RD2_JUMP: [-1.6, -1.6, 0],
+  RD2_JUNCTION: [-1.6, -0.8, 0],
+  RT_JUNCTION: [-5, -0.7, 0],
+  SE_JUMP1: [-2.6, -2.7, 0],
+  SE_JUMP2: [-4.6, -2.7, 0],
+  SE_JUNCTION: [-2.6, -1.5, 0]
+}
 const NODE_POS = new Map(NODES.map(n => [n.id, { x: n.x, y: n.y }]))
 const PATH_FT = new Map(PATHS.map(p => [p.id, { from: p.from, to: p.to }]))
 const RE_CONTROL = /^CONTROL_|_TO_CONTROL$|^ALUOP_|_TO_ALU_CONTROL$|^IR_OPCODE_/u
@@ -131,22 +169,22 @@ const resolveNode = (token: string): string => {
   return token
 }
 const posOf = (id: string): { x: number; y: number } => NODE_POS.get(id) ?? JUNCTIONS[id] ?? { x: 0, y: 0 }
-const pathPoints = (id: string): { x: number; y: number }[] => {
+const posOf3 = (id: string): [number, number, number] => NODE_3D[id]?.p ?? JUNCTION_3D[id] ?? [0, 0, 0]
+const nodeSeq = (id: string): string[] => {
   const segs = PATH_SEGMENTS[id]
   if (segs === undefined) {
     const ft = PATH_FT.get(id)
-    if (ft === undefined) return []
-    return [posOf(ft.from), posOf(ft.to)]
+    return ft === undefined ? [] : [ft.from, ft.to]
   }
   const ids: string[] = []
-  for (const seg of segs) {
-    const parts = seg.split('_TO_')
-    for (const part of parts) {
+  for (const seg of segs)
+    for (const part of seg.split('_TO_')) {
       const n = resolveNode(part)
       if (ids.at(-1) !== n) ids.push(n)
     }
-  }
-  return ids.map(posOf)
+  return ids
 }
-export { isControlPath, JUNCTIONS, NODES, pathPoints, VH, VW }
+const pathPoints = (id: string): { x: number; y: number }[] => nodeSeq(id).map(posOf)
+const pathPoints3D = (id: string): [number, number, number][] => nodeSeq(id).map(posOf3)
+export { isControlPath, JUNCTION_3D, JUNCTIONS, NODE_3D, NODES, pathPoints, pathPoints3D, VH, VW }
 export type { Node }
