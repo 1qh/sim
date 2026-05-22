@@ -21,7 +21,7 @@ import StaticDatapathSvg from '@/features/datapath/ref-demo/static-datapath-svg'
 import { PATH_SEGMENTS } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACTIVE = '#dc2626'
-const BASE = { h: 600, w: 900, x: 0, y: 0 }
+const BASE = { h: 880, w: 1320, x: -40, y: -40 }
 const INSPECT: Record<string, { sub: string; title: string }> = {
   ADD4: { sub: 'Adds 4 to the current PC to get the next sequential instruction address.', title: 'PC + 4 Adder' },
   ALU: { sub: 'Computes arithmetic or logic results from two input operands.', title: 'Arithmetic Logic Unit (ALU)' },
@@ -90,6 +90,7 @@ const RefDatapath2D = ({
   const wrapRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<null | { ox: number; oy: number; vx: number; vy: number }>(null)
   const rafRef = useRef(0)
+  const prevRef = useRef(BASE)
   const bits = useMemo(() => buildBits(word), [word])
   const signals = useMemo(() => toRefSignals(control), [control])
   const activeSegs = useMemo(() => {
@@ -118,15 +119,16 @@ const RefDatapath2D = ({
   const onInspect = (id: DatapathInspectID, el?: null | SVGGraphicsElement): void => {
     if (focused === id) {
       setFocused(null)
-      animateTo(BASE)
+      animateTo(prevRef.current)
       return
     }
+    prevRef.current = view
     setFocused(id)
     if (el) {
       const b = el.getBBox()
-      const w = BASE.w / 1.8
-      const h = BASE.h / 1.8
-      animateTo({ h, w, x: b.x + b.width / 2 - w / 2, y: b.y + b.height / 2 - h / 2 })
+      const w = view.w / 1.8
+      const h = view.h / 1.8
+      animateTo({ h, w, x: b.x + b.width / 2 - w * 0.42, y: b.y + b.height / 2 - h / 2 })
     }
   }
   const onWheel = (e: React.WheelEvent): void => {
