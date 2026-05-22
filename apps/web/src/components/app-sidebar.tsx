@@ -18,6 +18,7 @@ import {
 import { ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import type { NavSection } from '@/lib/nav'
 import { NAV } from '@/lib/nav'
 import ThemeToggle from './theme-toggle'
@@ -25,6 +26,11 @@ import ThemeToggle from './theme-toggle'
 const onSection = (pathname: string, href: string): boolean =>
   href === '/' ? pathname === '/' : pathname.startsWith(href)
 const Section = ({ section, pathname }: { pathname: string; section: NavSection }): React.JSX.Element => {
+  const [open, setOpen] = useState(() => onSection(pathname, section.href))
+  useEffect(() => {
+    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    if (onSection(pathname, section.href)) setOpen(true)
+  }, [pathname, section.href])
   if (section.items === undefined)
     return (
       <SidebarMenuItem>
@@ -38,10 +44,7 @@ const Section = ({ section, pathname }: { pathname: string; section: NavSection 
       </SidebarMenuItem>
     )
   return (
-    <Collapsible
-      className='group/collapsible'
-      defaultOpen={onSection(pathname, section.href)}
-      render={<SidebarMenuItem />}>
+    <Collapsible className='group/collapsible' onOpenChange={setOpen} open={open} render={<SidebarMenuItem />}>
       <CollapsibleTrigger
         render={<SidebarMenuButton isActive={onSection(pathname, section.href)} tooltip={section.title} />}>
         <section.icon />
