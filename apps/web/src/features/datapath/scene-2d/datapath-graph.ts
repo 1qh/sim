@@ -202,5 +202,17 @@ const nodeSeq = (id: string): string[] => {
 }
 const pathPoints = (id: string): { x: number; y: number }[] => nodeSeq(id).map(posOf)
 const pathPoints3D = (id: string): [number, number, number][] => nodeSeq(id).map(posOf3)
-export { isControlPath, JUNCTION_3D, JUNCTIONS, NODE_3D, NODE_COLOR, NODES, pathPoints, pathPoints3D, VH, VW }
+export {
+  isControlPath,
+  JUNCTION_3D,
+  JUNCTIONS,
+  NODE_3D,
+  NODE_COLOR,
+  NODES,
+  PATH_SEGMENTS,
+  pathPoints,
+  pathPoints3D,
+  VH,
+  VW
+}
 export type { Node }
