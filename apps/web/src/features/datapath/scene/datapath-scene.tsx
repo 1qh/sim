@@ -23,11 +23,12 @@ import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals } from '@/features/mips/types'
 import { activePaths, componentsForPaths } from '@/features/datapath/generated/stepTraces'
 import { PATHS } from '@/features/datapath/generated/topology'
-import { NODE_3D, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
+import { isControlPath, NODE_3D, NODES, pathPoints3D } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACCENT = '#22d3ee'
 const CRITICAL = '#f97316'
 const SELECTED = '#a855f7'
+const CONTROL_WIRE = '#8b5cf6'
 const KIND_COLOR: Record<string, string> = {
   alu: '#ef4444',
   gate: '#eab308',
@@ -171,10 +172,12 @@ const Pulse = ({ from, to }: { from: Vector3; to: Vector3 }): React.JSX.Element 
 const Wire = ({
   pts,
   active,
+  ctrl,
   palette,
   reduced
 }: {
   active: boolean
+  ctrl: boolean
   palette: Palette
   pts: Vector3[]
   reduced: boolean
@@ -182,9 +185,11 @@ const Wire = ({
   const points = useMemo<[number, number, number][]>(() => pts.map(p => [p.x, p.y, p.z]), [pts])
   const first = pts[0]
   const last = pts.at(-1)
+  const color = active ? ACCENT : ctrl ? CONTROL_WIRE : palette.wire
+  const dashed = ctrl && !active
   return (
     <>
-      <Line color={active ? ACCENT : palette.wire} lineWidth={active ? 3 : 1.6} points={points} transparent />
+      <Line color={color} dashed={dashed} dashScale={4} lineWidth={active ? 3 : 1.6} points={points} transparent />
       {active && !reduced && first !== undefined && last !== undefined ? <Pulse from={first} to={last} /> : undefined}
     </>
   )
@@ -274,7 +279,14 @@ const DatapathScene = ({
         </Environment>
         <ContactShadows blur={2.6} far={20} opacity={0.55} position={[0, -3, 0]} resolution={1024} scale={48} />
         {wires.map(w => (
-          <Wire active={activeP.has(w.id)} key={w.id} palette={palette} pts={w.pts} reduced={reduced} />
+          <Wire
+            active={activeP.has(w.id)}
+            ctrl={isControlPath(w.id)}
+            key={w.id}
+            palette={palette}
+            pts={w.pts}
+            reduced={reduced}
+          />
         ))}
         {NODES.map(c => {
           const isCritical = showCritical && criticalSet.has(c.id)
