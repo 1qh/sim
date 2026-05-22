@@ -1,18 +1,8 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
 /** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /** biome-ignore-all lint/correctness/useUniqueElementIds: static svg marker ids */
-/** biome-ignore-all lint/performance/useTopLevelRegex: hoisted */
 /** biome-ignore-all lint/a11y/useSemanticElements: svg g, real a11y via DatapathA11yProxies */
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: svg g, real a11y via DatapathA11yProxies */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, complexity, jsx-a11y/prefer-tag-over-role, eslint/no-bitwise */
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
 /* eslint-disable complexity, no-bitwise */
 'use client'
 import { useEffect, useMemo, useState } from 'react'

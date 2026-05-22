@@ -1,17 +1,7 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /** biome-ignore-all lint/a11y/noNoninteractiveElementInteractions: modal backdrop dismiss; Esc handled */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: modal backdrop dismiss; Esc handled */
 /** biome-ignore-all lint/a11y/useKeyWithClickEvents: modal backdrop dismiss; Esc handled, buttons keyboard-reachable */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-static-element-interactions, jsx-a11y/prefer-tag-over-role */
+/* oxlint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-static-element-interactions, jsx-a11y/prefer-tag-over-role */
 'use client'
 import { cn } from '@a/ui'
 import { useRouter } from 'next/navigation'

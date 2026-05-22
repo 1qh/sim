@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: gen */
 /** biome-ignore-all lint/performance/noAwaitInLoops: sequential file writes */
 /* eslint-disable no-console, no-await-in-loop */
 import { $ } from 'bun'

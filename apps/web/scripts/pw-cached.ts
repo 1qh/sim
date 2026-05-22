@@ -1,15 +1,6 @@
 #!/usr/bin/env bun
 /** biome-ignore-all lint/style/noProcessEnv: reads harness-passed LEDGER_TREE for cache key */
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
 /** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable promise/param-names */
 /* eslint-disable no-await-in-loop, no-console */
 import { $, argv, file, write } from 'bun'

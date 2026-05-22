@@ -1,13 +1,4 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* eslint-disable no-bitwise, @typescript-eslint/max-params */
 import { espresso } from 'espresso-iisojs'
 

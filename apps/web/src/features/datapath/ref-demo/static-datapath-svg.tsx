@@ -1,19 +1,7 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/suspicious/noMisplacedAssertion: noise */
-/** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/** biome-ignore-all lint/performance/noNamespaceImport: noise */
-/** biome-ignore-all lint/complexity/noUselessStringRaw: noise */
-/** biome-ignore-all lint/complexity/useMaxParams: noise */
 /** biome-ignore-all lint/correctness/useUniqueElementIds: vendored ref svg */
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: vendored ref svg */
-/** biome-ignore-all lint/a11y/useKeyWithClickEvents: vendored ref svg */
 /** biome-ignore-all lint/a11y/noSvgWithoutTitle: vendored ref svg */
 /** biome-ignore-all lint/a11y/useSemanticElements: vendored ref svg */
-/* oxlint-disable unicorn/no-array-reduce, unicorn/no-immediate-mutation, unicorn/number-literal-case, unicorn/no-process-exit, import/no-duplicates, promise/param-names, @eslint-react/naming-convention/component-name, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions, unicorn/filename-case, unicorn/no-abusive-eslint-disable */
+/* oxlint-disable unicorn/no-abusive-eslint-disable */
 /* eslint-disable */
 'use client'
 import type {
