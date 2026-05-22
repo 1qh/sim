@@ -1,5 +1,5 @@
-/** biome-ignore-all lint/suspicious/noArrayIndexKey: register/memory index is the stable address */
 /* oxlint-disable react/jsx-handler-names */
+
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, PanelRight } from 'lucide-react'
@@ -44,6 +44,15 @@ const REG_NAMES = [
 ]
 const TABS = ['Val', 'Reg', 'Mem', 'Ctrl', 'Info'] as const
 type Tab = (typeof TABS)[number]
+const FORMATS = ['dec', 'hex', 'bin'] as const
+type Fmt = (typeof FORMATS)[number]
+const fmtNum = (n: number, f: Fmt): string => {
+  const u = Math.trunc(n)
+  if (f === 'hex') return `0x${u.toString(16).toUpperCase().padStart(8, '0')}`
+  if (f === 'bin') return `0b${u.toString(2).padStart(32, '0')}`
+  return String(n)
+}
+const hexAddr = (a: number): string => `0x${Math.trunc(a).toString(16).toUpperCase().padStart(8, '0')}`
 const HINT: Record<Tab, string> = {
   Ctrl: 'Control signals the Control unit decodes from the opcode.',
   Info: 'What each component does — highlighted ones are active in this stage.',
@@ -84,11 +93,12 @@ const INSPECT: { id: string; sub: string; title: string }[] = [
 ]
 interface Edit {
   mem: Record<number, number>
+  memStart: number
   memWords: number
   pc: number
   regs: Record<number, number>
   setMem: (addr: number, v: number) => void
-  setMemWords: (n: number) => void
+  setMemRange: (start: number, words: number) => void
   setPc: (v: number) => void
   setReg: (n: number, v: number) => void
 }
@@ -129,8 +139,15 @@ const DatapathPanel = ({
 }): React.JSX.Element => {
   const [open, setOpen] = useState(true)
   const [tab, setTab] = useState<Tab>('Val')
+  const [fmt, setFmt] = useState<Fmt>('dec')
+  const [memStartDraft, setMemStartDraft] = useState('0')
+  const [memWordsDraft, setMemWordsDraft] = useState('8')
   const mem = Object.entries(after.dataMemory)
   const active = new Set(activeComponents)
+  const memRange =
+    edit === undefined
+      ? []
+      : Array.from({ length: Math.max(0, Math.min(64, edit.memWords)) }, (_, i) => edit.memStart + i * 4)
   return (
     <div className='absolute top-0 right-0 bottom-0 flex items-stretch'>
       <button
@@ -154,7 +171,22 @@ const DatapathPanel = ({
               </button>
             ))}
           </div>
-          <p className='border-b bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground italic'>{HINT[tab]}</p>
+          <div className='flex items-center justify-between gap-2 border-b bg-muted/30 px-3 py-2'>
+            <p className='text-[11px] text-muted-foreground italic'>{HINT[tab]}</p>
+            {tab === 'Val' || tab === 'Reg' || tab === 'Mem' ? (
+              <div className='flex shrink-0 overflow-hidden rounded border text-[10px] [&>button]:px-1.5 [&>button]:py-0.5'>
+                {FORMATS.map(f => (
+                  <button
+                    className={cn(f === fmt ? 'bg-primary text-primary-foreground' : 'hover:bg-muted')}
+                    key={f}
+                    onClick={() => setFmt(f)}
+                    type='button'>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            ) : undefined}
+          </div>
           <div className='flex-1 divide-y overflow-auto'>
             {tab === 'Val' ? Object.entries(values).map(([k, v]) => <Row k={k} key={k} v={v} />) : undefined}
             {tab === 'Reg'
@@ -164,7 +196,7 @@ const DatapathPanel = ({
                       hot={after.registers[n as RegisterNumber] !== before.registers[n as RegisterNumber]}
                       k={nm}
                       key={nm}
-                      v={String(after.registers[n as RegisterNumber])}
+                      v={fmtNum(after.registers[n as RegisterNumber], fmt)}
                     />
                   ))
                 : [
@@ -179,15 +211,85 @@ const DatapathPanel = ({
                 mem.length === 0 ? (
                   <div className='px-3 py-2 text-muted-foreground'>no memory writes</div>
                 ) : (
-                  mem.map(([addr, v]) => <Row k={`[${addr}]`} key={addr} v={String(v)} />)
+                  <table className='w-full'>
+                    <thead className='sticky top-0 bg-background text-left text-[10px] text-muted-foreground [&>tr>th]:px-3 [&>tr>th]:py-1'>
+                      <tr>
+                        <th>Addr</th>
+                        <th>Hex</th>
+                        <th className='text-right'>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className='[&>tr>td]:px-3 [&>tr>td]:py-1'>
+                      {mem
+                        .map(([a, v]) => ({ a: Number(a), v }))
+                        .toSorted((x, y) => x.a - y.a)
+                        .map(r => (
+                          <tr key={r.a}>
+                            <td className='text-muted-foreground'>{r.a}</td>
+                            <td className='text-muted-foreground'>{hexAddr(r.a)}</td>
+                            <td className='text-right'>{fmtNum(r.v, fmt)}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
                 )
               ) : (
-                [
-                  <EditRow k='words shown' key='words' onChange={edit.setMemWords} v={edit.memWords} />,
-                  ...Array.from({ length: Math.max(0, Math.min(64, edit.memWords)) }, (_, i) => (
-                    <EditRow k={`[${i}]`} key={i} onChange={v => edit.setMem(i, v)} v={edit.mem[i] ?? 0} />
-                  ))
-                ]
+                <div className='flex flex-col'>
+                  <div className='flex items-end gap-2 px-3 py-2'>
+                    <label className='flex flex-col text-[10px] text-muted-foreground'>
+                      Start addr
+                      <input
+                        aria-label='start address'
+                        className='mt-0.5 w-16 rounded border bg-background px-1'
+                        onChange={e => setMemStartDraft(e.target.value)}
+                        type='number'
+                        value={memStartDraft}
+                      />
+                    </label>
+                    <label className='flex flex-col text-[10px] text-muted-foreground'>
+                      Words
+                      <input
+                        aria-label='words'
+                        className='mt-0.5 w-14 rounded border bg-background px-1'
+                        onChange={e => setMemWordsDraft(e.target.value)}
+                        type='number'
+                        value={memWordsDraft}
+                      />
+                    </label>
+                    <button
+                      className='rounded bg-primary px-2 py-1 text-primary-foreground'
+                      onClick={() => edit.setMemRange(Number(memStartDraft) || 0, Number(memWordsDraft) || 1)}
+                      type='button'>
+                      Apply
+                    </button>
+                  </div>
+                  <table className='w-full'>
+                    <thead className='sticky top-0 bg-background text-left text-[10px] text-muted-foreground [&>tr>th]:px-3 [&>tr>th]:py-1'>
+                      <tr>
+                        <th>Addr</th>
+                        <th>Hex</th>
+                        <th className='text-right'>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody className='[&>tr>td]:px-3 [&>tr>td]:py-1'>
+                      {memRange.map(addr => (
+                        <tr key={addr}>
+                          <td className='text-muted-foreground'>{addr}</td>
+                          <td className='text-muted-foreground'>{hexAddr(addr)}</td>
+                          <td className='text-right'>
+                            <input
+                              aria-label={`mem ${addr}`}
+                              className='w-16 rounded border bg-background px-1 text-right'
+                              onChange={e => edit.setMem(addr, Number(e.target.value) || 0)}
+                              type='number'
+                              value={edit.mem[addr] ?? 0}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )
             ) : undefined}
             {tab === 'Ctrl' ? Object.entries(control).map(([k, v]) => <Row k={k} key={k} v={String(v)} />) : undefined}

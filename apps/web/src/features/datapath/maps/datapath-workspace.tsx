@@ -72,7 +72,8 @@ const DatapathWorkspace = ({
   const [initRegs, setInitRegs] = useState<Record<number, number>>({ 10: 3, 9: 10 })
   const [initPc, setInitPc] = useState(0)
   const [initMem, setInitMem] = useState<Record<number, number>>({})
-  const [memWords, setMemWords] = useState(4)
+  const [memWords, setMemWords] = useState(8)
+  const [memStart, setMemStart] = useState(0)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
@@ -171,15 +172,19 @@ const DatapathWorkspace = ({
   const edit = useMemo(
     () => ({
       mem: initMem,
+      memStart,
       memWords,
       pc: initPc,
       regs: initRegs,
       setMem: (a: number, v: number) => setInitMem(m => ({ ...m, [a]: v })),
-      setMemWords,
+      setMemRange: (s: number, w: number) => {
+        setMemStart(s)
+        setMemWords(w)
+      },
       setPc: setInitPc,
       setReg: (n: number, v: number) => setInitRegs(r => ({ ...r, [n]: v }))
     }),
-    [initMem, memWords, initPc, initRegs]
+    [initMem, memStart, memWords, initPc, initRegs]
   )
   return (
     <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
