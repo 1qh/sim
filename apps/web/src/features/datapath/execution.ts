@@ -32,10 +32,17 @@ interface Watchpoint {
   target: number
 }
 const SYSCALL_WORD = 0xc
-const createProgram = (words: readonly number[], speed = 1, seed?: Record<number, number>): ProgramState => {
+interface Seed {
+  memory?: Record<number, number>
+  pc?: number
+  registers?: Record<number, number>
+}
+const createProgram = (words: readonly number[], speed = 1, seed?: Seed): ProgramState => {
   let init = createInitialState()
-  if (seed !== undefined)
-    for (const [k, v] of Object.entries(seed)) init = writeRegister(init, Number(k) as RegisterNumber, v)
+  if (seed?.registers !== undefined)
+    for (const [k, v] of Object.entries(seed.registers)) init = writeRegister(init, Number(k) as RegisterNumber, v)
+  if (seed?.memory !== undefined) init = { ...init, dataMemory: { ...init.dataMemory, ...seed.memory } }
+  if (seed?.pc !== undefined) init = { ...init, pc: seed.pc }
   return { halted: false, history: [init], output: [], speed, trace: [], words: [...words] }
 }
 const current = (p: ProgramState): MachineState => p.history.at(-1) ?? createInitialState()
