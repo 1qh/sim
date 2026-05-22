@@ -10,6 +10,9 @@ const pkgTsc = (p: string): string => `cd packages/${p} && bunx tsc --noEmit`
 const featureTest = (p: string): string => `bun test apps/web/src/features/${p}`
 const pwTest = (file: string, grep: string): string => `cd apps/web && bun scripts/pw-cached.ts ${file} "${grep}"`
 const liveCurl = (path: string): string => `/usr/bin/curl -sf https://sim.noboil.dev${path}`
+const LOCAL_CONVEX = 'http://127.0.0.1:3220'
+const backendTest = (file: string, grep = ''): string =>
+  `cd apps/backend && CONVEX_SELF_HOSTED_URL=${LOCAL_CONVEX} bun test ${file}${grep === '' ? '' : ` -t ${grep}`}`
 const GATES: Gate[] = []
 GATES.push({ cmd: 'bun run fix', name: 'format' })
 GATES.push({ cmd: lint('disable-reasons.ts'), name: 'lint.disable-reasons' })
@@ -86,9 +89,9 @@ for (const c of [
 for (const c of ['v5-basic', 'v5-wrap', 'v5-petrick', 'v6-basic', 'v6-wrap', 'v6-multi-output'])
   GATES.push({ cmd: featureTest('kmap'), name: `test.e2e.kmap-3d.${c}` })
 GATES.push({ cmd: featureTest('share'), name: 'test.e2e.share' })
-GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts', name: 'test.convex' })
-GATES.push({ cmd: 'cd apps/backend && bun test convex/auth.live.test.ts', name: 'test.auth-flow' })
-GATES.push({ cmd: 'cd apps/backend && bun test convex/snapshots.live.test.ts -t rate', name: 'test.rate-limit' })
+GATES.push({ cmd: backendTest('convex/snapshots.live.test.ts'), name: 'test.convex' })
+GATES.push({ cmd: backendTest('convex/auth.live.test.ts'), name: 'test.auth-flow' })
+GATES.push({ cmd: backendTest('convex/snapshots.live.test.ts', 'rate'), name: 'test.rate-limit' })
 GATES.push({ cmd: featureTest('compare'), name: 'test.e2e.compare' })
 const lhPath: Record<string, string> = {
   compare: '/compare',
@@ -139,7 +142,7 @@ for (const s of ['datapath-cycle', 'kmap-cycle', 'share-cycle'])
   GATES.push({ cmd: pwTest('perf-heap.pw.ts', `perf.heap-leak.${s}`), name: `perf.heap-leak.${s}` })
 for (const p of ['bits', 'boolean', 'sim-engine'])
   GATES.push({ cmd: `cd packages/${p} && bunx stryker run`, name: `mutate.${p}` })
-GATES.push({ cmd: 'curl -sf http://127.0.0.1:3220/version', name: 'verify.local' })
+GATES.push({ cmd: `curl -sf ${LOCAL_CONVEX}/version`, name: 'verify.local' })
 GATES.push({ cmd: liveCurl('/'), name: 'verify.bearer' })
 GATES.push({
   cmd: 'D=$(mktemp -d) && git clone -q --depth 1 "file://$(git rev-parse --show-toplevel)" "$D" && (cd "$D" && bun i >/dev/null 2>&1 && bun test packages/bits/src/index.test.ts >/dev/null 2>&1); R=$?; rm -rf "$D"; exit $R',
@@ -149,7 +152,7 @@ for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'share'
   GATES.push({ cmd: liveCurl(r === 'home' ? '/' : `/${r}`), name: `smoke.deploy.${r}` })
 GATES.push({ cmd: liveCurl('/s/abc123'), name: 'smoke.share.dokploy' })
 GATES.push({ cmd: liveCurl('/s/golden'), name: 'smoke.share.cloudflare-tunnel' })
-GATES.push({ cmd: 'curl -sf http://127.0.0.1:3220/version', name: 'infra.convex.local' })
+GATES.push({ cmd: `curl -sf ${LOCAL_CONVEX}/version`, name: 'infra.convex.local' })
 GATES.push({ cmd: liveCurl('/'), name: 'infra.convex.dokploy' })
 GATES.push({ cmd: 'dig +short sim.noboil.dev | head -1 | grep -q "^[0-9]"', name: 'infra.cloudflare.dns' })
 GATES.push({ cmd: '/usr/bin/curl -sSI https://sim.noboil.dev/ | head -3 | grep -q HTTP', name: 'infra.cloudflare.tunnel' })
