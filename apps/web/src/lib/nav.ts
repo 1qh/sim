@@ -36,21 +36,8 @@ interface NavSection {
 }
 const NAV: NavSection[] = [
   { href: '/', icon: House, title: 'Home' },
-  {
-    href: '/mips',
-    icon: Cpu,
-    items: [{ href: '/mips/assembly', title: 'assembly' }, ...MIPS_NAMES.map(n => ({ href: `/mips/${n}`, title: n }))],
-    title: 'MIPS datapath'
-  },
-  {
-    href: '/mips-beta',
-    icon: Cpu,
-    items: [
-      { href: '/mips-beta/assembly', title: 'assembly' },
-      ...MIPS_NAMES.map(n => ({ href: `/mips-beta/${n}`, title: n }))
-    ],
-    title: 'MIPS datapath (beta)'
-  },
+  { href: '/mips', icon: Cpu, title: 'MIPS datapath' },
+  { href: '/mips-beta', icon: Cpu, title: 'MIPS datapath (beta)' },
   {
     href: '/kmap',
     icon: Grid3x3,
