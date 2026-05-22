@@ -8,7 +8,7 @@ const CATEGORIES = [
   { label: 'Branch', names: ['beq', 'bne'] },
   { label: 'Jump', names: ['j'] }
 ]
-const MipsLanding = ({ base }: { base: string }): React.JSX.Element => (
+const MipsLanding = ({ base, names }: { base: string; names: readonly string[] }): React.JSX.Element => (
   <main aria-label='mips index' className='mx-auto flex min-h-screen max-w-4xl flex-col gap-8 p-8 pt-20'>
     <header className='flex flex-col gap-2'>
       <h1 className='font-bold text-4xl tracking-tight'>MIPS datapath</h1>
@@ -27,18 +27,20 @@ const MipsLanding = ({ base }: { base: string }): React.JSX.Element => (
         </span>
       </span>
     </Link>
-    {CATEGORIES.map(cat => (
-      <section className='flex flex-col gap-2' key={cat.label}>
-        <h2 className='font-mono text-muted-foreground text-xs uppercase tracking-wide'>{cat.label}</h2>
-        <ul className='grid grid-cols-3 gap-2 font-mono sm:grid-cols-5 [&>li>a]:block [&>li>a]:rounded-lg [&>li>a]:border [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:transition hover:[&>li>a]:bg-muted'>
-          {cat.names.map(n => (
-            <li key={n}>
-              <Link href={`${base}/${n}`}>{n}</Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))}
+    {CATEGORIES.map(cat => ({ label: cat.label, names: cat.names.filter(n => names.includes(n)) }))
+      .filter(cat => cat.names.length > 0)
+      .map(cat => (
+        <section className='flex flex-col gap-2' key={cat.label}>
+          <h2 className='font-mono text-muted-foreground text-xs uppercase tracking-wide'>{cat.label}</h2>
+          <ul className='grid grid-cols-3 gap-2 font-mono sm:grid-cols-5 [&>li>a]:block [&>li>a]:rounded-lg [&>li>a]:border [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:transition hover:[&>li>a]:bg-muted'>
+            {cat.names.map(n => (
+              <li key={n}>
+                <Link href={`${base}/${n}`}>{n}</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
   </main>
 )
 export default MipsLanding
