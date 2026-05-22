@@ -33,7 +33,6 @@ const EXAMPLES = [
 ]
 const STEP_SET = new Set<string>(STEPS)
 const RE_FORM = /^(?:INPUT|TEXTAREA)$/u
-const SEED: Record<number, number> = { 10: 3, 9: 10 }
 const readParam = (key: string): string | undefined => {
   if (typeof window === 'undefined') return
   return new URLSearchParams(window.location.search).get(key) ?? undefined
@@ -76,6 +75,10 @@ const DatapathWorkspace = ({
   const [insIndex, setInsIndex] = useState(0)
   const [presetSrc, setPresetSrc] = useState<string | undefined>(undefined)
   const [showHelp, setShowHelp] = useState(false)
+  const [initRegs, setInitRegs] = useState<Record<number, number>>({ 10: 3, 9: 10 })
+  const [initPc, setInitPc] = useState(0)
+  const [initMem, setInitMem] = useState<Record<number, number>>({})
+  const [memWords, setMemWords] = useState(4)
   useEffect(() => {
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
@@ -135,7 +138,7 @@ const DatapathWorkspace = ({
     const ins = liveProgram[idx]
     if (ins === undefined) return
     const words = liveProgram.map(encodeInstruction)
-    let prog = createProgram(words, 1, SEED)
+    let prog = createProgram(words, 1, { memory: initMem, pc: initPc, registers: initRegs })
     for (let i = 0; i < idx; i += 1) prog = stepForward(prog)
     const before = current(prog)
     const after = current(stepForward(prog))
@@ -150,7 +153,7 @@ const DatapathWorkspace = ({
       values: datapathValues(before, after, ins),
       word: words[idx] ?? 0
     }
-  }, [liveProgram, insIndex])
+  }, [liveProgram, insIndex, initRegs, initPc, initMem])
   const aControl = live?.control ?? control
   const aCritical = live?.critical ?? critical
   const aDelay = live?.criticalDelayPs ?? criticalDelayPs
@@ -166,6 +169,19 @@ const DatapathWorkspace = ({
   const { view, setView, mounted } = useViewMode()
   const aAfter = live?.after ?? createInitialState()
   const aBefore = live?.before ?? createInitialState()
+  const edit = useMemo(
+    () => ({
+      mem: initMem,
+      memWords,
+      pc: initPc,
+      regs: initRegs,
+      setMem: (a: number, v: number) => setInitMem(m => ({ ...m, [a]: v })),
+      setMemWords,
+      setPc: setInitPc,
+      setReg: (n: number, v: number) => setInitRegs(r => ({ ...r, [n]: v }))
+    }),
+    [initMem, memWords, initPc, initRegs]
+  )
   return (
     <div className='absolute inset-0' onPointerDown={hint ? dismissHint : undefined}>
       <DatapathCanvas
@@ -286,6 +302,7 @@ const DatapathWorkspace = ({
         after={aAfter}
         before={aBefore}
         control={aControl}
+        edit={edit}
         step={step}
         values={aValues}
       />

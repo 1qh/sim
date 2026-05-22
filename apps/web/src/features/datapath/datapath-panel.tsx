@@ -1,3 +1,6 @@
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: register/memory index is the stable address */
+
+/* oxlint-disable react/jsx-handler-names */
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, PanelRight } from 'lucide-react'
@@ -80,11 +83,33 @@ const INSPECT: { id: string; sub: string; title: string }[] = [
   { id: 'BranchAdder', sub: 'Adds PC + 4 to the shifted offset to compute the branch target.', title: 'Branch Adder' },
   { id: 'PCSrcMux', sub: 'Selects the next value written into the PC.', title: 'PCSrc MUX' }
 ]
+interface Edit {
+  mem: Record<number, number>
+  memWords: number
+  pc: number
+  regs: Record<number, number>
+  setMem: (addr: number, v: number) => void
+  setMemWords: (n: number) => void
+  setPc: (v: number) => void
+  setReg: (n: number, v: number) => void
+}
 const Row = ({ k, v, hot }: { hot?: boolean; k: string; v: string }): React.JSX.Element => (
   <div className={cn('flex justify-between gap-3 px-3 py-1', hot === true && 'bg-[#22d3ee]/10 text-[#22d3ee]')}>
     <span className='text-muted-foreground'>{k}</span>
     <span className='text-foreground'>{v}</span>
   </div>
+)
+const EditRow = ({ k, v, onChange }: { k: string; onChange: (n: number) => void; v: number }): React.JSX.Element => (
+  <label className='flex items-center justify-between gap-3 px-3 py-1'>
+    <span className='text-muted-foreground'>{k}</span>
+    <input
+      aria-label={k}
+      className='w-20 rounded border bg-background px-1 text-right'
+      onChange={e => onChange(Number(e.target.value) || 0)}
+      type='number'
+      value={v}
+    />
+  </label>
 )
 const DatapathPanel = ({
   control,
@@ -92,12 +117,14 @@ const DatapathPanel = ({
   after,
   before,
   activeComponents,
-  step
+  step,
+  edit
 }: {
   activeComponents: readonly string[]
   after: MachineState
   before: MachineState
   control: ControlSignals
+  edit?: Edit
   step: Step
   values: Record<string, string>
 }): React.JSX.Element => {
@@ -132,20 +159,36 @@ const DatapathPanel = ({
           <div className='flex-1 divide-y overflow-auto'>
             {tab === 'Val' ? Object.entries(values).map(([k, v]) => <Row k={k} key={k} v={v} />) : undefined}
             {tab === 'Reg'
-              ? REG_NAMES.map((nm, n) => (
-                  <Row
-                    hot={after.registers[n as RegisterNumber] !== before.registers[n as RegisterNumber]}
-                    k={nm}
-                    key={nm}
-                    v={String(after.registers[n as RegisterNumber])}
-                  />
-                ))
+              ? edit === undefined
+                ? REG_NAMES.map((nm, n) => (
+                    <Row
+                      hot={after.registers[n as RegisterNumber] !== before.registers[n as RegisterNumber]}
+                      k={nm}
+                      key={nm}
+                      v={String(after.registers[n as RegisterNumber])}
+                    />
+                  ))
+                : [
+                    <EditRow k='PC (start)' key='pc' onChange={edit.setPc} v={edit.pc} />,
+                    ...REG_NAMES.map((nm, n) => (
+                      <EditRow k={nm} key={nm} onChange={v => edit.setReg(n, v)} v={edit.regs[n] ?? 0} />
+                    ))
+                  ]
               : undefined}
             {tab === 'Mem' ? (
-              mem.length === 0 ? (
-                <div className='px-3 py-2 text-muted-foreground'>no memory writes</div>
+              edit === undefined ? (
+                mem.length === 0 ? (
+                  <div className='px-3 py-2 text-muted-foreground'>no memory writes</div>
+                ) : (
+                  mem.map(([addr, v]) => <Row k={`[${addr}]`} key={addr} v={String(v)} />)
+                )
               ) : (
-                mem.map(([addr, v]) => <Row k={`[${addr}]`} key={addr} v={String(v)} />)
+                [
+                  <EditRow k='words shown' key='words' onChange={edit.setMemWords} v={edit.memWords} />,
+                  ...Array.from({ length: Math.max(0, Math.min(64, edit.memWords)) }, (_, i) => (
+                    <EditRow k={`[${i}]`} key={i} onChange={v => edit.setMem(i, v)} v={edit.mem[i] ?? 0} />
+                  ))
+                ]
               )
             ) : undefined}
             {tab === 'Ctrl' ? Object.entries(control).map(([k, v]) => <Row k={k} key={k} v={String(v)} />) : undefined}
