@@ -2,7 +2,8 @@
 /* oxlint-disable unicorn/consistent-function-scoping, unicorn/number-literal-case */
 /* eslint-disable no-bitwise */
 'use client'
-import { useMemo, useState } from 'react'
+import { X } from 'lucide-react'
+import { useMemo, useRef, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type {
   ControlSignalId,
@@ -20,6 +21,35 @@ import StaticDatapathSvg from '@/features/datapath/ref-demo/static-datapath-svg'
 import { PATH_SEGMENTS } from '@/features/datapath/scene-2d/datapath-graph'
 
 const ACTIVE = '#dc2626'
+const BASE = { h: 600, w: 900, x: 0, y: 0 }
+const INSPECT: Record<string, { sub: string; title: string }> = {
+  ADD4: { sub: 'Adds 4 to the current PC to get the next sequential instruction address.', title: 'PC + 4 Adder' },
+  ALU: { sub: 'Computes arithmetic or logic results from two input operands.', title: 'Arithmetic Logic Unit (ALU)' },
+  ALUSRC_MUX: { sub: 'Selects the second input to the ALU.', title: 'ALUSrc MUX' },
+  BRANCH_ADDER: { sub: 'Adds PC + 4 to the shifted offset to compute the branch target.', title: 'Branch Adder' },
+  DATA_MEMORY: { sub: 'Reads from or writes to memory using the ALU result as address.', title: 'Data Memory' },
+  INSTRUCTION_MEMORY: {
+    sub: 'Uses the PC as an address and outputs the instruction stored there.',
+    title: 'Instruction Memory'
+  },
+  INSTRUCTION_REGISTER: {
+    sub: 'Holds the fetched instruction and exposes its bit fields to the datapath.',
+    title: 'Instruction Register'
+  },
+  LEFT_SHIFT_2: {
+    sub: 'Shifts the sign-extended immediate left by 2 for branch target calculation.',
+    title: 'Left Shift 2'
+  },
+  MEMTOREG_MUX: { sub: 'Selects the data written back to the register file.', title: 'MemToReg MUX' },
+  PC: { sub: 'Stores the address of the current instruction.', title: 'Program Counter (PC)' },
+  PCSRC_MUX: { sub: 'Selects the next value written into the PC.', title: 'PCSrc MUX' },
+  REGDST_MUX: { sub: 'Selects which instruction field becomes the register-file write address.', title: 'RegDst MUX' },
+  REGISTER_FILE: {
+    sub: 'Reads two source registers and optionally writes one destination register.',
+    title: 'Register File'
+  },
+  SIGN_EXTEND: { sub: 'Extends the 16-bit immediate field into a 32-bit signed value.', title: 'Sign Extend' }
+}
 const field = (value: number, width: number): EncodedField => {
   const v = Math.trunc(value)
   return { bin: v.toString(2).padStart(width, '0').slice(-width), dec: String(v), hex: `0x${v.toString(16)}` }
@@ -55,7 +85,10 @@ const RefDatapath2D = ({
   step: Step
   word: number
 }): React.JSX.Element => {
-  const [selected, setSelected] = useState<DatapathInspectID | null>(null)
+  const [focused, setFocused] = useState<DatapathInspectID | null>(null)
+  const [view, setView] = useState(BASE)
+  const wrapRef = useRef<HTMLDivElement>(null)
+  const dragRef = useRef<null | { ox: number; oy: number; vx: number; vy: number }>(null)
   const bits = useMemo(() => buildBits(word), [word])
   const signals = useMemo(() => toRefSignals(control), [control])
   const activeSegs = useMemo(() => {
@@ -64,27 +97,94 @@ const RefDatapath2D = ({
     return s
   }, [control, step])
   const highlight = useMemo(() => getDatapathHighlightState(step, signals, signals, {}), [step, signals])
+  const onInspect = (id: DatapathInspectID, el?: null | SVGGraphicsElement): void => {
+    if (focused === id) {
+      setFocused(null)
+      setView(BASE)
+      return
+    }
+    setFocused(id)
+    if (el) {
+      const b = el.getBBox()
+      const w = Math.max(b.width, b.height * 1.5) * 2.6
+      const h = w / 1.5
+      setView({ h, w, x: b.x + b.width / 2 - w / 2, y: b.y + b.height / 2 - h / 2 })
+    }
+  }
+  const onWheel = (e: React.WheelEvent): void => {
+    const r = wrapRef.current?.getBoundingClientRect()
+    if (r === undefined) return
+    const f = e.deltaY > 0 ? 1.1 : 0.9
+    const sx = view.x + ((e.clientX - r.left) / r.width) * view.w
+    const sy = view.y + ((e.clientY - r.top) / r.height) * view.h
+    const w = Math.min(1800, Math.max(150, view.w * f))
+    const h = w / (BASE.w / BASE.h)
+    setView({ h, w, x: sx - ((e.clientX - r.left) / r.width) * w, y: sy - ((e.clientY - r.top) / r.height) * h })
+  }
+  const onMove = (e: React.PointerEvent): void => {
+    const d = dragRef.current
+    const r = wrapRef.current?.getBoundingClientRect()
+    if (d === null || r === undefined) return
+    setView(v => ({
+      ...v,
+      x: d.vx - ((e.clientX - d.ox) / r.width) * v.w,
+      y: d.vy - ((e.clientY - d.oy) / r.height) * v.h
+    }))
+  }
   const wireStroke = (id: DatapathSegment): string => (activeSegs.has(id) ? ACTIVE : 'black')
   const wireStrokeWidth = (id: DatapathSegment): number => (activeSegs.has(id) ? 2.3 : 1.5)
   const wireArrow = (id: DatapathSegment): string => (activeSegs.has(id) ? 'url(#arrow-red)' : 'url(#arrow-black)')
   const signalFill = (): string => '#2C1AF4'
   const muxFill = (s: ControlSignalId): string => getHighlightSvgFill(highlight.controls[s] ?? 'normal')
   const valueFill = (id: DatapathValueId): string => getHighlightSvgFill(highlight.values[id] ?? 'normal')
+  const info = focused === null ? undefined : INSPECT[focused]
   return (
-    <div className='absolute inset-0 flex items-center justify-center overflow-auto p-4' data-testid='datapath-canvas'>
-      <StaticDatapathSvg
-        bits={bits}
-        muxFill={muxFill}
-        onInspect={id => setSelected(prev => (prev === id ? null : id))}
-        selectedInspectId={selected}
-        signalFill={signalFill}
-        signals={signals}
-        valueFill={valueFill}
-        wireArrow={wireArrow}
-        wireFill={wireStroke}
-        wireStroke={wireStroke}
-        wireStrokeWidth={wireStrokeWidth}
-      />
+    <div className='absolute inset-0 overflow-hidden' data-testid='datapath-canvas'>
+      <div
+        className='size-full cursor-grab touch-none active:cursor-grabbing'
+        onPointerDown={e => {
+          dragRef.current = { ox: e.clientX, oy: e.clientY, vx: view.x, vy: view.y }
+        }}
+        onPointerLeave={() => {
+          dragRef.current = null
+        }}
+        onPointerMove={onMove}
+        onPointerUp={() => {
+          dragRef.current = null
+        }}
+        onWheel={onWheel}
+        ref={wrapRef}>
+        <StaticDatapathSvg
+          bits={bits}
+          muxFill={muxFill}
+          onInspect={onInspect}
+          selectedInspectId={focused}
+          signalFill={signalFill}
+          signals={signals}
+          valueFill={valueFill}
+          viewBox={`${view.x} ${view.y} ${view.w} ${view.h}`}
+          wireArrow={wireArrow}
+          wireFill={wireStroke}
+          wireStroke={wireStroke}
+          wireStrokeWidth={wireStrokeWidth}
+        />
+      </div>
+      {info === undefined ? undefined : (
+        <div className='absolute bottom-6 left-6 w-72 rounded-xl border bg-background/90 p-4 shadow-lg backdrop-blur-md'>
+          <div className='flex items-start justify-between gap-2'>
+            <span className='font-medium text-sm'>{info.title}</span>
+            <button
+              aria-label='close'
+              onClick={() => {
+                if (focused !== null) onInspect(focused)
+              }}
+              type='button'>
+              <X className='size-4' />
+            </button>
+          </div>
+          <p className='mt-1 text-muted-foreground text-xs'>{info.sub}</p>
+        </div>
+      )}
     </div>
   )
 }
