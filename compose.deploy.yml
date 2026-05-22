@@ -73,6 +73,7 @@ services:
       - sh
       - -c
       - >-
+        echo '{"dependencies":{"convex":"latest"}}' > package.json &&
         bunx convex env set "JWT_PRIVATE_KEY=$$JWT_PRIVATE_KEY" &&
         bunx convex env set "JWKS=$$JWKS"
     networks: [sim]
