@@ -26,12 +26,12 @@ const VH = 640
 const NODES: Node[] = [
   { h: 90, id: 'PCSrcMux', kind: 'mux', label: 'MUX', w: 26, x: 48, y: 300 },
   { h: 64, id: 'PC', kind: 'mem', label: 'PC', w: 40, x: 120, y: 300 },
-  { h: 88, id: 'IM', kind: 'mem', label: 'Instr\nMem', w: 86, x: 250, y: 300 },
+  { h: 88, id: 'IM', kind: 'mem', label: 'Instr\nMem', w: 98, x: 250, y: 300 },
   { h: 120, id: 'IR', kind: 'mem', label: 'IR', w: 40, x: 372, y: 300 },
   { h: 50, id: 'Add4', kind: 'mem', label: 'Add', w: 58, x: 250, y: 96 },
   { h: 26, id: 'CONST4', kind: 'const', label: '4', w: 24, x: 168, y: 150 },
   { h: 66, id: 'Control', kind: 'mem', label: 'Control', w: 92, x: 452, y: 90 },
-  { h: 124, id: 'RF', kind: 'mem', label: 'Registers', w: 96, x: 512, y: 300 },
+  { h: 124, id: 'RF', kind: 'mem', label: 'Registers', w: 108, x: 512, y: 300 },
   { h: 76, id: 'RegDstMux', kind: 'mux', label: 'MUX', w: 26, x: 452, y: 440 },
   { h: 64, id: 'SE', kind: 'mem', label: 'Sign\nExtend', w: 62, x: 512, y: 488 },
   { h: 36, id: 'LS2', kind: 'mem', label: '<<2', w: 50, x: 446, y: 186 },
@@ -44,7 +44,7 @@ const NODES: Node[] = [
   { h: 34, id: 'BeqAnd', kind: 'gate', label: 'AND', w: 38, x: 888, y: 174 },
   { h: 34, id: 'BneAnd', kind: 'gate', label: 'AND', w: 38, x: 888, y: 96 },
   { h: 34, id: 'OrGate', kind: 'gate', label: 'OR', w: 36, x: 958, y: 134 },
-  { h: 86, id: 'DM', kind: 'mem', label: 'Data\nMem', w: 84, x: 852, y: 336 },
+  { h: 86, id: 'DM', kind: 'mem', label: 'Data\nMem', w: 102, x: 852, y: 336 },
   { h: 88, id: 'MemToRegMux', kind: 'mux', label: 'MUX', w: 26, x: 956, y: 336 },
   { h: 60, id: 'WB', kind: 'mem', label: 'WB', w: 30, x: 1036, y: 336 }
 ]
