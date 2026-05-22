@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-
 import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
+import type { View } from '@/features/datapath/use-view-mode'
 import type { ControlSignals, Instruction } from '@/features/mips/types'
 import { criticalComponents, criticalPath } from '@/features/critical-path'
 import DatapathA11yProxies from '@/features/datapath/a11y/proxies'
@@ -48,16 +49,20 @@ const writeParams = (step: string, selected: string | undefined): void => {
 }
 const DatapathWorkspace = ({
   name,
+  base,
+  views,
   control,
   critical,
   asmInitial,
   values
 }: {
   asmInitial: string
+  base: string
   control: ControlSignals
   critical: readonly string[]
   name: string
   values: Record<string, string>
+  views: readonly View[]
 }): React.JSX.Element => {
   const router = useRouter()
   const [step, setStep] = useState<Step>('EX')
@@ -167,7 +172,7 @@ const DatapathWorkspace = ({
   const activeP = useMemo(() => new Set(activePaths(aControl, step)), [aControl, step])
   const activeC = useMemo(() => new Set(componentsForPaths([...activeP])), [activeP])
   const activeList = useMemo(() => [...activeC], [activeC])
-  const { view, setView, mounted } = useViewMode()
+  const { view, setView, mounted } = useViewMode(views)
   const aAfter = live?.after ?? createInitialState()
   const aBefore = live?.before ?? createInitialState()
   const edit = useMemo(
@@ -207,7 +212,7 @@ const DatapathWorkspace = ({
           aria-label='go to instruction'
           className='rounded border bg-background px-2 py-1 text-xs'
           onChange={e => {
-            if (e.target.value !== 'assembly') router.push(`/mips/${e.target.value}`)
+            if (e.target.value !== 'assembly') router.push(`${base}/${e.target.value}`)
           }}
           value='assembly'>
           <option value='assembly'>assembly</option>
@@ -218,9 +223,11 @@ const DatapathWorkspace = ({
           ))}
         </select>
       </div>
-      <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
-        <ViewToggle setView={setView} view={view} />
-      </div>
+      {views.length > 1 ? (
+        <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
+          <ViewToggle setView={setView} view={view} views={views} />
+        </div>
+      ) : undefined}
       {editorOpen ? (
         <div
           className={cn(
