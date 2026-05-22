@@ -21,6 +21,7 @@ const MIPS_NAMES = [
   'sub',
   'sw'
 ] as const
+const DATAPATH_INSTRUCTIONS = ['add', 'addi', 'and', 'beq', 'bne', 'lw', 'or', 'slt', 'sub', 'sw'] as const
 const KMAP_CASES = ['v2', 'v3', 'v4', 'v4-pos', 'v5', 'v5-wrap', 'v6', 'v6-wrap'] as const
 const PIPELINE_PROGRAMS = ['raw', 'waw', 'war', 'control', 'forwarding', 'stall'] as const
 interface NavItem {
@@ -61,5 +62,5 @@ const NAV: NavSection[] = [
     title: 'Learn'
   }
 ]
-export { KMAP_CASES, MIPS_NAMES, NAV, PIPELINE_PROGRAMS }
+export { DATAPATH_INSTRUCTIONS, KMAP_CASES, MIPS_NAMES, NAV, PIPELINE_PROGRAMS }
 export type { NavItem, NavSection }

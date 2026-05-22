@@ -3,6 +3,7 @@
 'use client'
 import { cn } from '@a/ui'
 import { ChevronLeft, ChevronRight, Code2, Pause, Play, Route, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals, Instruction } from '@/features/mips/types'
@@ -18,6 +19,7 @@ import useViewMode from '@/features/datapath/use-view-mode'
 import { datapathValues } from '@/features/datapath/values'
 import ViewToggle from '@/features/datapath/view-toggle'
 import { controlFor, encodeInstruction } from '@/features/mips'
+import { DATAPATH_INSTRUCTIONS } from '@/lib/nav'
 
 const PANEL = 'rounded-xl border bg-background/80 shadow-lg backdrop-blur-md'
 const ROLE = new Map(COMPONENTS.map(c => [c.id, c.role]))
@@ -96,6 +98,7 @@ const DatapathWorkspace = ({
   name: string
   values: Record<string, string>
 }): React.JSX.Element => {
+  const router = useRouter()
   const [step, setStep] = useState<Step>(initialStep)
   const [showCritical, setShowCritical] = useState(false)
   const [selected, setSelected] = useState<string | undefined>(() => readParam('sel'))
@@ -229,7 +232,23 @@ const DatapathWorkspace = ({
         view={view}
         word={live?.word ?? 0}
       />
-      <h1 className={cn('absolute top-4 left-4 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
+      <div className={cn('absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 font-mono text-sm', PANEL)}>
+        <h1>MIPS · {name}</h1>
+        <select
+          aria-label='go to instruction'
+          className='rounded border bg-background px-2 py-1 text-xs'
+          onChange={e => {
+            if (e.target.value !== 'assembly') router.push(`/mips/${e.target.value}`)
+          }}
+          value='assembly'>
+          <option value='assembly'>assembly</option>
+          {DATAPATH_INSTRUCTIONS.map(m => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
         <ViewToggle setView={setView} view={view} />
       </div>
