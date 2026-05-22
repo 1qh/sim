@@ -187,7 +187,8 @@ const DatapathWorkspace = ({
       critical: criticalComponents(ins, 'timing'),
       criticalDelayPs: criticalPath(ins, 'timing').delayPs,
       idx,
-      values: datapathValues(before, after, ins)
+      values: datapathValues(before, after, ins),
+      word: words[idx] ?? 0
     }
   }, [liveProgram, insIndex])
   const aControl = live?.control ?? control
@@ -236,6 +237,7 @@ const DatapathWorkspace = ({
         step={step}
         values={aValues}
         view={view}
+        word={live?.word ?? 0}
       />
       <h1 className={cn('absolute top-4 left-4 px-3 py-1.5 font-mono text-sm', PANEL)}>MIPS · {name}</h1>
       <div className={cn('-translate-x-1/2 absolute top-4 left-1/2 p-1', PANEL)}>
