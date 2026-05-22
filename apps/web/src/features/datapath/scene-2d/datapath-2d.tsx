@@ -133,7 +133,13 @@ const OVAL = new Set(['LS2', 'SE'])
 const ADDER = new Set(['Add4', 'BranchAdder'])
 const shape = (n: Node, fill: string, lit: boolean): React.JSX.Element => {
   const { x, y, w, h } = n
-  const common = { fill, fillOpacity: lit ? 1 : 0.5, stroke: lit ? fill : 'transparent', strokeWidth: 2 }
+  const common = {
+    fill,
+    fillOpacity: lit ? 0.95 : 0.7,
+    stroke: lit ? fill : 'currentColor',
+    strokeOpacity: lit ? 1 : 0.45,
+    strokeWidth: lit ? 2 : 1
+  }
   const glow = lit ? { style: { filter: `drop-shadow(0 0 5px ${fill})` } } : {}
   if (OVAL.has(n.id)) return <ellipse cx={x} cy={y} rx={w / 2} ry={h / 2} {...common} {...glow} />
   if (ADDER.has(n.id))
@@ -203,23 +209,23 @@ const Datapath2D = ({
             <path className='fill-muted-foreground' d='M0,0 L5,2.5 L0,5 Z' />
           </marker>
         </defs>
-        <text className='fill-muted-foreground' fontSize='8' x={170} y={376}>
-          instruction
+        <text className='fill-muted-foreground' fontSize='8' x={58} y={372}>
+          instruction [31:0]
         </text>
         {RULER.map((f, i) => (
           <g key={f.name}>
             <rect
               className='fill-transparent stroke-muted-foreground/40'
-              height={36}
+              height={34}
               rx={3}
-              width={120}
-              x={166}
-              y={384 + i * 40}
+              width={116}
+              x={54}
+              y={380 + i * 38}
             />
-            <text className='fill-muted-foreground' fontSize='8' x={172} y={398 + i * 40}>
+            <text className='fill-muted-foreground' fontSize='8' x={60} y={393 + i * 38}>
               {f.name} [{f.hi}:{f.lo}]
             </text>
-            <text className='fill-foreground font-mono' fontSize='11' x={172} y={413 + i * 40}>
+            <text className='fill-foreground font-mono' fontSize='11' x={60} y={407 + i * 38}>
               {bitsOf(word, f.hi, f.lo)}
             </text>
           </g>
