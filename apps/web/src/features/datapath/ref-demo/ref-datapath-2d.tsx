@@ -122,12 +122,12 @@ const RefDatapath2D = ({
       animateTo(prevRef.current)
       return
     }
-    prevRef.current = view
+    if (focused === null) prevRef.current = view
     setFocused(id)
     if (el) {
       const b = el.getBBox()
-      const w = view.w / 1.8
-      const h = view.h / 1.8
+      const w = BASE.w / 1.8
+      const h = BASE.h / 1.8
       animateTo({ h, w, x: b.x + b.width / 2 - w * 0.42, y: b.y + b.height / 2 - h / 2 })
     }
   }
