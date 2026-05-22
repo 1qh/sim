@@ -5,6 +5,7 @@ import { ChevronLeft, PanelRight } from 'lucide-react'
 import { useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
 import type { ControlSignals, MachineState, RegisterNumber } from '@/features/mips/types'
+import { glossaryFor } from '@/features/datapath/glossary'
 
 const PANEL = 'border bg-background/90 shadow-lg backdrop-blur-md'
 const REG_NAMES = [
@@ -106,7 +107,9 @@ interface Edit {
   setReg: (n: number, v: number) => void
 }
 const Row = ({ k, v, hot }: { hot?: boolean; k: string; v: string }): React.JSX.Element => (
-  <div className={cn('flex justify-between gap-3 px-3 py-1', hot === true && 'bg-[#22d3ee]/10 text-[#22d3ee]')}>
+  <div
+    className={cn('flex justify-between gap-3 px-3 py-1', hot === true && 'bg-[#22d3ee]/10 text-[#22d3ee]')}
+    title={glossaryFor(k)}>
     <span className='text-muted-foreground'>{k}</span>
     <span className='text-foreground'>{v}</span>
   </div>
@@ -122,7 +125,7 @@ const EditRow = ({
   onChange: (n: number) => void
   v: number
 }): React.JSX.Element => (
-  <label className='flex items-center justify-between gap-3 px-3 py-1'>
+  <label className='flex items-center justify-between gap-3 px-3 py-1' title={glossaryFor(k)}>
     <span className='text-muted-foreground'>{k}</span>
     <input
       aria-label={k}
@@ -179,6 +182,7 @@ const DatapathPanel = ({
                 className={cn(t === tab ? 'bg-muted font-medium' : 'text-muted-foreground hover:bg-muted/50')}
                 key={t}
                 onClick={() => setTab(t)}
+                title={glossaryFor(t)}
                 type='button'>
                 {t}
               </button>
