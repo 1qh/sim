@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-continue, no-console */
+/* eslint-disable no-console */
 import { argv, file } from 'bun'
 import process from 'node:process'
 
@@ -62,14 +61,14 @@ await Promise.all(
       const time = j.time ?? {}
       let v = ''
       let pubMs = Number.NEGATIVE_INFINITY
-      for (const [ver, ts] of Object.entries(time)) {
-        if (ver === 'created' || ver === 'modified') continue
-        const t = Date.parse(ts)
-        if (Number.isFinite(t) && t > pubMs) {
-          pubMs = t
-          v = ver
+      for (const [ver, ts] of Object.entries(time))
+        if (ver !== 'created' && ver !== 'modified') {
+          const t = Date.parse(ts)
+          if (Number.isFinite(t) && t > pubMs) {
+            pubMs = t
+            v = ver
+          }
         }
-      }
       if (pubMs === Number.NEGATIVE_INFINITY) {
         notFound.push(name)
         return

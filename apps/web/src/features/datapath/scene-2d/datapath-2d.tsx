@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
 /** biome-ignore-all lint/correctness/useUniqueElementIds: static svg marker ids */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: svg node click, a11y via DatapathA11yProxies */
@@ -97,7 +96,7 @@ const contrastOf = (hex: string): string => {
 const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
-    const m = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const m = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setReduced(m.matches)
     const onChange = (): void => setReduced(m.matches)

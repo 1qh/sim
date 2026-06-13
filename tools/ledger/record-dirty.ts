@@ -1,7 +1,6 @@
 #!/usr/bin/env bun
 /** biome-ignore-all lint/style/noProcessEnv: passes tree/commit to child gate procs */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-console, no-continue */
+/* eslint-disable no-console */
 import { argv, file } from 'bun'
 import process from 'node:process'
 import { ledgerEnv, runPool } from './pool'
@@ -19,11 +18,11 @@ interface Row {
   tree: string
 }
 const byGate = new Map<string, Row>()
-for (const line of text.split('\n')) {
-  if (!line.trim()) continue
-  const r = JSON.parse(line) as Row
-  if (r.tree === tree) byGate.set(r.gate, r)
-}
+for (const line of text.split('\n'))
+  if (line.trim()) {
+    const r = JSON.parse(line) as Row
+    if (r.tree === tree) byGate.set(r.gate, r)
+  }
 const explicit = argv.slice(2).filter(a => !a.startsWith('-'))
 const dirty =
   explicit.length > 0

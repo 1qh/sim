@@ -1,5 +1,4 @@
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable complexity, @typescript-eslint/switch-exhaustiveness-check, no-continue, max-depth */
+/* eslint-disable complexity, @typescript-eslint/switch-exhaustiveness-check, max-depth */
 import type { Instruction, RegisterNumber } from '../mips/types'
 import type { ForwardingArrow, Hazard, PipelineReport, PipelineRow, Stage } from './types'
 
@@ -62,59 +61,60 @@ const analyzePipeline = (
       for (let j = i - 1; j >= 0; j -= 1) {
         const producer = instructions[j]
         const producerStart = startCycles[j]
-        if (producer === undefined || producerStart === undefined) continue
-        const written = writesRegister(producer)
-        if (written === reg && reg !== 0) {
-          const producerExEnd = producerStart + 3
-          const producerMemEnd = producerStart + 4
-          const producerWbEnd = producerStart + 5
-          const consumerEx = start + 2
-          const consumerId = start + 1
-          if (enableForwarding) {
-            if (isLoad(producer)) {
-              const required = producerMemEnd
-              if (consumerEx < required && stallInsertion) {
-                const need = required - consumerEx
+        if (producer !== undefined && producerStart !== undefined) {
+          const written = writesRegister(producer)
+          if (written === reg && reg !== 0) {
+            const producerExEnd = producerStart + 3
+            const producerMemEnd = producerStart + 4
+            const producerWbEnd = producerStart + 5
+            const consumerEx = start + 2
+            const consumerId = start + 1
+            if (enableForwarding) {
+              if (isLoad(producer)) {
+                const required = producerMemEnd
+                if (consumerEx < required && stallInsertion) {
+                  const need = required - consumerEx
+                  start += need
+                  stalls += need
+                } else forwarding.push({ fromIndex: j, fromStage: 'MEM', register: reg, toIndex: i, toStage: 'EX' })
+                hazards.push({
+                  consumerCycle: start + 2,
+                  consumerIndex: i,
+                  kind: 'RAW',
+                  producerCycle: producerMemEnd,
+                  producerIndex: j,
+                  register: reg
+                })
+              } else if (consumerEx < producerExEnd && stallInsertion) {
+                const need = producerExEnd - consumerEx
                 start += need
                 stalls += need
-              } else forwarding.push({ fromIndex: j, fromStage: 'MEM', register: reg, toIndex: i, toStage: 'EX' })
-              hazards.push({
-                consumerCycle: start + 2,
-                consumerIndex: i,
-                kind: 'RAW',
-                producerCycle: producerMemEnd,
-                producerIndex: j,
-                register: reg
-              })
-            } else if (consumerEx < producerExEnd && stallInsertion) {
-              const need = producerExEnd - consumerEx
+              } else if (consumerEx >= producerExEnd && consumerEx < producerWbEnd) {
+                forwarding.push({ fromIndex: j, fromStage: 'EX', register: reg, toIndex: i, toStage: 'EX' })
+                hazards.push({
+                  consumerCycle: start + 2,
+                  consumerIndex: i,
+                  kind: 'RAW',
+                  producerCycle: producerExEnd,
+                  producerIndex: j,
+                  register: reg
+                })
+              }
+            } else if (consumerId < producerWbEnd && stallInsertion) {
+              const need = producerWbEnd - consumerId
               start += need
               stalls += need
-            } else if (consumerEx >= producerExEnd && consumerEx < producerWbEnd) {
-              forwarding.push({ fromIndex: j, fromStage: 'EX', register: reg, toIndex: i, toStage: 'EX' })
               hazards.push({
-                consumerCycle: start + 2,
+                consumerCycle: start + 1,
                 consumerIndex: i,
                 kind: 'RAW',
-                producerCycle: producerExEnd,
+                producerCycle: producerWbEnd,
                 producerIndex: j,
                 register: reg
               })
             }
-          } else if (consumerId < producerWbEnd && stallInsertion) {
-            const need = producerWbEnd - consumerId
-            start += need
-            stalls += need
-            hazards.push({
-              consumerCycle: start + 1,
-              consumerIndex: i,
-              kind: 'RAW',
-              producerCycle: producerWbEnd,
-              producerIndex: j,
-              register: reg
-            })
+            break
           }
-          break
         }
       }
     const prevIns = i > 0 ? instructions[i - 1] : undefined
@@ -156,17 +156,18 @@ const detectWar = (instructions: Instruction[]): Hazard[] => {
     const reads = readsRegisters(insA)
     for (let j = i + 1; j < instructions.length; j += 1) {
       const insB = instructions[j]
-      if (insB === undefined) continue
-      const written = writesRegister(insB)
-      if (written !== undefined && reads.includes(written) && written !== 0)
-        hazards.push({
-          consumerCycle: 0,
-          consumerIndex: j,
-          kind: 'WAR',
-          producerCycle: undefined,
-          producerIndex: i,
-          register: written
-        })
+      if (insB !== undefined) {
+        const written = writesRegister(insB)
+        if (written !== undefined && reads.includes(written) && written !== 0)
+          hazards.push({
+            consumerCycle: 0,
+            consumerIndex: j,
+            kind: 'WAR',
+            producerCycle: undefined,
+            producerIndex: i,
+            register: written
+          })
+      }
     }
   }
   return hazards
@@ -175,21 +176,22 @@ const detectWaw = (instructions: Instruction[]): Hazard[] => {
   const hazards: Hazard[] = []
   for (const [i, insA] of instructions.entries()) {
     const writtenA = writesRegister(insA)
-    if (writtenA === undefined || writtenA === 0) continue
-    for (let j = i + 1; j < instructions.length; j += 1) {
-      const insB = instructions[j]
-      if (insB === undefined) continue
-      const writtenB = writesRegister(insB)
-      if (writtenB === writtenA)
-        hazards.push({
-          consumerCycle: 0,
-          consumerIndex: j,
-          kind: 'WAW',
-          producerCycle: undefined,
-          producerIndex: i,
-          register: writtenA
-        })
-    }
+    if (writtenA !== undefined && writtenA !== 0)
+      for (let j = i + 1; j < instructions.length; j += 1) {
+        const insB = instructions[j]
+        if (insB !== undefined) {
+          const writtenB = writesRegister(insB)
+          if (writtenB === writtenA)
+            hazards.push({
+              consumerCycle: 0,
+              consumerIndex: j,
+              kind: 'WAW',
+              producerCycle: undefined,
+              producerIndex: i,
+              register: writtenA
+            })
+        }
+      }
   }
   return hazards
 }

@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-continue, no-console */
+/* eslint-disable no-console */
 import { $, argv, file } from 'bun'
 import { createHash } from 'node:crypto'
 import process from 'node:process'
@@ -25,14 +24,13 @@ interface Row {
   ts: string
 }
 const rows: Row[] = []
-for (const line of text.split('\n')) {
-  if (!line.trim()) continue
-  try {
-    rows.push(JSON.parse(line) as Row)
-  } catch (parseError) {
-    console.error(`skip malformed row: ${(parseError as Error).message}`)
-  }
-}
+for (const line of text.split('\n'))
+  if (line.trim())
+    try {
+      rows.push(JSON.parse(line) as Row)
+    } catch (parseError) {
+      console.error(`skip malformed row: ${(parseError as Error).message}`)
+    }
 const byGate = new Map<string, Row>()
 for (const r of rows) if (r.tree === tree) byGate.set(r.gate, r)
 const knownGreen = [...byGate.values()].filter(r => r.status === 'pass')
@@ -46,8 +44,7 @@ const verify = await file(verifyPath)
 const gatePattern = /^- \[[ x]\] `(?<gate>[a-z][a-z0-9._-]+)`/gmu
 for (const m of verify.matchAll(gatePattern)) {
   const t = m.groups?.gate
-  if (!t) continue
-  expected.add(t)
+  if (t) expected.add(t)
 }
 if (mode === 'green') {
   if (knownGreen.length === 0) console.log('no green-at-HEAD gates')

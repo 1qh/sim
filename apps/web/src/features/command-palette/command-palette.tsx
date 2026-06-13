@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/a11y/noNoninteractiveElementInteractions: modal backdrop dismiss; Esc handled */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: modal backdrop dismiss; Esc handled */
 /** biome-ignore-all lint/a11y/useKeyWithClickEvents: modal backdrop dismiss; Esc handled, buttons keyboard-reachable */
+/** biome-ignore-all lint/nursery/noUndeclaredClasses: standard tailwind v4 utilities biome cannot resolve */
 /* oxlint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/no-static-element-interactions, jsx-a11y/prefer-tag-over-role */
 'use client'
 import { cn } from '@a/ui'

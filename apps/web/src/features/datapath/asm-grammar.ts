@@ -1,8 +1,7 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
 /** biome-ignore-all lint/complexity/useMaxParams: noise */
 /* oxlint-disable unicorn/number-literal-case */
-/* eslint-disable no-bitwise, no-continue, complexity, @typescript-eslint/max-params */
+/* eslint-disable no-bitwise, complexity, @typescript-eslint/max-params */
 import type { Instruction, InstructionName, RegisterNumber } from '@/features/mips/types'
 import { encodeInstruction, FUNCT, OPCODE } from '@/features/mips/encode'
 
@@ -183,48 +182,63 @@ const toInstruction = (
   }
   return err(ctx.line, 0, op.length, 'ISA_UNSUPPORTED', `unsupported instruction ${op}`)
 }
+interface Pending {
+  args: string[]
+  line: number
+  op: string
+}
+const collectLine = (
+  code: string,
+  line: number,
+  addr: number,
+  symbols: Record<string, number>,
+  pending: Pending[],
+  diagnostics: Diagnostic[]
+): number => {
+  if (code.length === 0) return addr
+  let rest = code
+  const lm = RE_LABEL.exec(rest)
+  if (lm) {
+    const label = lm.groups?.label ?? ''
+    if (label in symbols)
+      diagnostics.push(err(line, 0, label.length, 'ASM_DUPLICATE_LABEL', `label ${label} defined twice`))
+    symbols[label] = addr
+    rest = rest.slice(lm[0].length).trim()
+  }
+  if (rest.length === 0) return addr
+  const sp = rest.indexOf(' ')
+  const op = (sp === -1 ? rest : rest.slice(0, sp)).toLowerCase()
+  const argStr = sp === -1 ? '' : rest.slice(sp + 1)
+  if (DIRECTIVES.has(op)) return addr
+  const args = splitOperands(argStr)
+  const expansions = PSEUDO.has(op) ? expandPseudo(op, args) : [[op, ...args]]
+  let next = addr
+  for (const ex of expansions) {
+    pending.push({ args: ex.slice(1), line, op: ex[0] ?? '' })
+    next += 4
+  }
+  return next
+}
 const assemble = (source: string): AssembleResult => {
   const rawLines = source.split('\n')
   const symbols: Record<string, number> = {}
-  const pending: { args: string[]; line: number; op: string }[] = []
+  const pending: Pending[] = []
   const diagnostics: Diagnostic[] = []
   let addr = 0
-  for (let i = 0; i < rawLines.length; i += 1) {
-    const code = stripComment(rawLines[i] ?? '').trim()
-    if (code.length === 0) continue
-    let rest = code
-    const lm = RE_LABEL.exec(rest)
-    if (lm) {
-      const label = lm.groups?.label ?? ''
-      if (label in symbols)
-        diagnostics.push(err(i, 0, label.length, 'ASM_DUPLICATE_LABEL', `label ${label} defined twice`))
-      symbols[label] = addr
-      rest = rest.slice(lm[0].length).trim()
-    }
-    if (rest.length === 0) continue
-    const sp = rest.indexOf(' ')
-    const op = (sp === -1 ? rest : rest.slice(0, sp)).toLowerCase()
-    const argStr = sp === -1 ? '' : rest.slice(sp + 1)
-    if (DIRECTIVES.has(op)) continue
-    const args = splitOperands(argStr)
-    const expansions = PSEUDO.has(op) ? expandPseudo(op, args) : [[op, ...args]]
-    for (const ex of expansions) {
-      pending.push({ args: ex.slice(1), line: i, op: ex[0] ?? '' })
-      addr += 4
-    }
-  }
+  for (let i = 0; i < rawLines.length; i += 1)
+    addr = collectLine(stripComment(rawLines[i] ?? '').trim(), i, addr, symbols, pending, diagnostics)
   const instructions: Instruction[] = []
   const words: number[] = []
   for (let idx = 0; idx < pending.length; idx += 1) {
     const p = pending[idx]
-    if (p === undefined) continue
-    const out = toInstruction(p.op, p.args, { idx, line: p.line, symbols })
-    if ('severity' in out) {
-      diagnostics.push(out)
-      continue
+    if (p !== undefined) {
+      const out = toInstruction(p.op, p.args, { idx, line: p.line, symbols })
+      if ('severity' in out) diagnostics.push(out)
+      else {
+        instructions.push(out)
+        words.push(Math.trunc(encodeInstruction(out)))
+      }
     }
-    instructions.push(out)
-    words.push(Math.trunc(encodeInstruction(out)))
   }
   return { diagnostics, instructions, symbols, words }
 }

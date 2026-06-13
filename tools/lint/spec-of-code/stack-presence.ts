@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-continue, no-console */
+/* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
 
@@ -21,12 +20,14 @@ const codeBlocks = [...stackText.matchAll(/`(?<pick>[@a-z][@a-z0-9._/-]+)`/giu)]
 const candidatePicks = new Set<string>()
 for (const m of codeBlocks) {
   const pick = m.groups?.pick
-  if (!pick) continue
-  if (pick.length < 3) continue
-  if (pick.startsWith('http')) continue
-  if (pick.includes('/') && !pick.startsWith('@')) continue
-  if (!/[a-z]/u.test(pick)) continue
-  candidatePicks.add(pick)
+  if (
+    pick &&
+    pick.length >= 3 &&
+    !pick.startsWith('http') &&
+    !(pick.includes('/') && !pick.startsWith('@')) &&
+    /[a-z]/u.test(pick)
+  )
+    candidatePicks.add(pick)
 }
 const readManifest = async (p: string): Promise<ManifestPackage> => {
   const raw = (await file(p)
@@ -58,11 +59,6 @@ const pkgManifests = await Promise.all(
 )
 for (const j of pkgManifests) for (const k of Object.keys(j.dependencies ?? {})) allDeps.add(k)
 const missingPicks: string[] = []
-for (const pick of candidatePicks) {
-  if (allDeps.has(pick)) continue
-  if (!(pick.startsWith('@') || /^[a-z][a-z0-9-]*$/u.test(pick))) continue
-  if (allDeps.has(pick.toLowerCase())) continue
-}
 if (missingPicks.length === 0) {
   console.log(`ok ${candidatePicks.size} STACK picks → ${allDeps.size} manifest deps`)
   process.exit(0)

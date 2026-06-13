@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: ledger line scan */
-/* eslint-disable no-console, no-continue */
+/* eslint-disable no-console */
 import { file } from 'bun'
 import process from 'node:process'
 import { ledgerEnv } from './pool'
@@ -17,11 +16,11 @@ const text = await file(`${env.LEDGER_REPO_ROOT}/ledger.jsonl`)
   .text()
   .catch(() => '')
 const byGate = new Map<string, Row>()
-for (const line of text.split('\n')) {
-  if (!line.trim()) continue
-  const r = JSON.parse(line) as Row
-  if (r.tree === tree) byGate.set(r.gate, r)
-}
+for (const line of text.split('\n'))
+  if (line.trim()) {
+    const r = JSON.parse(line) as Row
+    if (r.tree === tree) byGate.set(r.gate, r)
+  }
 const SELF = 'infra.ledger.stale-empty'
 const stale = GATES.filter(g => g.name !== SELF).filter(g => byGate.get(g.name)?.status !== 'pass')
 if (stale.length > 0) {

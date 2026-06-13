@@ -1,6 +1,5 @@
 #!/usr/bin/env bun
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-continue, no-console */
+/* eslint-disable no-console */
 import { $, file } from 'bun'
 import process from 'node:process'
 import { FUNCT, OPCODE } from '../../../apps/web/src/features/mips/encode'
@@ -12,10 +11,11 @@ const docFuncts = new Map<string, number>()
 for (const m of isaText.matchAll(/\|\s*`(?<mnemonic>[a-z]+)`\s*\|\s*(?<hex>0x[0-9a-f]+)\s*\|/giu)) {
   const mnemonic = m.groups?.mnemonic
   const hex = m.groups?.hex
-  if (!(mnemonic && hex)) continue
-  const value = Number.parseInt(hex.slice(2), 16)
-  if (mnemonic in OPCODE) docOpcodes.set(mnemonic, value)
-  else if (mnemonic in FUNCT) docFuncts.set(mnemonic, value)
+  if (mnemonic && hex) {
+    const value = Number.parseInt(hex.slice(2), 16)
+    if (mnemonic in OPCODE) docOpcodes.set(mnemonic, value)
+    else if (mnemonic in FUNCT) docFuncts.set(mnemonic, value)
+  }
 }
 const drift: string[] = []
 for (const [name, value] of docOpcodes) {

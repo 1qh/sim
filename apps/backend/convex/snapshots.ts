@@ -1,6 +1,5 @@
-/** biome-ignore-all lint/nursery/noContinue: noise */
 /** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/* eslint-disable no-await-in-loop, no-continue */
+/* eslint-disable no-await-in-loop */
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 
@@ -76,11 +75,11 @@ export const claimAnonSnapshots = mutation({
         .collect()
     )
     let claimed = 0
-    for (const row of owned) {
-      if (row.claimedByUserId !== undefined) continue
-      await ctx.db.patch(row._id, { claimedByUserId: userId })
-      claimed += 1
-    }
+    for (const row of owned)
+      if (row.claimedByUserId === undefined) {
+        await ctx.db.patch(row._id, { claimedByUserId: userId })
+        claimed += 1
+      }
     return { claimed }
   }
 })

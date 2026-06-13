@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/nursery/noUndeclaredEnvVars: noise */
 import { describe, expect, test } from 'bun:test'
 import { ConvexHttpClient } from 'convex/browser'
 import { api } from './_generated/api'

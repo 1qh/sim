@@ -1,4 +1,4 @@
-/** biome-ignore-all lint/nursery/noExcessiveClassesPerFile: chevrotain parser + visitor */
+/** biome-ignore-all lint/style/noExcessiveClassesPerFile: chevrotain grammar requires lexer + parser classes co-located */
 /** biome-ignore-all lint/nursery/noComponentHookFactories: noise */
 /* oxlint-disable unicorn/no-array-reduce */
 /* eslint-disable max-classes-per-file */

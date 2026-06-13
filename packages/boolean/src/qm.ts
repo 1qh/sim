@@ -1,6 +1,5 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise, no-continue, max-depth */
+/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise, max-depth */
 interface Implicant {
   bits: string
   covers: number[]
@@ -42,11 +41,11 @@ const findPrimeImplicants = (minterms: number[], dontCares: number[], width: num
   }
   const seen = new Set<string>()
   const unique: Implicant[] = []
-  for (const p of primes) {
-    if (seen.has(p.bits)) continue
-    seen.add(p.bits)
-    unique.push(p)
-  }
+  for (const p of primes)
+    if (!seen.has(p.bits)) {
+      seen.add(p.bits)
+      unique.push(p)
+    }
   return unique
 }
 const findEssentialPrimes = (primes: Implicant[], minterms: number[]): Implicant[] => {
@@ -69,11 +68,12 @@ const petrickSelect = (primes: Implicant[], remaining: number[]): Implicant[] =>
     for (let b = 0; b < candidates.length; b += 1) if ((mask >> b) & 1) pick.push(candidates[b])
     const covered = new Set<number>()
     for (const p of pick) for (const m of p.covers) covered.add(m)
-    if (!remaining.every(m => covered.has(m))) continue
-    const lits = pick.reduce((s, p) => s + countLiterals(p.bits), 0)
-    if (pick.length < best.length || (pick.length === best.length && lits < bestLits)) {
-      best = pick
-      bestLits = lits
+    if (remaining.every(m => covered.has(m))) {
+      const lits = pick.reduce((s, p) => s + countLiterals(p.bits), 0)
+      if (pick.length < best.length || (pick.length === best.length && lits < bestLits)) {
+        best = pick
+        bestLits = lits
+      }
     }
   }
   return best
@@ -94,10 +94,8 @@ const minimize = (minterms: number[], dontCares: number[], width: number): Impli
 }
 const implicantToSop = (imp: Implicant, vars: string[]): string => {
   const lits: string[] = []
-  for (let i = 0; i < imp.bits.length; i += 1) {
-    if (imp.bits[i] === '-') continue
-    lits.push(imp.bits[i] === '1' ? vars[i] : `!${vars[i]}`)
-  }
+  for (let i = 0; i < imp.bits.length; i += 1)
+    if (imp.bits[i] !== '-') lits.push(imp.bits[i] === '1' ? vars[i] : `!${vars[i]}`)
   return lits.length === 0 ? '1' : lits.join('·')
 }
 const sopExpression = (impls: Implicant[], vars: string[]): string => {
@@ -111,10 +109,8 @@ const posExpression = (maxterms: number[], dontCares: number[], width: number, v
   if (impls.length === 0) return '1'
   const clauses = impls.map(imp => {
     const lits: string[] = []
-    for (let i = 0; i < imp.bits.length; i += 1) {
-      if (imp.bits[i] === '-') continue
-      lits.push(imp.bits[i] === '0' ? vars[i] : `!${vars[i]}`)
-    }
+    for (let i = 0; i < imp.bits.length; i += 1)
+      if (imp.bits[i] !== '-') lits.push(imp.bits[i] === '0' ? vars[i] : `!${vars[i]}`)
     return lits.length === 0 ? '0' : `(${lits.join(' + ')})`
   })
   return clauses.join('·')

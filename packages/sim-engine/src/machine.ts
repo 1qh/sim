@@ -1,5 +1,3 @@
-/** biome-ignore-all lint/nursery/noContinue: noise */
-/* eslint-disable no-continue */
 import type { Patch } from './codec'
 import { applyDiff, diff, encode, hashValue } from './codec'
 
@@ -38,9 +36,10 @@ const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
   for (let i = 0; i < trace.patches.length; i += 1) {
     const patch = trace.patches[i]
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (patch === undefined) continue
-    const rebuilt = applyDiff(trace.states[i], patch)
-    if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false
+    if (patch !== undefined) {
+      const rebuilt = applyDiff(trace.states[i], patch)
+      if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false
+    }
   }
   return true
 }

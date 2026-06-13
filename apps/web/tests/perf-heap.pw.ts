@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /** biome-ignore-all lint/performance/noAwaitInLoops: noise */
 /* eslint-disable no-await-in-loop */
 import { expect, test } from '@playwright/test'
@@ -12,7 +11,7 @@ const MAX_GROWTH_BYTES = 5_000_000
 CYCLES.map(({ name, path }) =>
   test(`perf.heap-leak.${name}: ${path} repeated navigation no leak`, async ({ page }) => {
     await page.goto(path)
-    await page.evaluate(() => ('gc' in window ? (window as unknown as { gc: () => void }).gc() : undefined))
+    await page.evaluate(() => ('gc' in globalThis ? (globalThis as unknown as { gc: () => void }).gc() : undefined))
     const before = await page.evaluate(
       () => (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ?? 0
     )
@@ -20,7 +19,7 @@ CYCLES.map(({ name, path }) =>
       await page.goto('/')
       await page.goto(path)
     }
-    await page.evaluate(() => ('gc' in window ? (window as unknown as { gc: () => void }).gc() : undefined))
+    await page.evaluate(() => ('gc' in globalThis ? (globalThis as unknown as { gc: () => void }).gc() : undefined))
     const after = await page.evaluate(
       () => (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize ?? 0
     )

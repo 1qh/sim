@@ -1,5 +1,4 @@
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
-/** biome-ignore-all lint/nursery/noUnknownAttribute: R3F three.js intrinsic elements */
+/** biome-ignore-all lint/suspicious/noUnknownAttribute: react-three-fiber intrinsic elements/props biome cannot resolve */
 /* oxlint-disable react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop */
 /* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
 'use client'
@@ -37,7 +36,7 @@ const LIGHT: Palette = { idle: '#64748b', label: '#1e293b', substrate: '#eef2f7'
 const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
-    const m = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const m = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
     // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
     setReduced(m.matches)
     const onChange = (): void => setReduced(m.matches)

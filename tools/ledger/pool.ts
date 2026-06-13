@@ -1,6 +1,5 @@
-/** biome-ignore-all lint/nursery/noContinue: noise */
 /** biome-ignore-all lint/performance/noAwaitInLoops: noise */
-/* eslint-disable no-console, no-await-in-loop, no-continue */
+/* eslint-disable no-console, no-await-in-loop */
 import { $ } from 'bun'
 import { createHash } from 'node:crypto'
 import type { Gate } from './record-all-gates'
@@ -39,8 +38,7 @@ const runPool = async (gates: Gate[]): Promise<number> => {
     while (idx < rest.length) {
       const g = rest[idx]
       idx += 1
-      if (g === undefined) continue
-      if (!(await runOne(g))) failed += 1
+      if (g !== undefined && !(await runOne(g))) failed += 1
     }
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, rest.length) }, async () => worker()))

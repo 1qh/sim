@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/nursery/useGlobalThis: noise */
 /* eslint-disable complexity */
 'use client'
 import { cn } from '@a/ui'
@@ -35,16 +34,16 @@ const EXAMPLES = [
 const STEP_SET = new Set<string>(STEPS)
 const RE_FORM = /^(?:INPUT|TEXTAREA)$/u
 const readParam = (key: string): string | undefined => {
-  if (typeof window === 'undefined') return
-  return new URLSearchParams(window.location.search).get(key) ?? undefined
+  if (typeof globalThis === 'undefined') return
+  return new URLSearchParams(globalThis.location.search).get(key) ?? undefined
 }
 const writeParams = (step: string, selected: string | undefined): void => {
-  if (typeof window === 'undefined') return
-  const params = new URLSearchParams(window.location.search)
+  if (typeof globalThis === 'undefined') return
+  const params = new URLSearchParams(globalThis.location.search)
   params.set('step', step)
   if (selected === undefined) params.delete('sel')
   else params.set('sel', selected)
-  window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`)
+  globalThis.history.replaceState(null, '', `${globalThis.location.pathname}?${params.toString()}`)
 }
 const DatapathWorkspace = ({
   name,
@@ -112,8 +111,8 @@ const DatapathWorkspace = ({
       else if (k === 'e' || k === 'E') setEditorOpen(v => !v)
       else if (k === '?') setShowHelp(v => !v)
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    globalThis.addEventListener('keydown', onKey)
+    return () => globalThis.removeEventListener('keydown', onKey)
   }, [liveProgram.length])
   useEffect(() => {
     writeParams(step, selected)
