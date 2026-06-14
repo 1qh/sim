@@ -17,9 +17,6 @@
   "simple-git-hooks": {
     "pre-commit": "sh up.sh && git add -u"
   },
-  "overrides": {
-    "@auth/core": "0.41.x"
-  },
   "devDependencies": {
     "@axe-core/playwright": "latest",
     "@logtape/logtape": "latest",
@@ -28,7 +25,6 @@
     "@stryker-mutator/core": "latest",
     "@testing-library/react": "latest",
     "@types/three": "latest",
-    "convex-test": "latest",
     "fast-check": "latest",
     "happy-dom": "latest",
     "lintmax": "latest",

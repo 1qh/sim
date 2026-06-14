@@ -8,7 +8,7 @@ interface ShareEncoding {
   hash: string
   tier: Tier
 }
-type Tier = 'convex' | 'fragment'
+type Tier = 'fragment' | 'oversize'
 const URL_FRAGMENT_LIMIT_BYTES = 1024
 const base64UrlEncode = (bytes: Uint8Array): string => {
   let bin = ''
@@ -30,7 +30,7 @@ const encodeShare = <T>(value: T): ShareEncoding => {
   const fragment = base64UrlEncode(compressed)
   const hash = hashValue(value)
   if (fragment.length <= URL_FRAGMENT_LIMIT_BYTES) return { bytes: compressed.length, fragment, hash, tier: 'fragment' }
-  return { bytes: compressed.length, fragment: undefined, hash, tier: 'convex' }
+  return { bytes: compressed.length, fragment: undefined, hash, tier: 'oversize' }
 }
 const decodeFragment = <T>(fragment: string): T => {
   const compressed = base64UrlDecode(fragment)
@@ -39,7 +39,7 @@ const decodeFragment = <T>(fragment: string): T => {
   return JSON.parse(json) as T
 }
 const permalinkPath = (hash: string): string => `/s/${hash}`
-const isLargePayload = (encoding: ShareEncoding): boolean => encoding.tier === 'convex'
+const isLargePayload = (encoding: ShareEncoding): boolean => encoding.tier === 'oversize'
 export {
   base64UrlDecode,
   base64UrlEncode,

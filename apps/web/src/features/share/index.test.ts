@@ -33,7 +33,7 @@ describe('encodeShare tier selection', () => {
   test('large payload → convex tier', () => {
     const huge = { data: Array.from({ length: 5000 }, (_, i) => `item-${i}-pad-${Math.sin(i)}`) }
     const enc = encodeShare(huge)
-    expect(enc.tier).toBe('convex')
+    expect(enc.tier).toBe('oversize')
     expect(enc.fragment).toBeUndefined()
     expect(isLargePayload(enc)).toBe(true)
   })

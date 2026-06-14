@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@a/ui": "workspace:*",
-    "@auth/core": "latest",
-    "@convex-dev/auth": "latest",
     "@dnd-kit/abstract": "latest",
     "@dnd-kit/dom": "latest",
     "@dnd-kit/helpers": "latest",
@@ -42,7 +40,6 @@
     "@thi.ng/dgraph": "latest",
     "@three.ez/instanced-mesh": "latest",
     "@types/mdx": "latest",
-    "convex": "latest",
     "es-toolkit": "latest",
     "ky": "latest",
     "lucide-react": "latest",

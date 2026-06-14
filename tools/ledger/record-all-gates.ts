@@ -10,9 +10,6 @@ const pkgTsc = (p: string): string => `cd packages/${p} && bunx tsc --noEmit`
 const featureTest = (p: string): string => `bun test apps/web/src/features/${p}`
 const pwTest = (file: string, grep: string): string => `cd apps/web && bun scripts/pw-cached.ts ${file} "${grep}"`
 const liveCurl = (path: string): string => `/usr/bin/curl -sf https://sim.noboil.dev${path}`
-const LOCAL_CONVEX = 'http://127.0.0.1:3220'
-const backendTest = (file: string, grep = ''): string =>
-  `cd apps/backend && CONVEX_SELF_HOSTED_URL=${LOCAL_CONVEX} bun test ${file}${grep === '' ? '' : ` -t ${grep}`}`
 const GATES: Gate[] = []
 GATES.push({ cmd: 'bun run fix', name: 'format' })
 GATES.push({ cmd: lint('disable-reasons.ts'), name: 'lint.disable-reasons' })
@@ -30,9 +27,7 @@ GATES.push({ cmd: lintSpec('vision-coverage.ts'), name: 'spec.vision-coverage' }
 GATES.push({ cmd: lintSpec('datapath-diff.ts'), name: 'spec.datapath' })
 GATES.push({ cmd: lintSpec('isa-diff.ts'), name: 'spec.isa' })
 GATES.push({ cmd: lintSpec('stack-presence.ts'), name: 'spec.stack' })
-GATES.push({ cmd: lintSpec('convex-schema-diff.ts'), name: 'spec.schemas' })
 GATES.push({ cmd: lintSpec('lint-baseline-diff.ts'), name: 'spec.lint-baseline' })
-GATES.push({ cmd: lintSpec('gen-check.ts'), name: 'gen.check' })
 GATES.push({ cmd: 'bun tools/lint/a11y-contrast.ts normal dark', name: 'a11y.contrast.dark' })
 GATES.push({ cmd: 'bun tools/lint/a11y-contrast.ts normal light', name: 'a11y.contrast.light' })
 GATES.push({ cmd: 'bun tools/lint/a11y-contrast.ts deuteranopia dark', name: 'a11y.contrast.color-blind' })
@@ -41,7 +36,6 @@ for (const p of ['bits', 'boolean', 'design-tokens', 'editor', 'hud', 'sim-engin
   GATES.push({ cmd: pkgTest(p), name: `test.unit.${p}` })
 }
 GATES.push({ cmd: 'cd apps/web && bunx tsc --noEmit', name: 'tsc.apps-web' })
-GATES.push({ cmd: 'cd apps/backend && bunx tsc --noEmit', name: 'tsc.apps-backend' })
 GATES.push({ cmd: 'bun test apps/web', name: 'test.unit.apps-web' })
 GATES.push({ cmd: pkgTest('bits'), name: 'test.property.bits' })
 GATES.push({ cmd: pkgTest('boolean'), name: 'test.property.boolean' })
@@ -89,9 +83,6 @@ for (const c of [
 for (const c of ['v5-basic', 'v5-wrap', 'v5-petrick', 'v6-basic', 'v6-wrap', 'v6-multi-output'])
   GATES.push({ cmd: featureTest('kmap'), name: `test.e2e.kmap-3d.${c}` })
 GATES.push({ cmd: featureTest('share'), name: 'test.e2e.share' })
-GATES.push({ cmd: backendTest('convex/snapshots.live.test.ts'), name: 'test.convex' })
-GATES.push({ cmd: backendTest('convex/auth.live.test.ts'), name: 'test.auth-flow' })
-GATES.push({ cmd: backendTest('convex/snapshots.live.test.ts', 'rate'), name: 'test.rate-limit' })
 GATES.push({ cmd: featureTest('compare'), name: 'test.e2e.compare' })
 const lhPath: Record<string, string> = {
   compare: '/compare',
@@ -142,7 +133,6 @@ for (const s of ['datapath-cycle', 'kmap-cycle', 'share-cycle'])
   GATES.push({ cmd: pwTest('perf-heap.pw.ts', `perf.heap-leak.${s}`), name: `perf.heap-leak.${s}` })
 for (const p of ['bits', 'boolean', 'sim-engine'])
   GATES.push({ cmd: `cd packages/${p} && bunx stryker run`, name: `mutate.${p}` })
-GATES.push({ cmd: `curl -sf ${LOCAL_CONVEX}/version`, name: 'verify.local' })
 GATES.push({ cmd: liveCurl('/'), name: 'verify.bearer' })
 GATES.push({
   cmd: 'D=$(mktemp -d) && git clone -q --depth 1 "file://$(git rev-parse --show-toplevel)" "$D" && (cd "$D" && bun i >/dev/null 2>&1 && bun test packages/bits/src/index.test.ts >/dev/null 2>&1); R=$?; rm -rf "$D"; exit $R',
@@ -152,14 +142,12 @@ for (const r of ['home', 'mips', 'kmap', 'compare', 'pipeline', 'learn', 'share'
   GATES.push({ cmd: liveCurl(r === 'home' ? '/' : `/${r}`), name: `smoke.deploy.${r}` })
 GATES.push({ cmd: liveCurl('/s/abc123'), name: 'smoke.share.dokploy' })
 GATES.push({ cmd: liveCurl('/s/golden'), name: 'smoke.share.cloudflare-tunnel' })
-GATES.push({ cmd: `curl -sf ${LOCAL_CONVEX}/version`, name: 'infra.convex.local' })
-GATES.push({ cmd: liveCurl('/'), name: 'infra.convex.dokploy' })
 GATES.push({ cmd: 'dig +short sim.noboil.dev | head -1 | grep -q "^[0-9]"', name: 'infra.cloudflare.dns' })
 GATES.push({ cmd: '/usr/bin/curl -sSI https://sim.noboil.dev/ | head -3 | grep -q HTTP', name: 'infra.cloudflare.tunnel' })
 GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.sim-pushed' })
 GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.simdocs-pushed' })
 GATES.push({ cmd: 'gh api /repos/1qh/sim/actions/permissions | grep -q enabled', name: 'infra.ci.actions-enabled' })
-GATES.push({ cmd: 'bun test packages apps/web apps/backend', name: 'infra.ci.green-on-main' })
+GATES.push({ cmd: 'bun test packages apps/web', name: 'infra.ci.green-on-main' })
 GATES.push({ cmd: 'bun tools/ledger/stale-empty.ts', name: 'infra.ledger.stale-empty' })
 export { GATES }
 export type { Gate }

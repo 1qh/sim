@@ -2,80 +2,15 @@ name: sim
 networks:
   sim:
     driver: bridge
-volumes:
-  postgres-data:
-  convex-data:
 services:
-  postgres:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: convex
-      POSTGRES_DB: sim_self_hosted
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks: [sim]
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U convex -d sim_self_hosted']
-      interval: 10s
-      timeout: 5s
-      retries: 12
-  convex-backend:
-    image: ghcr.io/get-convex/convex-backend:latest
-    restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      INSTANCE_NAME: sim-self-hosted
-      INSTANCE_SECRET: ${INSTANCE_SECRET}
-      POSTGRES_URL: postgres://convex:${DB_PASSWORD}@postgres:5432
-      DISABLE_BEACON: 'true'
-      CONVEX_CLOUD_ORIGIN: http://convex-backend:3210
-      CONVEX_SITE_ORIGIN: http://convex-backend:3211
-      DO_NOT_REQUIRE_SSL: 'true'
-      RUST_LOG: info
-    volumes:
-      - convex-data:/convex/data
-    networks: [sim]
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3210/version']
-      interval: 10s
-      timeout: 5s
-      retries: 12
   next-app:
     image: ghcr.io/1qh/sim-web:latest
     pull_policy: always
     restart: unless-stopped
-    depends_on:
-      convex-backend:
-        condition: service_healthy
     environment:
       NODE_ENV: production
       PORT: '3000'
       SITE_URL: https://sim.noboil.dev
-      CONVEX_SELF_HOSTED_URL: http://convex-backend:3210
-      CONVEX_SELF_HOSTED_ADMIN_KEY: ${CONVEX_SELF_HOSTED_ADMIN_KEY}
-    networks: [sim]
-  convex-setup:
-    image: oven/bun:1
-    restart: 'no'
-    depends_on:
-      convex-backend:
-        condition: service_healthy
-    environment:
-      CONVEX_SELF_HOSTED_URL: http://convex-backend:3210
-      CONVEX_SELF_HOSTED_ADMIN_KEY: ${CONVEX_SELF_HOSTED_ADMIN_KEY}
-      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
-      JWKS: ${JWKS}
-    command:
-      - sh
-      - -c
-      - >-
-        echo '{"dependencies":{"convex":"latest"}}' > package.json &&
-        bunx convex env set "JWT_PRIVATE_KEY=$$JWT_PRIVATE_KEY" &&
-        bunx convex env set "JWKS=$$JWKS"
     networks: [sim]
   cloudflared:
     image: cloudflare/cloudflared:latest

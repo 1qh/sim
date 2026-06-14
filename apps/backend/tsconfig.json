@@ -1,4 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "exclude": ["convex/_generated/**", "node_modules"]
-}
