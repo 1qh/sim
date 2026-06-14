@@ -30,7 +30,7 @@ const args = argv.slice(2)
 const namesArgIdx = args.indexOf('--names')
 const names = new Set<string>()
 if (namesArgIdx === -1) {
-  const defaultPath = new URL('../../../simdocs/deps.json', import.meta.url).pathname
+  const defaultPath = new URL('../../../sim-doc/deps.json', import.meta.url).pathname
   const depsPath = args[0] ?? defaultPath
   const deps = (await file(depsPath).json()) as Record<string, string[]>
   for (const cat of REAL_NPM_CATS) for (const n of deps[cat] ?? []) names.add(REMAP[n] ?? n)

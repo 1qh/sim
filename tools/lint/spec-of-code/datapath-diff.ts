@@ -4,7 +4,7 @@ import { $, file } from 'bun'
 import process from 'node:process'
 
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const docText = await file(`${repoRoot}/../simdocs/MIPS-DATAPATH.md`).text()
+const docText = await file(`${repoRoot}/../sim-doc/MIPS-DATAPATH.md`).text()
 const SIGNAL_NAMES = [
   'RegDst',
   'ALUSrc',

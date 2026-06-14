@@ -8,7 +8,7 @@ interface RootPackage {
   scripts?: Record<string, string>
 }
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const adrText = await file(`${repoRoot}/../simdocs/adr/lint-baseline.md`).text()
+const adrText = await file(`${repoRoot}/../sim-doc/adr/lint-baseline.md`).text()
 const rootPkg = (await file(`${repoRoot}/package.json`).json()) as RootPackage
 const drift: string[] = []
 if (adrText.includes('`lintmax` is the single entry point') && !rootPkg.devDependencies?.lintmax)

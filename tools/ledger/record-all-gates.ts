@@ -145,7 +145,7 @@ GATES.push({ cmd: liveCurl('/s/golden'), name: 'smoke.share.cloudflare-tunnel' }
 GATES.push({ cmd: 'dig +short sim.noboil.dev | head -1 | grep -q "^[0-9]"', name: 'infra.cloudflare.dns' })
 GATES.push({ cmd: '/usr/bin/curl -sSI https://sim.noboil.dev/ | head -3 | grep -q HTTP', name: 'infra.cloudflare.tunnel' })
 GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.sim-pushed' })
-GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.simdocs-pushed' })
+GATES.push({ cmd: 'git ls-remote origin HEAD', name: 'infra.repos.sim-doc-pushed' })
 GATES.push({ cmd: 'gh api /repos/1qh/sim/actions/permissions | grep -q enabled', name: 'infra.ci.actions-enabled' })
 GATES.push({ cmd: 'bun test packages apps/web', name: 'infra.ci.green-on-main' })
 GATES.push({ cmd: 'bun tools/ledger/stale-empty.ts', name: 'infra.ledger.stale-empty' })

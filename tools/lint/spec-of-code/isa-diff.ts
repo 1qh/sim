@@ -5,7 +5,7 @@ import process from 'node:process'
 import { FUNCT, OPCODE } from '../../../apps/web/src/features/mips/encode'
 
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const isaText = await file(`${repoRoot}/../simdocs/MIPS-ISA.md`).text()
+const isaText = await file(`${repoRoot}/../sim-doc/MIPS-ISA.md`).text()
 const docOpcodes = new Map<string, number>()
 const docFuncts = new Map<string, number>()
 for (const m of isaText.matchAll(/\|\s*`(?<mnemonic>[a-z]+)`\s*\|\s*(?<hex>0x[0-9a-f]+)\s*\|/giu)) {

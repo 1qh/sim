@@ -37,7 +37,7 @@ const knownGreen = [...byGate.values()].filter(r => r.status === 'pass')
 const knownFail = [...byGate.values()].filter(r => r.status !== 'pass')
 const knownGates = new Set(byGate.keys())
 const expected = new Set<string>()
-const verifyPath = `${repoRoot}/../simdocs/VERIFY.md`
+const verifyPath = `${repoRoot}/../sim-doc/VERIFY.md`
 const verify = await file(verifyPath)
   .text()
   .catch(() => '')

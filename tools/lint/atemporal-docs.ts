@@ -18,7 +18,7 @@ const BANNED = [
 const results = await Promise.all(
   BANNED.map(async term => {
     const out =
-      await $`git grep -nIE -e ${term} -- '*.md' ':!CLAUDE.md' ':!tools/lint/atemporal-docs.ts' ':!simdocs/GOTCHAS.md'`
+      await $`git grep -nIE -e ${term} -- '*.md' ':!CLAUDE.md' ':!tools/lint/atemporal-docs.ts' ':!sim-doc/GOTCHAS.md'`
         .nothrow()
         .text()
     return out.trim() ? `# ${term}\n${out.trim()}` : ''

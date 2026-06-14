@@ -8,7 +8,7 @@ interface ManifestPackage {
   devDependencies?: Record<string, string>
 }
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const stackPath = `${repoRoot}/../simdocs/STACK.md`
+const stackPath = `${repoRoot}/../sim-doc/STACK.md`
 const stackText = await file(stackPath)
   .text()
   .catch(() => '')
