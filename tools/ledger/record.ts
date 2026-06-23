@@ -3,7 +3,7 @@
 /* eslint-disable no-console */
 import { $, argv, spawn } from 'bun'
 import { createHash } from 'node:crypto'
-import { appendFileSync } from 'node:fs'
+import { appendFile } from 'node:fs/promises'
 import process from 'node:process'
 
 const args = argv.slice(2)
@@ -39,7 +39,7 @@ const durationMs = Math.round(performance.now() - start)
 const status = exit === 0 ? 'pass' : 'fail'
 const notes = exit === 0 ? `ok ${durationMs}ms` : (err || out).slice(-2000)
 const row = { commit, durationMs, gate, notes, status, tree, ts: new Date().toISOString() }
-appendFileSync(ledgerPath, `${JSON.stringify(row)}\n`)
+await appendFile(ledgerPath, `${JSON.stringify(row)}\n`)
 if (exit !== 0) {
   process.stderr.write(err)
   process.stdout.write(out)

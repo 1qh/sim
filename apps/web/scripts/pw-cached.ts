@@ -4,7 +4,7 @@
 /* oxlint-disable promise/param-names */
 /* eslint-disable no-await-in-loop, no-console */
 import { $, argv, file, write } from 'bun'
-import { existsSync, mkdirSync } from 'node:fs'
+import { mkdir } from 'node:fs/promises'
 import process from 'node:process'
 
 const spec = argv[2]
@@ -43,11 +43,11 @@ const buildCache = async (): Promise<void> => {
   await write(cacheFile, JSON.stringify(specs))
 }
 const ensureCache = async (): Promise<void> => {
-  if (existsSync(cacheFile)) return
+  if (await file(cacheFile).exists()) return
   try {
-    mkdirSync(lockDir)
+    await mkdir(lockDir)
   } catch {
-    while (!existsSync(cacheFile))
+    while (!(await file(cacheFile).exists()))
       await new Promise(r => {
         setTimeout(r, 1000)
       })

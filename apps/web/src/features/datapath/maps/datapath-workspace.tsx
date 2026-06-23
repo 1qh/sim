@@ -32,6 +32,7 @@ const EXAMPLES = [
   { name: 'branch', src: 'addi $t0, $zero, 4\naddi $t1, $zero, 4\nbeq $t0, $t1, 2' }
 ]
 const STEP_SET = new Set<string>(STEPS)
+const clampStep = (idx: number): number => Math.min(STEPS.length - 1, Math.max(0, idx))
 const RE_FORM = /^(?:INPUT|TEXTAREA)$/u
 const readParam = (key: string): string | undefined => {
   if (typeof globalThis === 'undefined') return
@@ -95,8 +96,7 @@ const DatapathWorkspace = ({
       if (e.metaKey || e.ctrlKey || e.altKey) return
       const t = e.target as HTMLElement | null
       if (t && (t.isContentEditable || RE_FORM.test(t.tagName) || t.closest('.monaco-editor') !== null)) return
-      const stepBy = (d: number): void =>
-        setStep(s => STEPS[Math.min(STEPS.length - 1, Math.max(0, STEPS.indexOf(s) + d))] ?? 'IF')
+      const stepBy = (d: number): void => setStep(s => STEPS[clampStep(STEPS.indexOf(s) + d)] ?? 'IF')
       const insBy = (d: number): void => setInsIndex(i => Math.min(liveProgram.length - 1, Math.max(0, i + d)))
       const k = e.key
       if (k === 'Escape') setSelected(undefined)

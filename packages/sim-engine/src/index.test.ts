@@ -62,6 +62,7 @@ describe('sfc32 rng', () => {
   })
   test('fromSeed(123) golden nextFloat', () => {
     const s = fromSeed(123)
+    // oxlint-disable-next-line unicorn/numeric-separators-style -- biome autofix + oxlint disagree on fractional grouping
     expect(nextFloat(s)).toBeCloseTo(0.197_157_151_764_258_74, 12)
   })
   test('fromSeed(7) golden nextInt sequence with max=100', () => {

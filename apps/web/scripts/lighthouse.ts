@@ -4,9 +4,15 @@
 /* oxlint-disable promise/param-names */
 /* eslint-disable no-await-in-loop, no-console */
 import { $, argv, file, spawn, write } from 'bun'
-import { existsSync, mkdirSync } from 'node:fs'
+import { access, mkdir } from 'node:fs/promises'
 import process from 'node:process'
 
+const dirExists = async (p: string): Promise<boolean> => {
+  const ok = await access(p)
+    .then(() => true)
+    .catch(() => false)
+  return ok
+}
 const ROUTES = ['/', '/mips', '/kmap', '/compare', '/pipeline', '/learn', '/learn/foundation', '/s/abc123']
 const PERF_MIN = 0.88
 const A11Y_MIN = 0.97
@@ -22,11 +28,11 @@ interface Score {
 }
 const readCache = async (path: string): Promise<Score | undefined> => {
   const f = `${cacheDir}/${slug(path)}.json`
-  if (!existsSync(f)) return
+  if (!(await file(f).exists())) return
   return (await file(f).json()) as Score
 }
 const audit = async (): Promise<void> => {
-  mkdirSync(cacheDir, { recursive: true })
+  await mkdir(cacheDir, { recursive: true })
   const server = spawn(['bun', 'run', 'start', '--', '-p', '3000'], { stderr: 'pipe', stdout: 'pipe' })
   for (let i = 0; i < 60; i += 1) {
     const ok = await fetch('http://127.0.0.1:3000/')
@@ -58,9 +64,9 @@ const audit = async (): Promise<void> => {
 }
 const ensureCache = async (): Promise<void> => {
   try {
-    mkdirSync(lockDir)
+    await mkdir(lockDir)
   } catch {
-    while (existsSync(lockDir) && !existsSync(`${cacheDir}/_root.json`))
+    while ((await dirExists(lockDir)) && !(await file(`${cacheDir}/_root.json`).exists()))
       await new Promise(r => {
         setTimeout(r, 1000)
       })

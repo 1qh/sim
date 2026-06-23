@@ -4,9 +4,15 @@
 /* oxlint-disable promise/param-names */
 /* eslint-disable no-await-in-loop, no-console */
 import { $, file, gzipSync, write } from 'bun'
-import { existsSync, mkdirSync } from 'node:fs'
+import { access, mkdir } from 'node:fs/promises'
 import process from 'node:process'
 
+const dirExists = async (p: string): Promise<boolean> => {
+  const ok = await access(p)
+    .then(() => true)
+    .catch(() => false)
+  return ok
+}
 const SHARED_FIRST_LOAD_GZ_LIMIT = 200 * 1024
 const RE_HEAVY = /monaco|three/iu
 const envTree = process.env.LEDGER_TREE
@@ -14,9 +20,9 @@ const key = envTree ?? 'manual'
 const resultFile = `/tmp/size-limit-${key}.json`
 const lockDir = `/tmp/size-limit-${key}.lock`
 const cachedCode = async (): Promise<number | undefined> =>
-  existsSync(resultFile) ? ((await file(resultFile).json()) as { code: number }).code : undefined
+  (await file(resultFile).exists()) ? ((await file(resultFile).json()) as { code: number }).code : undefined
 const measure = async (): Promise<number> => {
-  if (!existsSync('.next/build-manifest.json')) {
+  if (!(await file('.next/build-manifest.json').exists())) {
     const b = await $`bunx next build`.nothrow().quiet()
     if (b.exitCode !== 0) {
       console.error('size-limit: next build failed')
@@ -31,7 +37,11 @@ const measure = async (): Promise<number> => {
   let gz = 0
   for (const f of shared) {
     const bf = file(`.next/${f}`)
-    if (await bf.exists()) gz += gzipSync(await bf.bytes()).length
+    if (await bf.exists()) {
+      const bytes = await bf.bytes()
+      // oxlint-disable-next-line node/no-sync -- gzip/gunzip is CPU work, not blocking I/O
+      gz += gzipSync(bytes).length
+    }
   }
   const heavyInShared = shared.some(f => RE_HEAVY.test(f))
   const ok = gz <= SHARED_FIRST_LOAD_GZ_LIMIT && !heavyInShared
@@ -44,10 +54,10 @@ const pre = await cachedCode()
 if (pre !== undefined) process.exit(pre)
 let acquired = false
 try {
-  mkdirSync(lockDir)
+  await mkdir(lockDir)
   acquired = true
 } catch {
-  while (existsSync(lockDir) && !existsSync(resultFile))
+  while ((await dirExists(lockDir)) && !(await file(resultFile).exists()))
     await new Promise(res => {
       setTimeout(res, 1000)
     })

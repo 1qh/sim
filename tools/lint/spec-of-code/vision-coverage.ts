@@ -2,12 +2,21 @@
 /** biome-ignore-all lint/performance/noAwaitInLoops: noise */
 /* eslint-disable no-console, no-await-in-loop */
 import { $, file } from 'bun'
-import { existsSync } from 'node:fs'
+import { access } from 'node:fs/promises'
 import process from 'node:process'
 
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const read = async (p: string): Promise<string> => (existsSync(`${repoRoot}/${p}`) ? file(`${repoRoot}/${p}`).text() : '')
-const exists = (p: string): boolean => existsSync(`${repoRoot}/${p}`)
+const pathExists = async (p: string): Promise<boolean> => {
+  try {
+    await access(p)
+    return true
+  } catch {
+    return false
+  }
+}
+const read = async (p: string): Promise<string> =>
+  (await pathExists(`${repoRoot}/${p}`)) ? file(`${repoRoot}/${p}`).text() : ''
+const exists = async (p: string): Promise<boolean> => pathExists(`${repoRoot}/${p}`)
 interface Check {
   deliverable: string
   ok: boolean
@@ -38,7 +47,7 @@ for (const pkg of ['three-kit', 'hud', 'design-tokens', 'sim-engine', 'editor', 
       .split('\n').length < 6
   add(`substrate package ${pkg} is real`, src.length > 0 && !isStub, isStub ? 'placeholder stub' : 'real')
 }
-const datapathScene = exists('apps/web/src/features/datapath/scene/datapath-scene.tsx')
+const datapathScene = await exists('apps/web/src/features/datapath/scene/datapath-scene.tsx')
 const datapathSceneSrc = await read('apps/web/src/features/datapath/scene/datapath-scene.tsx')
 const hasCanvas = datapathSceneSrc.includes('<Canvas') || datapathSceneSrc.includes('Canvas frameloop')
 add(
@@ -48,21 +57,19 @@ add(
 )
 for (const gen of ['topology.ts', 'isa.ts', 'stepTraces.ts']) {
   const p = `apps/web/src/features/datapath/generated/${gen}`
-  add(`datapath generated/${gen}`, exists(p), exists(p) ? 'present' : 'missing')
+  const present = await exists(p)
+  add(`datapath generated/${gen}`, present, present ? 'present' : 'missing')
 }
 const topo = await read('apps/web/src/features/datapath/generated/topology.ts')
 const compCount = (topo.match(/\bid:\s*'[A-Z]/gu) ?? []).length
 const pathCount = (topo.match(/_TO_[A-Z]/gu) ?? []).length
 add('topology >= 22 components', compCount >= 22, `${compCount} component ids`)
 add('topology >= 40 paths', pathCount >= 40, `${pathCount} path refs`)
-const kmap3d = exists('apps/web/src/features/kmap/scene/toroidal-kmap.tsx')
+const kmap3d = await exists('apps/web/src/features/kmap/scene/toroidal-kmap.tsx')
 const kmap3dSrc = await read('apps/web/src/features/kmap/scene/toroidal-kmap.tsx')
 add('3D toroidal K-map scene exists', kmap3d && kmap3dSrc.includes('<Canvas'), kmap3d ? 'present' : 'missing')
-add(
-  'datapath a11y DOM proxies',
-  exists('apps/web/src/features/datapath/a11y/proxies.tsx'),
-  exists('apps/web/src/features/datapath/a11y/proxies.tsx') ? 'present' : 'missing'
-)
+const a11yProxies = await exists('apps/web/src/features/datapath/a11y/proxies.tsx')
+add('datapath a11y DOM proxies', a11yProxies, a11yProxies ? 'present' : 'missing')
 const LOCKED_FLOOR_ISA = [
   'add',
   'addi',
@@ -132,7 +139,7 @@ add(
   pipeDiagramReal ? 'diagram present (StageMatrix via PipelineIsland)' : 'stub page, no diagram'
 )
 const cmpPage = await read('apps/web/src/app/compare/page.tsx')
-const cmpIsland = exists('apps/web/src/features/compare/compare-island.tsx')
+const cmpIsland = await exists('apps/web/src/features/compare/compare-island.tsx')
 add(
   'compare dual 3D scene (COMPARE.md)',
   cmpIsland || /DatapathIsland[\s\S]*DatapathIsland|split-pane|two.*scene/iu.test(cmpPage),
@@ -140,13 +147,13 @@ add(
 )
 const learnDir = `${repoRoot}/apps/web/content/learn`
 const exDir = `${repoRoot}/apps/web/content/examples`
-const learnMdx = existsSync(learnDir)
+const learnMdx = (await pathExists(learnDir))
   ? (await $`find ${learnDir} -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
   : []
-const mipsEx = existsSync(`${exDir}/mips`)
+const mipsEx = (await pathExists(`${exDir}/mips`))
   ? (await $`find ${exDir}/mips -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
   : []
-const kmapEx = existsSync(`${exDir}/kmap`)
+const kmapEx = (await pathExists(`${exDir}/kmap`))
   ? (await $`find ${exDir}/kmap -name '*.mdx'`.nothrow().text()).trim().split('\n').filter(Boolean)
   : []
 add('learn MDX pages >= 17 (LEARN.md/CONTENT-DESIGN.md)', learnMdx.length >= 17, `${learnMdx.length} pages`)
@@ -248,12 +255,14 @@ for (const r of [
   'apps/web/src/app/terms/page.tsx',
   'apps/web/src/app/api/healthz/route.ts',
   'apps/web/src/app/sitemap.ts'
-])
+]) {
+  const present = await exists(r)
   add(
     `route ${r.replace('apps/web/src/app', '').replace('/page.tsx', '').replace('/route.ts', '')}`,
-    exists(r),
-    exists(r) ? 'present' : 'missing'
+    present,
+    present ? 'present' : 'missing'
   )
+}
 const { GATES } = await import('../../ledger/record-all-gates')
 const NOOP = /^\s*(?:true|:|echo\b|exit 0)\s*$/u
 const noopGates = GATES.filter(g => NOOP.test(g.cmd) || g.cmd.includes('|| true') || g.cmd.includes('; true'))

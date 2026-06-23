@@ -26,6 +26,7 @@ const base64UrlDecode = (s: string): Uint8Array => {
 }
 const encodeShare = <T>(value: T): ShareEncoding => {
   const canonical = toCanonicalBytes(value)
+  // oxlint-disable-next-line node/no-sync -- gzip/gunzip is CPU work, not blocking I/O
   const compressed = new Uint8Array(gzipSync(canonical))
   const fragment = base64UrlEncode(compressed)
   const hash = hashValue(value)
@@ -34,6 +35,7 @@ const encodeShare = <T>(value: T): ShareEncoding => {
 }
 const decodeFragment = <T>(fragment: string): T => {
   const compressed = base64UrlDecode(fragment)
+  // oxlint-disable-next-line node/no-sync -- gzip/gunzip is CPU work, not blocking I/O
   const canonical = new Uint8Array(gunzipSync(compressed))
   const json = new TextDecoder().decode(canonical)
   return JSON.parse(json) as T

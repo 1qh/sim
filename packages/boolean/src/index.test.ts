@@ -107,8 +107,9 @@ const u32arb = (max: number): Arbitrary<number> => integer({ max, min: 0 })
 const widthArb = (): Arbitrary<number> => integer({ max: 4, min: 2 })
 describe('property: minimized SOP truth-table-equivalent to original', () => {
   test('random 4-var minterm set produces equivalent truth table', () => {
+    const mintermArb = uniqueArray(u32arb(15), { maxLength: 16 })
     assert(
-      property(uniqueArray(u32arb(15), { maxLength: 16 }), mins => {
+      property(mintermArb, mins => {
         const result = solve({ minterms: [...mins], vars: ['A', 'B', 'C', 'D'] })
         const rebuiltTT = result.truthTable
         const minSet = new Set(mins)
