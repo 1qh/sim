@@ -78,7 +78,7 @@ const parseRegister = (tok: string): number | undefined => {
 const parseImm = (tok: string): number | undefined => {
   if (RE_HEX.test(tok)) return Number.parseInt(tok, 16)
   if (RE_BIN.test(tok)) return Number.parseInt(tok.replace('0b', ''), 2) * (tok.startsWith('-') ? -1 : 1)
-  if (RE_INT.test(tok)) return Number.parseInt(tok, 10)
+  if (RE_INT.test(tok)) return Math.trunc(Number(tok))
 }
 const stripComment = (line: string): string => {
   const h = line.indexOf('#')
