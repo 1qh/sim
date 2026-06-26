@@ -24,5 +24,6 @@
     "prepublishOnly": "bun run build",
     "postpublish": "bun ../../tools/prune-versions.ts",
     "test": "bun test"
-  }
+  },
+  "private": true
 }
