@@ -1,6 +1,7 @@
 {
   "name": "@sim/editor",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -27,6 +28,5 @@
   "dependencies": {
     "chevrotain": "latest",
     "monaco-editor": "latest"
-  },
-  "private": true
+  }
 }

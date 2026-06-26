@@ -1,6 +1,7 @@
 {
   "name": "@sim/bits",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -24,6 +25,5 @@
     "prepublishOnly": "bun run build",
     "postpublish": "bun ../../tools/prune-versions.ts",
     "test": "bun test"
-  },
-  "private": true
+  }
 }

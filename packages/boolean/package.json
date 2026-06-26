@@ -1,6 +1,7 @@
 {
   "name": "@sim/boolean",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -29,6 +30,5 @@
     "chevrotain": "latest",
     "espresso-iisojs": "latest",
     "zod": "latest"
-  },
-  "private": true
+  }
 }

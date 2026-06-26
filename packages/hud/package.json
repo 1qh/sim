@@ -1,6 +1,7 @@
 {
   "name": "@sim/hud",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -29,6 +30,5 @@
     "@react-three/uikit": "latest",
     "@sim/design-tokens": "workspace:*",
     "three": "latest"
-  },
-  "private": true
+  }
 }

@@ -1,6 +1,7 @@
 {
   "name": "@sim/sim-engine",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -30,6 +31,5 @@
     "canonicalize": "latest",
     "rfc6902": "latest",
     "zod": "latest"
-  },
-  "private": true
+  }
 }

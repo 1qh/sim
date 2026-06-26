@@ -1,6 +1,7 @@
 {
   "name": "@sim/three-kit",
   "version": "0.0.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",
@@ -34,6 +35,5 @@
     "postprocessing": "latest",
     "stats-gl": "latest",
     "three": "latest"
-  },
-  "private": true
+  }
 }
