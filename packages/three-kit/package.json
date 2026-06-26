@@ -34,5 +34,6 @@
     "postprocessing": "latest",
     "stats-gl": "latest",
     "three": "latest"
-  }
+  },
+  "private": true
 }

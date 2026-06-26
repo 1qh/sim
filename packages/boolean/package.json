@@ -29,5 +29,6 @@
     "chevrotain": "latest",
     "espresso-iisojs": "latest",
     "zod": "latest"
-  }
+  },
+  "private": true
 }

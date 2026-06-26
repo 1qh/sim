@@ -29,5 +29,6 @@
     "@react-three/uikit": "latest",
     "@sim/design-tokens": "workspace:*",
     "three": "latest"
-  }
+  },
+  "private": true
 }

@@ -26,5 +26,6 @@
   },
   "dependencies": {
     "colorjs.io": "latest"
-  }
+  },
+  "private": true
 }

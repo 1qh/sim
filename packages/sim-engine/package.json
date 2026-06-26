@@ -30,5 +30,6 @@
     "canonicalize": "latest",
     "rfc6902": "latest",
     "zod": "latest"
-  }
+  },
+  "private": true
 }

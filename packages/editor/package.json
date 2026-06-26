@@ -27,5 +27,6 @@
   "dependencies": {
     "chevrotain": "latest",
     "monaco-editor": "latest"
-  }
+  },
+  "private": true
 }
