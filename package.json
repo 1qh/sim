@@ -11,7 +11,7 @@
     "check": "lintmax check",
     "clean": "sh clean.sh",
     "fix": "lintmax fix",
-    "postinstall": "sherif",
+    "postinstall": "sherif -i typescript",
     "prepare": "bunx simple-git-hooks"
   },
   "simple-git-hooks": {
@@ -35,7 +35,7 @@
     "tinybench": "latest",
     "tsdown": "latest",
     "turbo": "latest",
-    "typescript": "latest",
+    "typescript": "~6.0.3",
     "unlighthouse": "latest",
     "unrun": "latest",
     "wrangler": "latest"
