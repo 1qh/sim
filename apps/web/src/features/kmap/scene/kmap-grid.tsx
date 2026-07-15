@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: k-map cell index IS the minterm identity */
-/* eslint-disable no-bitwise, react/hook-use-state */
+/* eslint-disable no-bitwise */
 'use client'
 import { cn } from '@a/ui'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { kmap } from '@/features/kmap'
 
 interface Group {
@@ -17,7 +17,7 @@ const KmapGrid = ({ minterms, vars }: { minterms: number[]; vars: number }): Rea
   const [dragStart, setDragStart] = useState<number | undefined>(undefined)
   const [hover, setHover] = useState<number | undefined>(undefined)
   const [groups, setGroups] = useState<Group[]>([])
-  const [, setRedo] = useState<Group[][]>([])
+  const redoRef = useRef<Group[][]>([])
   const rectCells = (a: number, b: number): number[] => {
     const ar = Math.floor(a / cols)
     const ac = a % cols
@@ -32,21 +32,19 @@ const KmapGrid = ({ minterms, vars }: { minterms: number[]; vars: number }): Rea
   const commit = (sel: number[]): void => {
     if (!isPow2(sel.length)) return
     setGroups(g => [...g, { cells: sel }])
-    setRedo([])
+    redoRef.current = []
   }
-  const undo = (): void =>
-    setGroups(g => {
-      if (g.length === 0) return g
-      setRedo(r => [...r, g])
-      return g.slice(0, -1)
-    })
-  const doRedo = (): void =>
-    setRedo(r => {
-      const last = r.at(-1)
-      if (!last) return r
-      setGroups(last)
-      return r.slice(0, -1)
-    })
+  const undo = (): void => {
+    if (groups.length === 0) return
+    redoRef.current = [...redoRef.current, groups]
+    setGroups(groups.slice(0, -1))
+  }
+  const doRedo = (): void => {
+    const last = redoRef.current.at(-1)
+    if (!last) return
+    redoRef.current = redoRef.current.slice(0, -1)
+    setGroups(last)
+  }
   return (
     <section aria-label={`k-map grouping ${vars} vars`} className='flex flex-col gap-3'>
       <div

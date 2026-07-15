@@ -97,7 +97,7 @@ const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
     const m = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     setReduced(m.matches)
     const onChange = (): void => setReduced(m.matches)
     m.addEventListener('change', onChange)

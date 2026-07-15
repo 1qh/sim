@@ -77,18 +77,18 @@ const DatapathWorkspace = ({
   const [memWords, setMemWords] = useState(8)
   const [memStart, setMemStart] = useState(0)
   useEffect(() => {
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     if (localStorage.getItem(HINT_KEY) === null) setHint(true)
     const s = readParam('step')
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     if (s !== undefined && STEP_SET.has(s)) setStep(s as Step)
     const sel = readParam('sel')
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     if (sel !== undefined) setSelected(sel)
   }, [])
   useEffect(() => {
     const r = assemble(asmInitial)
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     if (r.diagnostics.length === 0 && r.instructions.length > 0) setLiveProgram(r.instructions)
   }, [asmInitial])
   useEffect(() => {

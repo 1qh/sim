@@ -29,7 +29,7 @@ const onSection = (pathname: string, href: string): boolean =>
 const Section = ({ section, pathname }: { pathname: string; section: NavSection }): React.JSX.Element => {
   const [open, setOpen] = useState(() => onSection(pathname, section.href))
   useEffect(() => {
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     if (onSection(pathname, section.href)) setOpen(true)
   }, [pathname, section.href])
   if (section.items === undefined)

@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
 /** biome-ignore-all lint/suspicious/noUnknownAttribute: react-three-fiber intrinsic elements/props biome cannot resolve */
 /* oxlint-disable react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop */
-/* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property, no-bitwise */
+/* eslint-disable react/no-unknown-property, @eslint-react/dom-no-unknown-property, no-bitwise */
 'use client'
 import { cn } from '@a/ui'
 import { OrbitControls } from '@react-three/drei'

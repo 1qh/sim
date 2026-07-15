@@ -13,9 +13,9 @@ const useViewMode = (
     const url = new URLSearchParams(globalThis.location.search).get('view')
     const stored = localStorage.getItem(KEY)
     const initial = ok(url) ? url : ok(stored) ? stored : (allowed[0] ?? '2d')
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     setView(initial)
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     setMounted(true)
   }, [allowed])
   const set = (v: View): void => {

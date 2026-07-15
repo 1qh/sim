@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noUnknownAttribute: react-three-fiber intrinsic elements/props biome cannot resolve */
 /* oxlint-disable react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop */
-/* eslint-disable react/no-unknown-property, @eslint-react/dom/no-unknown-property */
+/* eslint-disable react/no-unknown-property, @eslint-react/dom-no-unknown-property */
 'use client'
 import type { Mesh, MeshStandardMaterial } from 'three'
 import { ContactShadows, Environment, Lightformer, Line, OrbitControls, RoundedBox, Text } from '@react-three/drei'
@@ -37,7 +37,7 @@ const usePrefersReducedMotion = (): boolean => {
   const [reduced, setReduced] = useState(true)
   useEffect(() => {
     const m = globalThis.matchMedia('(prefers-reduced-motion: reduce)')
-    // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line @eslint-react/set-state-in-effect
     setReduced(m.matches)
     const onChange = (): void => setReduced(m.matches)
     m.addEventListener('change', onChange)
