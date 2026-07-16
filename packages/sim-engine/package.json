@@ -23,7 +23,8 @@
   "scripts": {
     "build": "tsdown",
     "prepublishOnly": "bun run build",
-    "postpublish": "bun ../../tools/prune-versions.ts"
+    "postpublish": "bun ../../tools/prune-versions.ts",
+    "test": "bun test"
   },
   "dependencies": {
     "@noble/hashes": "latest",
