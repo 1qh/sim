@@ -2,6 +2,7 @@
   "name": "@sim/three-kit",
   "version": "0.0.1",
   "private": true,
+  "description": "sim three-kit — three.js scene helpers",
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",

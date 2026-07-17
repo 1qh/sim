@@ -14,8 +14,9 @@ import {
 describe('themes shape', () => {
   test('every theme defines every role', () => {
     const roles = Object.keys(themes.dark)
-    expect(Object.keys(themes.light).toSorted()).toEqual(roles.toSorted())
-    expect(Object.keys(themes['high-contrast']).toSorted()).toEqual(roles.toSorted())
+    const cmp = (a: string, b: string): number => (a < b ? -1 : Number(a > b))
+    expect(Object.keys(themes.light).toSorted(cmp)).toEqual(roles.toSorted(cmp))
+    expect(Object.keys(themes['high-contrast']).toSorted(cmp)).toEqual(roles.toSorted(cmp))
   })
 })
 describe('hue shift', () => {

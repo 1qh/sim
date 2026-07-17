@@ -34,8 +34,7 @@ const scrub = <S, E>(trace: Trace<S, E>, step: number): S => {
 const verifyTrace = <S, E>(trace: Trace<S, E>): boolean => {
   for (let i = 0; i < trace.states.length; i += 1) if (hashValue(trace.states[i]) !== trace.hashes[i]) return false
   for (let i = 0; i < trace.patches.length; i += 1) {
-    const patch = trace.patches[i]
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const patch = trace.patches.at(i)
     if (patch !== undefined) {
       const rebuilt = applyDiff(trace.states[i], patch)
       if (hashValue(rebuilt) !== trace.hashes[i + 1]) return false

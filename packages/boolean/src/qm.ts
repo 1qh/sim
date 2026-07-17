@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
-/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise, max-depth */
+/* eslint-disable @typescript-eslint/max-params, @typescript-eslint/no-use-before-define, @typescript-eslint/no-misused-spread, no-bitwise */
 interface Implicant {
   bits: string
   covers: number[]
@@ -18,35 +18,42 @@ const combine = (a: string, b: string): string | undefined => {
     }
   return diff === 1 ? result : undefined
 }
+const combinePass = (current: Implicant[]): { next: Implicant[]; used: Set<number> } => {
+  const next: Implicant[] = []
+  const used = new Set<number>()
+  for (let i = 0; i < current.length; i += 1)
+    for (let j = i + 1; j < current.length; j += 1) {
+      const c = combine(current[i].bits, current[j].bits)
+      if (c !== undefined) {
+        used.add(i)
+        used.add(j)
+        const covers = [...new Set([...current[i].covers, ...current[j].covers])].toSorted((a, b) => a - b)
+        if (!next.some(n => n.bits === c)) next.push({ bits: c, covers })
+      }
+    }
+  return { next, used }
+}
+const dedupeByBits = (impls: Implicant[]): Implicant[] => {
+  const seen = new Set<string>()
+  const unique: Implicant[] = []
+  for (const p of impls)
+    if (!seen.has(p.bits)) {
+      seen.add(p.bits)
+      unique.push(p)
+    }
+  return unique
+}
 const findPrimeImplicants = (minterms: number[], dontCares: number[], width: number): Implicant[] => {
   const all = [...new Set([...minterms, ...dontCares])].toSorted((a, b) => a - b)
   if (all.length === 0) return []
   let current: Implicant[] = all.map(m => ({ bits: toBitString(m, width), covers: [m] }))
   const primes: Implicant[] = []
   while (current.length > 0) {
-    const next: Implicant[] = []
-    const used = new Set<number>()
-    for (let i = 0; i < current.length; i += 1)
-      for (let j = i + 1; j < current.length; j += 1) {
-        const c = combine(current[i].bits, current[j].bits)
-        if (c !== undefined) {
-          used.add(i)
-          used.add(j)
-          const covers = [...new Set([...current[i].covers, ...current[j].covers])].toSorted((a, b) => a - b)
-          if (!next.some(n => n.bits === c)) next.push({ bits: c, covers })
-        }
-      }
+    const { next, used } = combinePass(current)
     for (let i = 0; i < current.length; i += 1) if (!used.has(i)) primes.push(current[i])
     current = next
   }
-  const seen = new Set<string>()
-  const unique: Implicant[] = []
-  for (const p of primes)
-    if (!seen.has(p.bits)) {
-      seen.add(p.bits)
-      unique.push(p)
-    }
-  return unique
+  return dedupeByBits(primes)
 }
 const findEssentialPrimes = (primes: Implicant[], minterms: number[]): Implicant[] => {
   const essential: Implicant[] = []
@@ -56,6 +63,16 @@ const findEssentialPrimes = (primes: Implicant[], minterms: number[]): Implicant
   }
   return essential
 }
+const subsetOf = (candidates: Implicant[], mask: number): Implicant[] => {
+  const pick: Implicant[] = []
+  for (let b = 0; b < candidates.length; b += 1) if ((mask >> b) & 1) pick.push(candidates[b])
+  return pick
+}
+const coversAll = (pick: Implicant[], remaining: number[]): boolean => {
+  const covered = new Set<number>()
+  for (const p of pick) for (const m of p.covers) covered.add(m)
+  return remaining.every(m => covered.has(m))
+}
 const petrickSelect = (primes: Implicant[], remaining: number[]): Implicant[] => {
   if (remaining.length === 0) return []
   const candidates = primes.filter(p => p.covers.some(m => remaining.includes(m)))
@@ -64,11 +81,8 @@ const petrickSelect = (primes: Implicant[], remaining: number[]): Implicant[] =>
   let bestLits = Number.POSITIVE_INFINITY
   const allSubsets = 1 << candidates.length
   for (let mask = 1; mask < allSubsets; mask += 1) {
-    const pick: Implicant[] = []
-    for (let b = 0; b < candidates.length; b += 1) if ((mask >> b) & 1) pick.push(candidates[b])
-    const covered = new Set<number>()
-    for (const p of pick) for (const m of p.covers) covered.add(m)
-    if (remaining.every(m => covered.has(m))) {
+    const pick = subsetOf(candidates, mask)
+    if (coversAll(pick, remaining)) {
       const lits = pick.reduce((s, p) => s + countLiterals(p.bits), 0)
       if (pick.length < best.length || (pick.length === best.length && lits < bestLits)) {
         best = pick

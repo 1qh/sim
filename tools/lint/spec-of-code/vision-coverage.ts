@@ -50,11 +50,9 @@ for (const pkg of ['three-kit', 'hud', 'design-tokens', 'sim-engine', 'editor', 
 const datapathScene = await exists('apps/web/src/features/datapath/scene/datapath-scene.tsx')
 const datapathSceneSrc = await read('apps/web/src/features/datapath/scene/datapath-scene.tsx')
 const hasCanvas = datapathSceneSrc.includes('<Canvas') || datapathSceneSrc.includes('Canvas frameloop')
-add(
-  '3D datapath scene exists with R3F Canvas',
-  datapathScene && hasCanvas,
-  datapathScene ? (hasCanvas ? 'Canvas present' : 'no <Canvas>') : 'scene file missing'
-)
+let canvasWhy = 'scene file missing'
+if (datapathScene) canvasWhy = hasCanvas ? 'Canvas present' : 'no <Canvas>'
+add('3D datapath scene exists with R3F Canvas', datapathScene && hasCanvas, canvasWhy)
 for (const gen of ['topology.ts', 'isa.ts', 'stepTraces.ts']) {
   const p = `apps/web/src/features/datapath/generated/${gen}`
   const present = await exists(p)
@@ -159,7 +157,8 @@ const kmapEx = (await pathExists(`${exDir}/kmap`))
 add('learn MDX pages >= 17 (LEARN.md/CONTENT-DESIGN.md)', learnMdx.length >= 17, `${learnMdx.length} pages`)
 add('MIPS example library >= 20 (adr/example-library.md)', mipsEx.length >= 20, `${mipsEx.length} examples`)
 add('K-map example library >= 20 (adr/example-library.md)', kmapEx.length >= 20, `${kmapEx.length} examples`)
-const BOILERPLATE_MIPS = /addi \$t0, \$zero, 1\s*\n\s*add \$t1, \$t0, \$t0/u
+const BOILERPLATE_MIPS =
+  /addi \$t0, \$zero, 1[\t\v\f\r \u00A0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*\n\s*add \$t1, \$t0, \$t0/u
 const BOILERPLATE_KMAP = /<KmapView vars=\{3\} minterms=\{\[1,2,4,7\]\} \/>/u
 const countBoilerplate = async (files: string[], re: RegExp): Promise<number> => {
   let n = 0
@@ -264,7 +263,7 @@ for (const r of [
   )
 }
 const { GATES } = await import('../../ledger/record-all-gates')
-const NOOP = /^\s*(?:true|:|echo\b|exit 0)\s*$/u
+const NOOP = /^\s*(?:true|:|echo|exit 0)\s*$/u
 const noopGates = GATES.filter(g => NOOP.test(g.cmd) || g.cmd.includes('|| true') || g.cmd.includes('; true'))
 add(
   'zero no-op/placeholder ledger gates',

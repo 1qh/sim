@@ -1,5 +1,6 @@
 /* eslint-disable complexity */
 'use client'
+import type { Dispatch, SetStateAction } from 'react'
 import { cn } from '@a/ui'
 import { ChevronLeft, ChevronRight, Code2, Pause, Play, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -46,6 +47,17 @@ const writeParams = (step: string, selected: string | undefined): void => {
   else params.set('sel', selected)
   globalThis.history.replaceState(null, '', `${globalThis.location.pathname}?${params.toString()}`)
 }
+const stepBy = (setStep: Dispatch<SetStateAction<Step>>, d: number): void =>
+  setStep(s => STEPS[clampStep(STEPS.indexOf(s) + d)] ?? 'IF')
+const insBy = (setInsIndex: Dispatch<SetStateAction<number>>, length: number, d: number): void =>
+  setInsIndex(i => Math.min(length - 1, Math.max(0, i + d)))
+const advanceInstruction =
+  (length: number, setPlaying: Dispatch<SetStateAction<boolean>>) =>
+  (i: number): number => {
+    if (i < length - 1) return i + 1
+    setPlaying(false)
+    return i
+  }
 const DatapathWorkspace = ({
   name,
   base,
@@ -96,17 +108,15 @@ const DatapathWorkspace = ({
       if (e.metaKey || e.ctrlKey || e.altKey) return
       const t = e.target as HTMLElement | null
       if (t && (t.isContentEditable || RE_FORM.test(t.tagName) || t.closest('.monaco-editor') !== null)) return
-      const stepBy = (d: number): void => setStep(s => STEPS[clampStep(STEPS.indexOf(s) + d)] ?? 'IF')
-      const insBy = (d: number): void => setInsIndex(i => Math.min(liveProgram.length - 1, Math.max(0, i + d)))
       const k = e.key
       if (k === 'Escape') setSelected(undefined)
       else if (k === ' ') {
         e.preventDefault()
         setPlaying(v => !v)
-      } else if (k === 'ArrowRight') stepBy(1)
-      else if (k === 'ArrowLeft') stepBy(-1)
-      else if (k === '.') insBy(1)
-      else if (k === ',') insBy(-1)
+      } else if (k === 'ArrowRight') stepBy(setStep, 1)
+      else if (k === 'ArrowLeft') stepBy(setStep, -1)
+      else if (k === '.') insBy(setInsIndex, liveProgram.length, 1)
+      else if (k === ',') insBy(setInsIndex, liveProgram.length, -1)
       else if (k >= '1' && k <= '5') setStep(STEPS[Number(k) - 1] ?? 'IF')
       else if (k === 'e' || k === 'E') setEditorOpen(v => !v)
       else if (k === '?') setShowHelp(v => !v)
@@ -123,11 +133,7 @@ const DatapathWorkspace = ({
       setStep(s => {
         const si = STEPS.indexOf(s)
         if (si < STEPS.length - 1) return STEPS[si + 1] ?? 'IF'
-        setInsIndex(i => {
-          if (i < liveProgram.length - 1) return i + 1
-          setPlaying(false)
-          return i
-        })
+        setInsIndex(advanceInstruction(liveProgram.length, setPlaying))
         return 'IF'
       })
     }, 900)

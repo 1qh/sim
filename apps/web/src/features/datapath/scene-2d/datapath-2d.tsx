@@ -2,7 +2,7 @@
 /** biome-ignore-all lint/correctness/useUniqueElementIds: static svg marker ids */
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: svg node click, a11y via DatapathA11yProxies */
 /* oxlint-disable jsx-a11y/prefer-tag-over-role */
-/* eslint-disable complexity, no-bitwise */
+/* eslint-disable no-bitwise */
 'use client'
 import { useEffect, useMemo, useState } from 'react'
 import type { Step } from '@/features/datapath/generated/stepTraces'
@@ -156,6 +156,68 @@ const shape = (n: Node, fill: string, lit: boolean): React.JSX.Element => {
   if (n.kind === 'gate' || n.kind === 'const') return <ellipse cx={x} cy={y} rx={w / 2} ry={h / 2} {...common} {...glow} />
   return <rect height={h} rx={6} width={w} x={x - w / 2} y={y - h / 2} {...common} {...glow} />
 }
+const strokeFor = (on: boolean, ctrl: boolean): string => {
+  if (on) return ACTIVE
+  return ctrl ? CONTROL_WIRE : 'currentColor'
+}
+const dashFor = (on: boolean, ctrl: boolean): string | undefined => {
+  if (on) return '7 5'
+  return ctrl ? '3 3' : undefined
+}
+const PathWire = ({
+  activeP,
+  p,
+  reduced
+}: {
+  activeP: Set<string>
+  p: (typeof PATHS)[number]
+  reduced: boolean
+}): null | React.JSX.Element => {
+  const pts = pathPoints(p.id)
+  if (pts.length === 0) return null
+  const on = activeP.has(p.id)
+  const ctrl = isControlPath(p.id)
+  const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
+  const start = pts[0]
+  const sig = SIGNAL_LABEL[p.id]
+  const tap = TAP_LABEL[p.id]
+  let label: React.JSX.Element | undefined
+  if (ctrl && sig !== undefined && mid !== undefined)
+    label = (
+      <text fill={CONTROL_WIRE} fontSize='8' x={mid.x + 3} y={mid.y - 3}>
+        {sig}
+      </text>
+    )
+  else if (on && mid !== undefined)
+    label = (
+      <text className='fill-muted-foreground' fontSize='9' x={mid.x + 3} y={mid.y - 4}>
+        /{widthOf(p.id)}
+      </text>
+    )
+  return (
+    <g>
+      {tap !== undefined && start !== undefined ? (
+        <text className='fill-muted-foreground' fontSize='7.5' x={start.x + 16} y={start.y - 5}>
+          {tap}
+        </text>
+      ) : undefined}
+      <path
+        d={wireD(pts)}
+        fill='none'
+        markerEnd={on ? 'url(#ah)' : 'url(#ahd)'}
+        stroke={strokeFor(on, ctrl)}
+        strokeDasharray={dashFor(on, ctrl)}
+        strokeOpacity={ctrl && !on ? 0.7 : 1}
+        strokeWidth={on ? 2.4 : 1}
+        {...(on || ctrl ? {} : { className: 'text-muted-foreground/35' })}>
+        {on && !reduced ? (
+          <animate attributeName='stroke-dashoffset' dur='0.6s' from='12' repeatCount='indefinite' to='0' />
+        ) : undefined}
+      </path>
+      {label}
+    </g>
+  )
+}
 const Datapath2D = ({
   control,
   step,
@@ -212,48 +274,9 @@ const Datapath2D = ({
             </text>
           </g>
         ))}
-        {PATHS.map(p => {
-          const pts = pathPoints(p.id)
-          if (pts.length === 0) return null
-          const on = activeP.has(p.id)
-          const ctrl = isControlPath(p.id)
-          const mid = pts[Math.floor(pts.length / 2)] ?? pts[0]
-          const start = pts[0]
-          const stroke = on ? ACTIVE : ctrl ? CONTROL_WIRE : 'currentColor'
-          const sig = SIGNAL_LABEL[p.id]
-          const tap = TAP_LABEL[p.id]
-          return (
-            <g key={p.id}>
-              {tap !== undefined && start !== undefined ? (
-                <text className='fill-muted-foreground' fontSize='7.5' x={start.x + 16} y={start.y - 5}>
-                  {tap}
-                </text>
-              ) : undefined}
-              <path
-                d={wireD(pts)}
-                fill='none'
-                markerEnd={on ? 'url(#ah)' : 'url(#ahd)'}
-                stroke={stroke}
-                strokeDasharray={on ? '7 5' : ctrl ? '3 3' : undefined}
-                strokeOpacity={ctrl && !on ? 0.7 : 1}
-                strokeWidth={on ? 2.4 : 1}
-                {...(on || ctrl ? {} : { className: 'text-muted-foreground/35' })}>
-                {on && !reduced ? (
-                  <animate attributeName='stroke-dashoffset' dur='0.6s' from='12' repeatCount='indefinite' to='0' />
-                ) : undefined}
-              </path>
-              {ctrl && sig !== undefined && mid !== undefined ? (
-                <text fill={CONTROL_WIRE} fontSize='8' x={mid.x + 3} y={mid.y - 3}>
-                  {sig}
-                </text>
-              ) : on && mid !== undefined ? (
-                <text className='fill-muted-foreground' fontSize='9' x={mid.x + 3} y={mid.y - 4}>
-                  /{widthOf(p.id)}
-                </text>
-              ) : undefined}
-            </g>
-          )
-        })}
+        {PATHS.map(p => (
+          <PathWire activeP={activeP} key={p.id} p={p} reduced={reduced} />
+        ))}
         {Object.entries(JUNCTIONS).map(([id, j]) => (
           <circle
             cx={j.x}

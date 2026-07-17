@@ -2,6 +2,7 @@
   "name": "web",
   "version": "0.0.0",
   "private": true,
+  "description": "sim web app — interactive circuit and datapath visualizations",
   "type": "module",
   "scripts": {
     "build": "next build",

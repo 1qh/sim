@@ -84,7 +84,9 @@ const Box = ({
   const typeColor = NODE_COLOR[id] ?? palette.idle
   const color = selected ? SELECTED : typeColor
   const lit = selected || active
-  const base = selected ? 2.4 : active ? 1.5 : 0
+  let base = 0
+  if (selected) base = 2.4
+  else if (active) base = 1.5
   useFrame(({ clock }) => {
     if (matRef.current === null) return
     if (reduced) {
@@ -166,7 +168,9 @@ const Wire = ({
   const points = useMemo<[number, number, number][]>(() => pts.map(p => [p.x, p.y, p.z]), [pts])
   const first = pts[0]
   const last = pts.at(-1)
-  const color = active ? ACCENT : ctrl ? CONTROL_WIRE : palette.wire
+  let color = palette.wire
+  if (active) color = ACCENT
+  else if (ctrl) color = CONTROL_WIRE
   const dashed = ctrl && !active
   return (
     <>

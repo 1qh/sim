@@ -45,7 +45,11 @@ const evalExpr = (e: Expr, env: Record<string, 0 | 1>): 0 | 1 => {
       return 0
   }
 }
-const sortedVars = (e: Expr): string[] => [...collectVars(e)].toSorted((x, y) => (x < y ? -1 : x > y ? 1 : 0))
+const cmpStr = (x: string, y: string): number => {
+  if (x < y) return -1
+  return x > y ? 1 : 0
+}
+const sortedVars = (e: Expr): string[] => [...collectVars(e)].toSorted(cmpStr)
 const truthTable = (e: Expr, vars: string[] = sortedVars(e)): (0 | 1)[] => {
   const rows = 2 ** vars.length
   const out: (0 | 1)[] = []

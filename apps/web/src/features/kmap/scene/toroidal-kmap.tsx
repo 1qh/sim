@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noBitwiseOperators: noise */
 /** biome-ignore-all lint/suspicious/noUnknownAttribute: react-three-fiber intrinsic elements/props biome cannot resolve */
-/* oxlint-disable react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop */
 /* eslint-disable react/no-unknown-property, @eslint-react/dom-no-unknown-property, no-bitwise */
+/* oxlint-disable react-perf/jsx-no-new-array-as-prop, react-perf/jsx-no-new-object-as-prop -- react-three-fiber props (position/args/camera tuples and objects) are the framework's idiom; hoisting them per-frame is not applicable to static scene primitives */
 'use client'
 import { cn } from '@a/ui'
 import { OrbitControls } from '@react-three/drei'
@@ -10,16 +10,34 @@ import { useTheme } from 'next-themes'
 import { useMemo, useState } from 'react'
 
 const ACCENT = '#22d3ee'
+type CellValue = 0 | 1 | 'X'
 const SELECTED = '#a855f7'
 const gray = (n: number): number => n ^ (n >> 1)
+const cellHeight = (v: CellValue): number => {
+  if (v === 1) return 0.55
+  return v === 'X' ? 0.3 : 0.08
+}
+const cellColor = (isSel: boolean, v: CellValue): string => {
+  if (isSel) return SELECTED
+  if (v === 1) return ACCENT
+  return v === 'X' ? '#f59e0b' : '#3a4651'
+}
+const cellEmissive = (isSel: boolean, v: CellValue, substrate: string): string => {
+  if (isSel) return SELECTED
+  return v === 1 ? ACCENT : substrate
+}
+const cellEmissiveIntensity = (isSel: boolean, v: CellValue): number => {
+  if (isSel) return 1.8
+  return v === 1 ? 1.3 : 0
+}
 interface Cell {
   bin: string
   idx: number
   key: string
-  out01: 0 | 1 | 'X'
+  out01: CellValue
   pos: [number, number, number]
 }
-const ToroidalKmap = ({ vars, truthTable }: { truthTable: readonly (0 | 1 | 'X')[]; vars: number }) => {
+const ToroidalKmap = ({ vars, truthTable }: { truthTable: readonly CellValue[]; vars: number }) => {
   const { resolvedTheme } = useTheme()
   const substrate = resolvedTheme === 'light' ? '#eef2f7' : '#0b0f14'
   const [selected, setSelected] = useState<Cell | undefined>(undefined)
@@ -35,7 +53,7 @@ const ToroidalKmap = ({ vars, truthTable }: { truthTable: readonly (0 | 1 | 'X')
         const v = truthTable[idx] ?? 0
         const u = (i / major) * Math.PI * 2
         const w = (j / minor) * Math.PI * 2
-        const h = v === 1 ? 0.55 : v === 'X' ? 0.3 : 0.08
+        const h = cellHeight(v)
         const rr = r + h
         const x = (R + rr * Math.cos(w)) * Math.cos(u)
         const y = rr * Math.sin(w)
@@ -54,18 +72,21 @@ const ToroidalKmap = ({ vars, truthTable }: { truthTable: readonly (0 | 1 | 'X')
           <torusGeometry args={[R, r, 24, 48]} />
           <meshStandardMaterial color='#1b232b' metalness={0.4} roughness={0.7} wireframe />
         </mesh>
-        {cells.map(c => (
-          <mesh key={c.key} onPointerDown={() => setSelected(c)} position={c.pos}>
-            <boxGeometry args={[0.55, 0.55, 0.55]} />
-            <meshStandardMaterial
-              color={selected?.key === c.key ? SELECTED : c.out01 === 1 ? ACCENT : c.out01 === 'X' ? '#f59e0b' : '#3a4651'}
-              emissive={selected?.key === c.key ? SELECTED : c.out01 === 1 ? ACCENT : substrate}
-              emissiveIntensity={selected?.key === c.key ? 1.8 : c.out01 === 1 ? 1.3 : 0}
-              metalness={0.7}
-              roughness={0.4}
-            />
-          </mesh>
-        ))}
+        {cells.map(c => {
+          const isSel = selected?.key === c.key
+          return (
+            <mesh key={c.key} onPointerDown={() => setSelected(c)} position={c.pos}>
+              <boxGeometry args={[0.55, 0.55, 0.55]} />
+              <meshStandardMaterial
+                color={cellColor(isSel, c.out01)}
+                emissive={cellEmissive(isSel, c.out01, substrate)}
+                emissiveIntensity={cellEmissiveIntensity(isSel, c.out01)}
+                metalness={0.7}
+                roughness={0.4}
+              />
+            </mesh>
+          )
+        })}
         <OrbitControls makeDefault />
       </Canvas>
       {selected === undefined ? undefined : (

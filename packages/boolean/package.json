@@ -2,6 +2,7 @@
   "name": "@sim/boolean",
   "version": "0.0.1",
   "private": true,
+  "description": "sim boolean — boolean expression parsing, AST, and Quine-McCluskey minimization",
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",

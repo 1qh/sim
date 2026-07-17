@@ -11,7 +11,7 @@ const ROUTES = [
   { name: 'foundation', path: '/learn/foundation' },
   { name: 'share', path: '/s/abc123' }
 ]
-ROUTES.map(({ name, path }) => {
+const registerRoute = ({ name, path }: { name: string; path: string }): void => {
   test(`anon: ${name} loads with 200 + no auth wall`, async ({ page }) => {
     const response = await page.goto(path)
     expect(response?.status()).toBe(200)
@@ -31,8 +31,8 @@ ROUTES.map(({ name, path }) => {
     const focused = await page.evaluate(() => document.activeElement?.tagName ?? null)
     expect(focused).not.toBeNull()
   })
-  return name
-})
+}
+for (const route of ROUTES) registerRoute(route)
 test('visual: mips datapath snapshot', async ({ page }) => {
   await page.goto('/mips')
   await expect(page).toHaveScreenshot('mips-datapath.png', { maxDiffPixelRatio: 0.05 })

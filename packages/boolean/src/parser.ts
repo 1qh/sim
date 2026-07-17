@@ -7,13 +7,13 @@ import { createToken, CstParser, Lexer } from 'chevrotain'
 import type { Expr } from './ast'
 import { and, c, not, or, v, xor } from './ast'
 
-const Identifier = createToken({ name: 'Identifier', pattern: /[a-zA-Z_][\w]*/u })
+const Identifier = createToken({ name: 'Identifier', pattern: /[a-zA-Z_]\w*/u })
 const True = createToken({ longer_alt: Identifier, name: 'True', pattern: /1\b|true|TRUE/u })
 const False = createToken({ longer_alt: Identifier, name: 'False', pattern: /0\b|false|FALSE/u })
-const AndOp = createToken({ name: 'AndOp', pattern: /&&|&|\*|·|\.|\bAND\b|\band\b/u })
+const AndOp = createToken({ name: 'AndOp', pattern: /&&|[&*·.]|\bAND\b|\band\b/u })
 const OrOp = createToken({ name: 'OrOp', pattern: /\|\||\||\+|\bOR\b|\bor\b/u })
 const XorOp = createToken({ name: 'XorOp', pattern: /\^|⊕|\bXOR\b|\bxor\b/u })
-const NotOp = createToken({ name: 'NotOp', pattern: /!|~|¬|\bNOT\b|\bnot\b/u })
+const NotOp = createToken({ name: 'NotOp', pattern: /[!~¬]|\bNOT\b|\bnot\b/u })
 const LParen = createToken({ name: 'LParen', pattern: /\(/u })
 const RParen = createToken({ name: 'RParen', pattern: /\)/u })
 const WhiteSpace = createToken({ group: Lexer.SKIPPED, name: 'WhiteSpace', pattern: /\s+/u })
@@ -103,12 +103,12 @@ class BoolVisitor extends BaseVisitor {
   }
   public andExpr(ctx: CstChildren): Expr {
     const operands = (ctx.notExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
-    return operands.reduce((acc, cur) => and(acc, cur))
+    const [first, ...rest] = operands
+    return rest.reduce((acc, cur) => and(acc, cur), first)
   }
   public atomExpr(ctx: CstChildren): Expr {
     if (ctx.Identifier) {
-      const ident = ctx.Identifier[0]
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      const ident = ctx.Identifier.at(0)
       if (ident === undefined) throw new Error('atom: empty Identifier')
       return v(ident.image)
     }
@@ -128,11 +128,13 @@ class BoolVisitor extends BaseVisitor {
   }
   public orExpr(ctx: CstChildren): Expr {
     const operands = (ctx.xorExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
-    return operands.reduce((acc, cur) => or(acc, cur))
+    const [first, ...rest] = operands
+    return rest.reduce((acc, cur) => or(acc, cur), first)
   }
   public xorExpr(ctx: CstChildren): Expr {
     const operands = (ctx.andExpr ?? []).map(n => this.visit(n as CstNode) as Expr)
-    return operands.reduce((acc, cur) => xor(acc, cur))
+    const [first, ...rest] = operands
+    return rest.reduce((acc, cur) => xor(acc, cur), first)
   }
 }
 const visitor = new BoolVisitor()

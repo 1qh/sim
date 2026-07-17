@@ -1,5 +1,6 @@
 {
   "private": true,
+  "description": "sim monorepo — interactive MIPS datapath, boolean algebra, and K-map learning simulators",
   "workspaces": [
     "packages/*",
     "apps/*",
@@ -29,7 +30,7 @@
     "@types/three": "latest",
     "fast-check": "latest",
     "happy-dom": "latest",
-    "lintmax": "latest",
+    "lintmax": "^0.1.82",
     "memlab": "latest",
     "pa11y": "latest",
     "sherif": "latest",

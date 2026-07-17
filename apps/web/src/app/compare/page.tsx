@@ -11,12 +11,13 @@ import {
   writeRegister
 } from '@/features/mips'
 
+const I_OPCODE: Record<string, number> = { addi: 0x08, andi: 0x0c, lw: 0x23, ori: 0x0d, sw: 0x2b }
 const build = (name: string): Instruction => {
   if (name === 'addi' || name === 'lw' || name === 'sw' || name === 'ori' || name === 'andi')
     return {
       imm: 4,
       name: name as Instruction['name'],
-      opcode: name === 'lw' ? 0x23 : name === 'sw' ? 0x2b : name === 'ori' ? 0x0d : name === 'andi' ? 0x0c : 0x08,
+      opcode: I_OPCODE[name] ?? 0x08,
       rs: 1 as RegisterNumber,
       rt: 2 as RegisterNumber,
       type: 'I'

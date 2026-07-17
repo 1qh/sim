@@ -19,10 +19,11 @@ const NAMES = [
   'sll',
   'srl'
 ]
-NAMES.map(name =>
+const registerName = (name: string): void => {
   test(`visual.datapath.${name}`, async ({ page }) => {
     await page.goto(`/mips/${name}`)
     await expect(page.locator('h1')).toContainText(name)
     await expect(page).toHaveScreenshot(`mips-${name}.png`, { maxDiffPixelRatio: 0.05 })
   })
-)
+}
+for (const name of NAMES) registerName(name)

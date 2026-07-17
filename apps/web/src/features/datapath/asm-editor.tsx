@@ -3,9 +3,19 @@
 import { toMonacoMarkers } from '@sim/editor'
 import { useEffect, useRef, useState } from 'react'
 import type { Instruction } from '@/features/mips/types'
+import type { Diagnostic } from './asm-grammar'
 import { assemble } from './asm-grammar'
 
 const noop = (): undefined => undefined
+const toMarkerInput = (
+  d: Diagnostic
+): { endColumn: number; line: number; message: string; severity: 'error'; startColumn: number } => ({
+  endColumn: d.col + d.len + 1,
+  line: d.line + 1,
+  message: `${d.code}: ${d.message}`,
+  severity: 'error',
+  startColumn: d.col + 1
+})
 const AsmEditor = ({
   initial,
   onAssembled = noop
@@ -40,19 +50,7 @@ const AsmEditor = ({
         setDiagCount(r.diagnostics.length)
         setWordCount(r.words.length)
         if (r.diagnostics.length === 0 && r.instructions.length > 0) onAssembledRef.current(r.instructions)
-        monaco.editor.setModelMarkers(
-          model,
-          'mips',
-          toMonacoMarkers(
-            r.diagnostics.map(d => ({
-              endColumn: d.col + d.len + 1,
-              line: d.line + 1,
-              message: `${d.code}: ${d.message}`,
-              severity: 'error' as const,
-              startColumn: d.col + 1
-            }))
-          )
-        )
+        monaco.editor.setModelMarkers(model, 'mips', toMonacoMarkers(r.diagnostics.map(toMarkerInput)))
       }
       lint()
       model.onDidChangeContent(lint)

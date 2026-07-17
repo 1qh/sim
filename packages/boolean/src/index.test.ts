@@ -108,18 +108,20 @@ const widthArb = (): Arbitrary<number> => integer({ max: 4, min: 2 })
 describe('property: minimized SOP truth-table-equivalent to original', () => {
   test('random 4-var minterm set produces equivalent truth table', () => {
     const mintermArb = uniqueArray(u32arb(15), { maxLength: 16 })
-    assert(
-      property(mintermArb, mins => {
-        const result = solve({ minterms: [...mins], vars: ['A', 'B', 'C', 'D'] })
-        const rebuiltTT = result.truthTable
-        const minSet = new Set(mins)
-        for (let i = 0; i < 16; i += 1) {
-          const expected = minSet.has(i) ? 1 : 0
-          if (rebuiltTT[i] !== expected) return false
-        }
-        return true
-      })
-    )
+    expect(() =>
+      assert(
+        property(mintermArb, mins => {
+          const result = solve({ minterms: [...mins], vars: ['A', 'B', 'C', 'D'] })
+          const rebuiltTT = result.truthTable
+          const minSet = new Set(mins)
+          for (let i = 0; i < 16; i += 1) {
+            const expected = minSet.has(i) ? 1 : 0
+            if (rebuiltTT[i] !== expected) return false
+          }
+          return true
+        })
+      )
+    ).not.toThrow()
   })
 })
 describe('sortedVars', () => {
@@ -496,7 +498,7 @@ describe('boolean qm internals deeper', () => {
   test('combine: diff=2 does not combine', () => {
     const r = findPrimeImplicants([0, 3], [], 2)
     expect(r).toHaveLength(2)
-    expect(r.map(p => p.bits).toSorted()).toEqual(['00', '11'])
+    expect(r.map(p => p.bits).toSorted((a, b) => (a < b ? -1 : Number(a > b)))).toEqual(['00', '11'])
   })
   test('findPrimeImplicants 4-term square reduces to two 2-cubes', () => {
     const r = findPrimeImplicants([0, 1, 2, 3], [], 2)

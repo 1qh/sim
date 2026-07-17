@@ -49,7 +49,7 @@ describe('diffSteps', () => {
     const left = stepWith(seed, makeR(3, 1, 2, 'add', 0x20))
     const right = stepWith(seed, makeR(3, 1, 2, 'sub', 0x22))
     const d = diffSteps(left, right)
-    expect(d.registerDiffs.length).toBe(1)
+    expect(d.registerDiffs).toHaveLength(1)
     expect((d.registerDiffs[0] as { before: number }).before).toBe(13)
     expect((d.registerDiffs[0] as { after: number }).after).toBe(7)
     expect(d.hashAfterLeft).not.toBe(d.hashAfterRight)

@@ -12,7 +12,9 @@ const useViewMode = (
     const ok = (v: null | string): v is View => v !== null && (allowed as readonly string[]).includes(v)
     const url = new URLSearchParams(globalThis.location.search).get('view')
     const stored = localStorage.getItem(KEY)
-    const initial = ok(url) ? url : ok(stored) ? stored : (allowed[0] ?? '2d')
+    let initial: View = allowed[0] ?? '2d'
+    if (ok(stored)) initial = stored
+    if (ok(url)) initial = url
     // eslint-disable-next-line @eslint-react/set-state-in-effect
     setView(initial)
     // eslint-disable-next-line @eslint-react/set-state-in-effect

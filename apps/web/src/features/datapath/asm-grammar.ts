@@ -59,9 +59,11 @@ const DIRECTIVES = new Set([
   '.word'
 ])
 const monarchTokens = {
+  // eslint-disable-next-line sonarjs/super-linear-regex -- linear: single `.*`, no nested or adjacent ambiguous quantifiers
   comment: /#.*$/u,
   directive: /\.[a-z]+/u,
   keyword: [...R_OPS, ...I_OPS, 'j', ...PSEUDO],
+  // eslint-disable-next-line sonarjs/super-linear-regex -- single `\w*` quantifier before a literal `:`; linear on any input
   label: /[A-Za-z_]\w*:/u,
   number: /0x[0-9a-fA-F]+|0b[01]+|-?\d+/u,
   register: /\$(?:\d+|[a-z]{1,2}\d?)/u
@@ -118,68 +120,76 @@ const err = (line: number, col: number, len: number, code: string, message: stri
   message,
   severity: 'error'
 })
+const regOf = (t: string): RegisterNumber | undefined => parseRegister(t) as RegisterNumber | undefined
+const toRType = (op: string, args: string[], line: number): Diagnostic | Instruction => {
+  const name = op as InstructionName
+  if (SHIFT_OPS.has(op)) {
+    const rd = regOf(args[0] ?? '')
+    const rt = regOf(args[1] ?? '')
+    const sh = parseImm(args[2] ?? '')
+    if (rd === undefined || rt === undefined || sh === undefined)
+      return err(line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad operands for ${op}`)
+    return { funct: FUNCT[op as 'sll' | 'srl'], name, rd, rs: 0, rt, shamt: sh & 0x1f, type: 'R' }
+  }
+  const rd = regOf(args[0] ?? '')
+  const rs = regOf(args[1] ?? '')
+  const rt = regOf(args[2] ?? '')
+  if (rd === undefined || rs === undefined || rt === undefined)
+    return err(line, 0, op.length, 'ASM_REGISTER_INVALID', `bad register for ${op}`)
+  return { funct: FUNCT[op as keyof typeof FUNCT], name, rd, rs, rt, shamt: 0, type: 'R' }
+}
+const toIType = (
+  op: string,
+  args: string[],
+  ctx: { idx: number; line: number; symbols: Record<string, number> }
+  // eslint-disable-next-line sonarjs/cognitive-complexity -- I-type assembly covers branch/load/store/immediate forms, each with distinct operand validation; inherent grammar branching
+): Diagnostic | Instruction => {
+  const name = op as InstructionName
+  const opcode = OPCODE[op as keyof typeof OPCODE]
+  if (MEM_OPS.has(op)) {
+    const rt = regOf(args[0] ?? '')
+    const m = RE_MEM.exec(args[1] ?? '')
+    const off = m ? (parseImm(m.groups?.off ?? '') ?? 0) : 0
+    const base = m ? regOf(m.groups?.base ?? '') : undefined
+    if (rt === undefined || base === undefined)
+      return err(ctx.line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad ${op}, expect rt, off(base)`)
+    return { imm: off, name, opcode, rs: base, rt, type: 'I' }
+  }
+  if (BRANCH_OPS.has(op)) {
+    const rs = regOf(args[0] ?? '')
+    const rt = regOf(args[1] ?? '')
+    const dest = ctx.symbols[args[2] ?? '']
+    if (rs === undefined || rt === undefined)
+      return err(ctx.line, 0, op.length, 'ASM_REGISTER_INVALID', `bad register for ${op}`)
+    if (dest === undefined) return err(ctx.line, 0, 1, 'ASM_UNDEFINED_LABEL', `undefined label ${args[2]}`)
+    return { imm: (dest - (ctx.idx + 1) * 4) >> 2, name, opcode, rs, rt, type: 'I' }
+  }
+  if (op === 'lui') {
+    const rt = regOf(args[0] ?? '')
+    const imm = parseImm(args[1] ?? '')
+    if (rt === undefined || imm === undefined) return err(ctx.line, 0, 3, 'ASM_SYNTAX_ERROR', 'bad lui')
+    return { imm, name, opcode, rs: 0, rt, type: 'I' }
+  }
+  const rt = regOf(args[0] ?? '')
+  const rs = regOf(args[1] ?? '')
+  const imm = parseImm(args[2] ?? '')
+  if (rt === undefined || rs === undefined || imm === undefined)
+    return err(ctx.line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad operands for ${op}`)
+  if (imm < -32_768 || imm > 65_535) return err(ctx.line, 0, op.length, 'ASM_IMMEDIATE_RANGE', 'immediate out of range')
+  return { imm, name, opcode, rs, rt, type: 'I' }
+}
 const toInstruction = (
   op: string,
   args: string[],
   ctx: { idx: number; line: number; symbols: Record<string, number> }
 ): Diagnostic | Instruction => {
-  const rn = (t: string): RegisterNumber | undefined => parseRegister(t) as RegisterNumber | undefined
-  const name = op as InstructionName
-  if (R_OPS.has(op)) {
-    if (SHIFT_OPS.has(op)) {
-      const rd = rn(args[0] ?? '')
-      const rt = rn(args[1] ?? '')
-      const sh = parseImm(args[2] ?? '')
-      if (rd === undefined || rt === undefined || sh === undefined)
-        return err(ctx.line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad operands for ${op}`)
-      return { funct: FUNCT[op as 'sll' | 'srl'], name, rd, rs: 0, rt, shamt: sh & 0x1f, type: 'R' }
-    }
-    const rd = rn(args[0] ?? '')
-    const rs = rn(args[1] ?? '')
-    const rt = rn(args[2] ?? '')
-    if (rd === undefined || rs === undefined || rt === undefined)
-      return err(ctx.line, 0, op.length, 'ASM_REGISTER_INVALID', `bad register for ${op}`)
-    return { funct: FUNCT[op as keyof typeof FUNCT], name, rd, rs, rt, shamt: 0, type: 'R' }
-  }
+  if (R_OPS.has(op)) return toRType(op, args, ctx.line)
   if (op === 'j') {
     const target = ctx.symbols[args[0] ?? ''] ?? parseImm(args[0] ?? '')
     if (target === undefined) return err(ctx.line, 0, 1, 'ASM_UNDEFINED_LABEL', `undefined label ${args[0]}`)
-    return { name, opcode: OPCODE.j, target: target >>> 2, type: 'J' }
+    return { name: op as InstructionName, opcode: OPCODE.j, target: target >>> 2, type: 'J' }
   }
-  if (I_OPS.has(op)) {
-    const opcode = OPCODE[op as keyof typeof OPCODE]
-    if (MEM_OPS.has(op)) {
-      const rt = rn(args[0] ?? '')
-      const m = RE_MEM.exec(args[1] ?? '')
-      const off = m ? (parseImm(m.groups?.off ?? '') ?? 0) : 0
-      const base = m ? rn(m.groups?.base ?? '') : undefined
-      if (rt === undefined || base === undefined)
-        return err(ctx.line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad ${op}, expect rt, off(base)`)
-      return { imm: off, name, opcode, rs: base, rt, type: 'I' }
-    }
-    if (BRANCH_OPS.has(op)) {
-      const rs = rn(args[0] ?? '')
-      const rt = rn(args[1] ?? '')
-      const dest = ctx.symbols[args[2] ?? '']
-      if (rs === undefined || rt === undefined)
-        return err(ctx.line, 0, op.length, 'ASM_REGISTER_INVALID', `bad register for ${op}`)
-      if (dest === undefined) return err(ctx.line, 0, 1, 'ASM_UNDEFINED_LABEL', `undefined label ${args[2]}`)
-      return { imm: (dest - (ctx.idx + 1) * 4) >> 2, name, opcode, rs, rt, type: 'I' }
-    }
-    if (op === 'lui') {
-      const rt = rn(args[0] ?? '')
-      const imm = parseImm(args[1] ?? '')
-      if (rt === undefined || imm === undefined) return err(ctx.line, 0, 3, 'ASM_SYNTAX_ERROR', 'bad lui')
-      return { imm, name, opcode, rs: 0, rt, type: 'I' }
-    }
-    const rt = rn(args[0] ?? '')
-    const rs = rn(args[1] ?? '')
-    const imm = parseImm(args[2] ?? '')
-    if (rt === undefined || rs === undefined || imm === undefined)
-      return err(ctx.line, 0, op.length, 'ASM_SYNTAX_ERROR', `bad operands for ${op}`)
-    if (imm < -32_768 || imm > 65_535) return err(ctx.line, 0, op.length, 'ASM_IMMEDIATE_RANGE', 'immediate out of range')
-    return { imm, name, opcode, rs, rt, type: 'I' }
-  }
+  if (I_OPS.has(op)) return toIType(op, args, ctx)
   return err(ctx.line, 0, op.length, 'ISA_UNSUPPORTED', `unsupported instruction ${op}`)
 }
 interface Pending {

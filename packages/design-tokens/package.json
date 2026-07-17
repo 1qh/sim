@@ -2,6 +2,7 @@
   "name": "@sim/design-tokens",
   "version": "0.0.1",
   "private": true,
+  "description": "sim design tokens",
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",

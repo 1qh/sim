@@ -6,6 +6,7 @@ import { analyzePipeline } from '@/features/pipeline'
 import KmapInteractive from './kmap-interactive'
 
 const FUNCT: Record<string, number> = { add: 0x20, and: 0x24, nor: 0x27, or: 0x25, slt: 0x2a, sub: 0x22 }
+const I_OPCODE: Record<string, number> = { lw: 0x23, sw: 0x2b }
 const buildInstruction = (name: string): Instruction => {
   if (name in FUNCT)
     return {
@@ -29,7 +30,7 @@ const buildInstruction = (name: string): Instruction => {
   return {
     imm: 4,
     name: name as Instruction['name'],
-    opcode: name === 'lw' ? 0x23 : name === 'sw' ? 0x2b : 0x08,
+    opcode: I_OPCODE[name] ?? 0x08,
     rs: 1 as RegisterNumber,
     rt: 2 as RegisterNumber,
     type: 'I'

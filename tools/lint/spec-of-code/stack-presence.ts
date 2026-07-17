@@ -16,7 +16,7 @@ if (stackText.length === 0) {
   console.error(`stack-presence: STACK.md not readable at ${stackPath}`)
   process.exit(2)
 }
-const codeBlocks = [...stackText.matchAll(/`(?<pick>[@a-z][@a-z0-9._/-]+)`/giu)]
+const codeBlocks = [...stackText.matchAll(/`(?<pick>[@a-z][@\w./-]+)`/giu)]
 const candidatePicks = new Set<string>()
 for (const m of codeBlocks) {
   const pick = m.groups?.pick

@@ -9,7 +9,7 @@ const SCENES = [
   { name: 'foundation', path: '/learn/foundation' }
 ]
 const FCP_BUDGET_MS = 800
-SCENES.map(({ name, path }) =>
+const registerScene = ({ name, path }: { name: string; path: string }): void => {
   test(`perf.frame-budget.${name}: FCP < ${FCP_BUDGET_MS}ms`, async ({ page }) => {
     await page.goto(path, { waitUntil: 'load' })
     const fcp = await page.evaluate(() => {
@@ -19,4 +19,5 @@ SCENES.map(({ name, path }) =>
     })
     expect(fcp).toBeLessThan(FCP_BUDGET_MS)
   })
-)
+}
+for (const scene of SCENES) registerScene(scene)

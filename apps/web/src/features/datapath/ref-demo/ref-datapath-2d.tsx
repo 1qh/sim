@@ -65,8 +65,13 @@ const buildBits = (word: number): EncodedInstruction => ({
   rt: field((word >>> 16) & 0x1f, 5),
   shamt: field((word >>> 6) & 0x1f, 5)
 })
+const aluOpBits = (v: number): '00' | '01' | '10' => {
+  if (v === 0) return '00'
+  if (v === 1) return '01'
+  return '10'
+}
 const toRefSignals = (c: ControlSignals): RuntimeControlSignals => ({
-  ALUOp: c.ALUOp === 0 ? '00' : c.ALUOp === 1 ? '01' : '10',
+  ALUOp: aluOpBits(c.ALUOp),
   ALUSrc: c.ALUSrc,
   Branch: c.Branch,
   BranchNE: c.BranchNE,

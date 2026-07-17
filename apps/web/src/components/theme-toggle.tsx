@@ -12,7 +12,8 @@ const ThemeToggle = (): React.JSX.Element => {
     setMounted(true)
   }, [])
   const dark = mounted && resolvedTheme === 'dark'
-  const label = mounted ? (dark ? 'Light mode' : 'Dark mode') : 'Theme'
+  let label = 'Theme'
+  if (mounted) label = dark ? 'Light mode' : 'Dark mode'
   return (
     <SidebarMenuButton onClick={() => setTheme(dark ? 'light' : 'dark')} suppressHydrationWarning tooltip={label}>
       {dark ? <Sun /> : <Moon />}

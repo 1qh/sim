@@ -1,4 +1,3 @@
-/* eslint-disable complexity, @typescript-eslint/naming-convention */
 import type { Expr } from './ast'
 import type { Implicant } from './qm'
 import { evalExpr, maxterms, minterms, sortedVars, truthTable } from './ast'
@@ -28,6 +27,35 @@ interface SolveResult {
   vars: string[]
   width: number
 }
+const complementTerms = (present: number[], dontCares: number[] | undefined, width: number): number[] => {
+  const out: number[] = []
+  const presentSet = new Set(present)
+  const dcSet = new Set(dontCares)
+  const rows = 2 ** width
+  for (let i = 0; i < rows; i += 1) if (!(presentSet.has(i) || dcSet.has(i))) out.push(i)
+  return out
+}
+const buildTruthTable = ({
+  dontCares,
+  expr,
+  mins,
+  vars,
+  width
+}: {
+  dontCares: number[]
+  expr: Expr | undefined
+  mins: number[]
+  vars: string[]
+  width: number
+}): (0 | 1)[] => {
+  if (expr !== undefined) return truthTable(expr, vars)
+  const tt: (0 | 1)[] = []
+  const rows = 2 ** width
+  const minSet = new Set(mins)
+  const dcSet = new Set(dontCares)
+  for (let i = 0; i < rows; i += 1) tt.push(minSet.has(i) || dcSet.has(i) ? 1 : 0)
+  return tt
+}
 const solve = (input: SolveInput): SolveResult => {
   let expr: Expr | undefined
   let vars: string[] | undefined = input.vars
@@ -40,19 +68,11 @@ const solve = (input: SolveInput): SolveResult => {
     vars ??= Array.from({ length: width }, (_, i) => String.fromCodePoint(0x41 + i))
     if (input.minterms !== undefined) {
       mins = input.minterms
-      maxs = []
-      const rows = 2 ** width
-      const minSet = new Set(mins)
-      const dcSet = new Set(input.dontCares)
-      for (let i = 0; i < rows; i += 1) if (!(minSet.has(i) || dcSet.has(i))) maxs.push(i)
+      maxs = complementTerms(mins, input.dontCares, width)
     } else if (input.maxterms === undefined) throw new Error('solve: expression / minterms / maxterms required')
     else {
       maxs = input.maxterms
-      mins = []
-      const rows = 2 ** width
-      const maxSet = new Set(maxs)
-      const dcSet = new Set(input.dontCares)
-      for (let i = 0; i < rows; i += 1) if (!(maxSet.has(i) || dcSet.has(i))) mins.push(i)
+      mins = complementTerms(maxs, input.dontCares, width)
     }
   } else {
     expr = parse(input.expression)
@@ -69,16 +89,7 @@ const solve = (input: SolveInput): SolveResult => {
   const minimalSopImplicants = minimize(mins, dontCares, width)
   const minimalSop = sopExpression(minimalSopImplicants, vars)
   const minimalPos = width <= 4 ? posExpression(maxs, dontCares, width, vars) : espressoPos(maxs, dontCares, width, vars)
-  const tt: (0 | 1)[] = []
-  if (expr === undefined) {
-    const rows = 2 ** width
-    const minSet = new Set(mins)
-    const dcSet = new Set(dontCares)
-    for (let i = 0; i < rows; i += 1) tt.push(minSet.has(i) ? 1 : dcSet.has(i) ? 1 : 0)
-  } else {
-    const computed = truthTable(expr, vars)
-    for (const v_ of computed) tt.push(v_)
-  }
+  const tt = buildTruthTable({ dontCares, expr, mins, vars, width })
   return {
     dontCares,
     essentialPrimeImplicants,

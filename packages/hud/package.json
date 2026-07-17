@@ -2,6 +2,7 @@
   "name": "@sim/hud",
   "version": "0.0.1",
   "private": true,
+  "description": "sim hud — heads-up display overlay component",
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",

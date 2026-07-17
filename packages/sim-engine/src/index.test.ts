@@ -189,7 +189,7 @@ describe('coverage ratchet for codec', () => {
     const a = hashValue('hello')
     const b = hashValue('hello')
     expect(a).toBe(b)
-    expect(a.length).toBe(64)
+    expect(a).toHaveLength(64)
   })
   test('diff/applyDiff for nested object', () => {
     const a = { user: { age: 1, name: 'a' } }

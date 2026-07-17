@@ -49,7 +49,8 @@ for (const p of LEARN_PAGES) {
   const nav = [p.prev ? `[← ${p.prev}](/learn/${p.prev})` : '', p.next ? `[${p.next} →](/learn/${p.next})` : '']
     .filter(Boolean)
     .join(' · ')
-  const md = `# ${p.title}\n\n${BODY[p.slug] ?? `Lesson: ${p.title}.`}\n\n---\n\n${nav}\n`
+  const fallback = `Lesson: ${p.title}.`
+  const md = `# ${p.title}\n\n${BODY[p.slug] ?? fallback}\n\n---\n\n${nav}\n`
   await writeFile(`${learnDir}/${p.slug}.mdx`, md)
   written += 1
 }

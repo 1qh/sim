@@ -16,7 +16,7 @@ describe('kmap 2D', () => {
   test('v2 OR: f(A,B) = A+B → SOP "A + B"', () => {
     const r = kmap({ expression: 'A | B' })
     expect(r.geometry).toBe('2d')
-    expect(r.minimalSop.split(' + ').toSorted()).toEqual(['A', 'B'])
+    expect(r.minimalSop.split(' + ').toSorted((a, b) => (a < b ? -1 : Number(a > b)))).toEqual(['A', 'B'])
   })
   test('v3 majority → A·B + A·C + B·C', () => {
     const r = kmap({ expression: '(A&B) | (B&C) | (A&C)' })
@@ -95,7 +95,7 @@ describe('kmap edge cases', () => {
   })
   test('v4-wrap: corner minterms wrap to single 4-cell group', () => {
     const r = kmap({ minterms: [0, 2, 8, 10], vars: ['A', 'B', 'C', 'D'] })
-    expect(r.minimalSopImplicants.length).toBe(1)
+    expect(r.minimalSopImplicants).toHaveLength(1)
   })
   test('v5-wrap: minterm 0 and 31 wrap on toroidal edge', () => {
     const r = kmap({ minterms: [0, 31], vars: ['A', 'B', 'C', 'D', 'E'] })

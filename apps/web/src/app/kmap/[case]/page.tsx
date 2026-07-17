@@ -5,11 +5,15 @@ import MapsSurface from '@/components/maps-surface'
 import { kmap } from '@/features/kmap'
 import KmapGrid from '@/features/kmap/scene/kmap-grid'
 import KmapIsland from '@/features/kmap/scene/kmap-island'
-
+// eslint-disable-next-line sonarjs/function-return-type -- a K-map cell is genuinely 0, 1, or don't-care 'X'; the union return is the domain, not an inconsistency
+const cellValue = (i: number, dcs: Set<number>, mins: Set<number>): 0 | 1 | 'X' => {
+  if (dcs.has(i)) return 'X'
+  return mins.has(i) ? 1 : 0
+}
 const buildTruthTable = (vars: number, minterms: readonly number[], dontCares: readonly number[]): (0 | 1 | 'X')[] => {
   const mins = new Set(minterms)
   const dcs = new Set(dontCares)
-  return Array.from({ length: 2 ** vars }, (_, i) => (dcs.has(i) ? 'X' : mins.has(i) ? 1 : 0))
+  return Array.from({ length: 2 ** vars }, (_, i) => cellValue(i, dcs, mins))
 }
 const CASES: Record<string, { dontCares?: number[]; minterms?: number[]; vars: string[] }> = {
   v2: { minterms: [0, 1, 2], vars: ['A', 'B'] },

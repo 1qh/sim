@@ -2,6 +2,7 @@
   "name": "@sim/bits",
   "version": "0.0.1",
   "private": true,
+  "description": "sim bits — bit-vector and binary utilities",
   "repository": {
     "type": "git",
     "url": "https://github.com/1qh/sim",

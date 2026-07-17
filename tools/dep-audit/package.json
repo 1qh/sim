@@ -1,6 +1,7 @@
 {
   "name": "dep-audit",
   "private": true,
+  "description": "sim dependency audit tool",
   "type": "module",
   "bin": {
     "dep-audit": "./audit.ts"

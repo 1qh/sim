@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { PATHS } from '@/features/datapath/generated/topology'
 
 interface Node {
@@ -158,30 +157,33 @@ const NODE_POS = new Map(NODES.map(n => [n.id, { x: n.x, y: n.y }]))
 const PATH_FT = new Map(PATHS.map(p => [p.id, { from: p.from, to: p.to }]))
 const RE_CONTROL = /^CONTROL_|_TO_CONTROL$|^ALUOP_|_TO_ALU_CONTROL$|^IR_OPCODE_/u
 const isControlPath = (id: string): boolean => RE_CONTROL.test(id)
+const NODE_PREFIXES: [string, string][] = [
+  ['PCSRC_MUX', 'PCSrcMux'],
+  ['REGDST_MUX', 'RegDstMux'],
+  ['ALUSRC_MUX', 'ALUSrcMux'],
+  ['MEMTOREG_MUX', 'MemToRegMux'],
+  ['ALU_CONTROL', 'ALUControl'],
+  ['ALU_ZERO', 'Zero'],
+  ['NOT_GATE', 'NotGate'],
+  ['BEQ_AND_GATE', 'BeqAnd'],
+  ['BNE_AND_GATE', 'BneAnd'],
+  ['OR_GATE', 'OrGate'],
+  ['ALU', 'ALU'],
+  ['SIGN_EXTEND', 'SE'],
+  ['LEFT_SHIFT_2', 'LS2'],
+  ['BRANCH_ADDER', 'BranchAdder'],
+  ['ADD4', 'Add4'],
+  ['CONST4', 'CONST4'],
+  ['IM', 'IM'],
+  ['IR', 'IR'],
+  ['RF', 'RF'],
+  ['DM', 'DM'],
+  ['CONTROL', 'Control'],
+  ['PC', 'PC']
+]
 const resolveNode = (token: string): string => {
   if (token in JUNCTIONS) return token
-  if (token.startsWith('PCSRC_MUX')) return 'PCSrcMux'
-  if (token.startsWith('REGDST_MUX')) return 'RegDstMux'
-  if (token.startsWith('ALUSRC_MUX')) return 'ALUSrcMux'
-  if (token.startsWith('MEMTOREG_MUX')) return 'MemToRegMux'
-  if (token.startsWith('ALU_CONTROL')) return 'ALUControl'
-  if (token.startsWith('ALU_ZERO')) return 'Zero'
-  if (token.startsWith('NOT_GATE')) return 'NotGate'
-  if (token.startsWith('BEQ_AND_GATE')) return 'BeqAnd'
-  if (token.startsWith('BNE_AND_GATE')) return 'BneAnd'
-  if (token.startsWith('OR_GATE')) return 'OrGate'
-  if (token.startsWith('ALU')) return 'ALU'
-  if (token.startsWith('SIGN_EXTEND')) return 'SE'
-  if (token.startsWith('LEFT_SHIFT_2')) return 'LS2'
-  if (token.startsWith('BRANCH_ADDER')) return 'BranchAdder'
-  if (token.startsWith('ADD4')) return 'Add4'
-  if (token.startsWith('CONST4')) return 'CONST4'
-  if (token.startsWith('IM')) return 'IM'
-  if (token.startsWith('IR')) return 'IR'
-  if (token.startsWith('RF')) return 'RF'
-  if (token.startsWith('DM')) return 'DM'
-  if (token.startsWith('CONTROL')) return 'Control'
-  if (token.startsWith('PC')) return 'PC'
+  for (const [prefix, node] of NODE_PREFIXES) if (token.startsWith(prefix)) return node
   return token
 }
 const posOf = (id: string): { x: number; y: number } => NODE_POS.get(id) ?? JUNCTIONS[id] ?? { x: 0, y: 0 }
