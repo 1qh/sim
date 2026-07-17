@@ -2,11 +2,12 @@
 /* eslint-disable no-console */
 import { $ } from 'bun'
 import process from 'node:process'
-
+/** `[A-Z_]` cannot match a digit, so every env name carrying one — S3_KEY, OAUTH2_SECRET — was invisible to this and its fallback shipped unseen. Proven: a planted `process.env.S3_KEY ?? '…'` passed while `process.env.FOO ?? '…'` on the line above was caught. */
+const ENV_NAME = '[A-Z0-9_]+'
 const PATTERNS = [
-  String.raw`process\.env\.[A-Z_]+ \?\? ['"]`,
-  String.raw`Bun\.env\.[A-Z_]+ \?\? ['"]`,
-  String.raw`process\.env\.[A-Z_]+ \|\| ['"]`,
+  String.raw`process\.env\.${ENV_NAME} \?\? ['"]`,
+  String.raw`Bun\.env\.${ENV_NAME} \?\? ['"]`,
+  String.raw`process\.env\.${ENV_NAME} \|\| ['"]`,
   String.raw`getenv\([^)]+\) \|\| ['"]`
 ]
 const results = await Promise.all(
