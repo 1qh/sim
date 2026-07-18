@@ -17,6 +17,10 @@ jobs:
       - if: runner.os == 'Linux'
         run: sudo apt-get install -y zsh
       - uses: oven-sh/setup-bun@v2
+      - name: fetch sim-doc sibling (enforces spec-of-code doc↔code checks)
+        run: |
+          rm -rf ../sim-doc
+          git clone --depth 1 https://github.com/1qh/sim-doc.git ../sim-doc
       - run: bun action
       - name: prune prior CI runs
         if: always()
