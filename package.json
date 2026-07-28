@@ -30,7 +30,7 @@
     "@types/three": "latest",
     "fast-check": "latest",
     "happy-dom": "latest",
-    "lintmax": "^0.1.82",
+    "lintmax": "latest",
     "memlab": "latest",
     "pa11y": "latest",
     "sherif": "latest",
