@@ -7,15 +7,15 @@
 set -u
 dir=$(cd "$(dirname "$0")" && pwd)
 failed=0
-for lint in "$dir"/*.ts "$dir"/spec-of-code/*.ts; do
-  [ -f "$lint" ] || continue
-  if ! bun "$lint"; then
-    echo "custom lint failed: ${lint#"$dir"/}" >&2
+for lint in "${dir}"/*.ts "${dir}"/spec-of-code/*.ts; do
+  [ -f "${lint}" ] || continue
+  if ! bun "${lint}"; then
+    echo "custom lint failed: ${lint#"${dir}"/}" >&2
     failed=$((failed + 1))
   fi
 done
-if [ "$failed" -gt 0 ]; then
-  echo "$failed custom lint(s) failed" >&2
+if [ "${failed}" -gt 0 ]; then
+  echo "${failed} custom lint(s) failed" >&2
   exit 1
 fi
 echo ok
