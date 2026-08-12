@@ -27,12 +27,17 @@ interface SolveResult {
   vars: string[]
   width: number
 }
+const indexMask = (xs: readonly number[] | undefined, rows: number): Uint8Array => {
+  const mask = new Uint8Array(rows)
+  for (const x of xs ?? []) if (x >= 0 && x < rows) mask[x] = 1
+  return mask
+}
 const complementTerms = (present: number[], dontCares: number[] | undefined, width: number): number[] => {
   const out: number[] = []
-  const presentSet = new Set(present)
-  const dcSet = new Set(dontCares)
   const rows = 2 ** width
-  for (let i = 0; i < rows; i += 1) if (!(presentSet.has(i) || dcSet.has(i))) out.push(i)
+  const presentMask = indexMask(present, rows)
+  const dcMask = indexMask(dontCares, rows)
+  for (let i = 0; i < rows; i += 1) if (!(presentMask[i] || dcMask[i])) out.push(i)
   return out
 }
 const buildTruthTable = ({
@@ -51,9 +56,9 @@ const buildTruthTable = ({
   if (expr !== undefined) return truthTable(expr, vars)
   const tt: (0 | 1)[] = []
   const rows = 2 ** width
-  const minSet = new Set(mins)
-  const dcSet = new Set(dontCares)
-  for (let i = 0; i < rows; i += 1) tt.push(minSet.has(i) || dcSet.has(i) ? 1 : 0)
+  const minMask = indexMask(mins, rows)
+  const dcMask = indexMask(dontCares, rows)
+  for (let i = 0; i < rows; i += 1) tt.push(minMask[i] || dcMask[i] ? 1 : 0)
   return tt
 }
 const solve = (input: SolveInput): SolveResult => {

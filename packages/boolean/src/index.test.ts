@@ -106,16 +106,15 @@ describe('Quine-McCluskey', () => {
 const u32arb = (max: number): Arbitrary<number> => integer({ max, min: 0 })
 const widthArb = (): Arbitrary<number> => integer({ max: 4, min: 2 })
 describe('property: minimized SOP truth-table-equivalent to original', () => {
-  test('random 4-var minterm set produces equivalent truth table', () => {
+  test('random 4-var minterms set produces equivalent truth table', () => {
     const mintermArb = uniqueArray(u32arb(15), { maxLength: 16 })
     expect(() =>
       assert(
         property(mintermArb, mins => {
           const result = solve({ minterms: [...mins], vars: ['A', 'B', 'C', 'D'] })
           const rebuiltTT = result.truthTable
-          const minSet = new Set(mins)
           for (let i = 0; i < 16; i += 1) {
-            const expected = minSet.has(i) ? 1 : 0
+            const expected = mins.includes(i) ? 1 : 0
             if (rebuiltTT[i] !== expected) return false
           }
           return true
@@ -292,7 +291,7 @@ describe('boolean qm internals', () => {
     expect(countLiterals('1-0-')).toBe(2)
     expect(countLiterals('1010')).toBe(4)
   })
-  test('implicantToSop builds correct minterm clause', () => {
+  test('implicantToSop builds correct minterms clause', () => {
     expect(implicantToSop({ bits: '11', covers: [3] }, ['A', 'B'])).toBe('A·B')
     expect(implicantToSop({ bits: '00', covers: [0] }, ['A', 'B'])).toBe('!A·!B')
     expect(implicantToSop({ bits: '1-', covers: [2, 3] }, ['A', 'B'])).toBe('A')
@@ -367,7 +366,7 @@ describe('boolean POS edge — empty maxterms', () => {
     const r = solve({ minterms: [1, 2, 3], vars: ['A', 'B'] })
     expect(r.minimalPos).toBe('(A + B)')
   })
-  test('F=!A·!B yields "(A + B)" alternative? no: minterm=0', () => {
+  test('F=!A·!B yields "(A + B)" alternative? no: minterms=0', () => {
     const r = solve({ minterms: [0], vars: ['A', 'B'] })
     expect(r.minimalPos).toBe('(!B)·(!A)')
   })
@@ -410,7 +409,7 @@ describe('boolean solve input shapes', () => {
     expect(r.truthTable).toEqual([0, 0, 0, 1])
     expect(r.expr).toBeDefined()
   })
-  test('minterm path truthTable uses dontCares as 1s', () => {
+  test('minterms path truthTable uses dontCares as 1s', () => {
     const r = solve({ dontCares: [1], minterms: [3], vars: ['A', 'B'] })
     expect(r.truthTable).toEqual([0, 1, 0, 1])
   })
@@ -480,7 +479,7 @@ describe('boolean targeted mutation kills', () => {
     const r = solve({ minterms: [0, 63], width: 6 })
     expect(r.minimalPos.startsWith('(')).toBe(true)
   })
-  test('truthTable length matches 2^width for minterm input', () => {
+  test('truthTable length matches 2^width for minterms input', () => {
     expect(solve({ minterms: [3], width: 2 }).truthTable).toHaveLength(4)
     expect(solve({ minterms: [3], width: 3 }).truthTable).toHaveLength(8)
   })
@@ -510,7 +509,7 @@ describe('boolean qm internals deeper', () => {
     expect(r).toHaveLength(1)
     expect(r[0].bits).toBe('---')
   })
-  test('findEssentialPrimes picks the single covering prime per minterm', () => {
+  test('findEssentialPrimes picks the single covering prime per minterms', () => {
     const primes: { bits: string; covers: number[] }[] = [
       { bits: '0-', covers: [0, 1] },
       { bits: '1-', covers: [2, 3] }
@@ -518,7 +517,7 @@ describe('boolean qm internals deeper', () => {
     const essential = findEssentialPrimes(primes, [0, 2])
     expect(essential).toHaveLength(2)
   })
-  test('findEssentialPrimes excludes prime when minterm covered by multiple', () => {
+  test('findEssentialPrimes excludes prime when minterms covered by multiple', () => {
     const primes: { bits: string; covers: number[] }[] = [
       { bits: '0-', covers: [0, 1] },
       { bits: '-1', covers: [1, 3] }

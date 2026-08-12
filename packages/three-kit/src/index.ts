@@ -72,17 +72,8 @@ const packInstanceMatrices = (
   }
   return into
 }
-const DEFAULT_BOOKMARKS: readonly CameraBookmark[] = [
-  bookmark('survey', [0, 6, 14], [0, 0, 0]),
-  bookmark('alu', [3, 2, 6], [3, 0, 0]),
-  bookmark('regfile', [-5, 2, 6], [-5, 0, 0]),
-  bookmark('control', [0, 5, 5], [0, 2, 0]),
-  bookmark('memory', [6, 2, 6], [6, 0, 0]),
-  bookmark('side', [12, 2, 0], [0, 0, 0])
-]
 export {
   bookmark,
-  DEFAULT_BOOKMARKS,
   DEFAULT_TOKENS,
   glassMaterial,
   hazardMaterial,

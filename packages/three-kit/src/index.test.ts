@@ -2,7 +2,6 @@ import { describe, expect, test } from 'bun:test'
 import { Vector3 } from 'three'
 import {
   bookmark,
-  DEFAULT_BOOKMARKS,
   glassMaterial,
   hazardMaterial,
   packInstanceMatrices,
@@ -35,10 +34,6 @@ describe('@sim/three-kit camera grammar', () => {
     const b = bookmark('x', [1, 2, 3], [4, 5, 6])
     expect(b.position.x).toBe(1)
     expect(b.target.z).toBe(6)
-  })
-  test('default bookmarks cover survey + components', () => {
-    expect(DEFAULT_BOOKMARKS.length).toBeGreaterThanOrEqual(6)
-    expect(DEFAULT_BOOKMARKS.map(b => b.key)).toContain('survey')
   })
 })
 describe('@sim/three-kit pulseAlong (deterministic)', () => {

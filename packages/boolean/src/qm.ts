@@ -4,6 +4,8 @@ interface Implicant {
   bits: string
   covers: number[]
 }
+const sortedUnique = (xs: readonly number[]): number[] =>
+  xs.toSorted((a, b) => a - b).filter((v, i, s) => i === 0 || v !== s[i - 1])
 const toBitString = (n: number, width: number): string => n.toString(2).padStart(width, '0')
 const countOnes = (bits: string): number => [...bits].filter(b => b === '1').length
 const combine = (a: string, b: string): string | undefined => {
@@ -27,7 +29,7 @@ const combinePass = (current: Implicant[]): { next: Implicant[]; used: Set<numbe
       if (c !== undefined) {
         used.add(i)
         used.add(j)
-        const covers = [...new Set([...current[i].covers, ...current[j].covers])].toSorted((a, b) => a - b)
+        const covers = sortedUnique([...current[i].covers, ...current[j].covers])
         if (!next.some(n => n.bits === c)) next.push({ bits: c, covers })
       }
     }
@@ -44,7 +46,7 @@ const dedupeByBits = (impls: Implicant[]): Implicant[] => {
   return unique
 }
 const findPrimeImplicants = (minterms: number[], dontCares: number[], width: number): Implicant[] => {
-  const all = [...new Set([...minterms, ...dontCares])].toSorted((a, b) => a - b)
+  const all = sortedUnique([...minterms, ...dontCares])
   if (all.length === 0) return []
   let current: Implicant[] = all.map(m => ({ bits: toBitString(m, width), covers: [m] }))
   const primes: Implicant[] = []
